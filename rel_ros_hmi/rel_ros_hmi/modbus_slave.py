@@ -11,7 +11,7 @@ from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, SlaveTCP
+from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
@@ -34,6 +34,11 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         address = address - 1
         logger.debug("setValues with address %s, value %s", address, value)
         value = value[0]
+        register: Register = get_register_by_address(self.hr.parameters)
+        if register is None:
+            register: Register = get_register_by_address(self.hr.sensors)
+        if not register:
+            logger.debug("Not getting a valid register for address %s", address)
         if address == self.hr.parameters.target_pressure_pistons.address:
             logger.debug("write parameter target_pressure_pistons = %s", value)
             self.hr.parameters.target_pressure_pistons.value = value
