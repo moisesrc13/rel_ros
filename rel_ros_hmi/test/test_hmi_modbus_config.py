@@ -1,12 +1,7 @@
 import pytest
 
 from rel_ros_hmi.config import load_modbus_config
-from rel_ros_hmi.models.modbus_m import (
-    HoldingRegisters,
-    ModbusConfig,
-    Register,
-    get_register_by_address,
-)
+from rel_ros_hmi.models.modbus_m import ModbusConfig, Register, get_register_by_address
 
 
 @pytest.fixture
@@ -16,7 +11,7 @@ def config() -> ModbusConfig:
 
 def test_config(config):
     assert isinstance(config, ModbusConfig)
-    assert isinstance(config.modbus.holding_registers, HoldingRegisters)
+    assert isinstance(config.modbus.holding_registers, list)
 
 
 def test_get_register_by_address():
@@ -24,9 +19,12 @@ def test_get_register_by_address():
         Register(name="test1", address=1000, data_type="uint16", value=30),
         Register(name="test2", address=2000, data_type="uint16", value=40),
     ]
-    r = get_register_by_address(test_registers, 40001)
+    r, idx = get_register_by_address(test_registers, 40001)
     assert not r
-    r = get_register_by_address(test_registers, 1000)
+    assert not idx
+    r, idx = get_register_by_address(test_registers, 1000)
     assert r.name == "test1"
-    r = get_register_by_address(test_registers, 2000)
+    assert idx == 0
+    r, idx = get_register_by_address(test_registers, 2000)
     assert r.name == "test2"
+    assert idx == 1

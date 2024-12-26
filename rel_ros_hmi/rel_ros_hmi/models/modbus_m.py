@@ -25,22 +25,22 @@ class Register(BaseModel):
             self.words = 1
 
 
-class HoldingRegisters(BaseModel):
-    parameters: list[Register]
-    sensors: list[Register]
-
-
 class SlaveTCP(BaseModel):
     host: str
     port: int
     framer: str = "socket"
     timeout_seconds: int = 5
-    holding_registers: HoldingRegisters
+    holding_registers: list[Register]
 
 
 class ModbusConfig(BaseModel):
     modbus: SlaveTCP
 
 
-def get_register_by_address(registers: list[Register], address: int) -> Optional[Register]:
-    return next((r for r in registers if r.address == address), None)
+def get_register_by_address(
+    registers: list[Register], address: int
+) -> Optional[tuple[Register, int]]:
+    for index, r in enumerate(registers):
+        if r.address == address:
+            return (r, index)
+    return (None, None)

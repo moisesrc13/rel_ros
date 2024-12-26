@@ -34,20 +34,15 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         address = address - 1
         logger.debug("setValues with address %s, value %s", address, value)
         value = value[0]
-        register: Register = get_register_by_address(self.hr.parameters)
-        if register is None:
-            register: Register = get_register_by_address(self.hr.sensors)
+        logger.debug("getting from parameters ...")
+        register, idx = get_register_by_address(self.hr, address)
         if not register:
             logger.debug("Not getting a valid register for address %s", address)
-        if address == self.hr.parameters.target_pressure_pistons.address:
-            logger.debug("write parameter target_pressure_pistons = %s", value)
-            self.hr.parameters.target_pressure_pistons.value = value
-        elif address == self.hr.parameters.target_pressure_material.address:
-            logger.debug("write parameter target_pressure_material = %s", value)
-            self.hr.parameters.target_pressure_material.value = value
-        elif address == self.hr.parameters.system_state.address:
-            logger.debug("write parameter system_state = %s", value)
-            self.hr.parameters.system_state.value = value
+            return
+
+        logger.debug("write register %s with value %s", register, value)
+        register.value = value
+        self.hr[idx] = register
 
     def getValues(self, address, count=1):
         """
