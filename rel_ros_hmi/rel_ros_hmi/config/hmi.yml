@@ -1,0 +1,48 @@
+parameters:
+  target_pressure_pistons:
+    address: 40001
+    data_type: "uint16"
+  target_pressure_material:
+    address: 40002
+    data_type: "uint16"
+  system_state:
+    address: 40003
+    data_type: "uint16"
+  pulse_train_high:
+    address: 40004
+    data_type: "uint16"
+  pulse_train_medium:
+    address: 40005
+    data_type: "uint16"
+  pulse_train_low:
+    address: 40006
+    data_type: "uint16"
+  emergency_stop_state:
+    address: 40007
+    data_type: "uint16"
+  solenoid_valves_state:
+    address: 40008
+    data_type: "uint16"
+  alarm_state:
+    address: 40009
+    data_type: "uint16"
+  alarm_pre_vacuum_limit_high:
+    address: 40010
+    data_type: "uint16"
+  alarm_pre_vacuum_limit_low:
+    address: 40011
+    data_type: "uint16"
+  alarm_pre_vacuum_distance:
+    address: 40012
+    data_type: "uint16"
+
+sensors:
+  material_pressure:
+    address: 40013
+    data_type: "uint16"
+  material_temperature:
+    address: 40014
+    data_type: "uint16"
+  laser_distance:
+    address: 40014
+    data_type: "uint16"

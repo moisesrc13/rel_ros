@@ -1,0 +1,35 @@
+basic:  # mode
+  segments:
+    audible:
+      octect: 5
+      bits: [1, 0]
+    segment_1:
+      octect: 3
+      bits: [1, 0]
+    segment_2:
+      octect: 3
+      bits: [3, 2]
+    segment_3:
+      octect: 3
+      bits: [5, 4]
+    segment_4:
+      octect: 3
+      bits: [7, 6]
+    segment_5:
+      octect: 2
+      bits: [9, 8]
+    segment_6:
+      octect: 2
+      bits: [11, 10]
+    segment_7:
+      octect: 2
+      bits: [13, 12]
+    segment_8:
+      octect: 2
+      bits: [15, 14]
+    segment_9:
+      octect: 1
+      bits: [1, 0]
+    segment_10:
+      octect: 1
+      bits: [3, 2]
