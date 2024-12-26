@@ -13,7 +13,7 @@ class RegisterDataType(Enum):
 
 class Register(BaseModel):
     address: int
-    words: int
+    words: int = 1
     data_type: RegisterDataType = RegisterDataType.uint16
 
     def __post_init__(self):
@@ -23,28 +23,30 @@ class Register(BaseModel):
             self.words = 1
 
 
+class Parameters(BaseModel):
+    target_pressure_pistons: Register
+    target_pressure_material: Register
+    system_state: Register
+    pulse_train_high: Register
+    pulse_train_medium: Register
+    pulse_train_low: Register
+    emergency_stop_state: Register
+    solenoid_valves_state: Register
+    alarm_state: Register
+    alarm_pre_vacuum_limit_high: Register
+    alarm_pre_vacuum_limit_low: Register
+    alarm_pre_vacuum_distance: Register
+
+
+class Sensors(BaseModel):
+    material_pressure: Register
+    material_temperature: Register
+    laser_distance: Register
+
+
 class HoldingRegisters(BaseModel):
-    data_input_status: Optional[Register] = None
-    data_input: Optional[Register] = None
-    data_output_status: Optional[Register] = None
-    data_output: Optional[Register] = None
-
-
-class DevicePort(BaseModel):
-    init_address: int
-    name: Optional[str] = None
-    holding_registers: HoldingRegisters
-
-
-class DevicePorts(BaseModel):
-    port_1: Optional[DevicePort] = None
-    port_2: Optional[DevicePort] = None
-    port_3: Optional[DevicePort] = None
-    port_4: Optional[DevicePort] = None
-    port_5: Optional[DevicePort] = None
-    port_6: Optional[DevicePort] = None
-    port_7: Optional[DevicePort] = None
-    port_8: Optional[DevicePort] = None
+    parameters: Parameters
+    sensors: Sensors
 
 
 class SlaveTCP(BaseModel):
@@ -52,12 +54,4 @@ class SlaveTCP(BaseModel):
     port: int
     framer: str = "socket"
     timeout_seconds: int = 5
-    device_ports: DevicePorts
-
-
-class ModbusSlaves(BaseModel):
-    master_io_link: SlaveTCP
-
-
-class ModbusConfig(BaseModel):
-    slaves: ModbusSlaves
+    holding_registers: HoldingRegisters
