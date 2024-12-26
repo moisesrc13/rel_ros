@@ -41,6 +41,10 @@ ros2 run rel_ros_master_control rel_ros_master_control_node
 
 ## Run on local
 
+> my local all
+`export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"`
+
+
 > my local
 `export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros_master_control"`
 
