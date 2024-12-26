@@ -42,6 +42,5 @@ class ModbusConfig(BaseModel):
     modbus: SlaveTCP
 
 
-def get_register_by_address(registers: list[Register], address: int) -> Register:
-    print(registers)
-    # register: Register = [r for r in registers if ]
+def get_register_by_address(registers: list[Register], address: int) -> Optional[Register]:
+    return next((r for r in registers if r.address == address), None)
