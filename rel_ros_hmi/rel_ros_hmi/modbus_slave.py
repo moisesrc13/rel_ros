@@ -1,8 +1,3 @@
-"""
-this is our modbus slave(s) implementation, mainly for testing
-"""
-import random
-
 from pymodbus.constants import Endian
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
 from pymodbus.device import ModbusDeviceIdentification
@@ -11,7 +6,7 @@ from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
@@ -49,10 +44,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         Return the requested values from the datastore.
         Automation inputs (from dispenser to modbus)
         """
-        logger.debug("calling GET values ...")
-
-        def get_random_float(start: int, end: int) -> float:
-            return round(random.uniform(start, end), 2)
+        logger.debug("calling GET values from modbus slave ...")
 
         address = address - 1
         builder = BinaryPayloadBuilder(wordorder=Endian.LITTLE, byteorder=Endian.BIG)
@@ -63,45 +55,11 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 address,
                 address_value[0],
             )
-
-            if address == self.test_address:
-                logger.info(
-                    "requesting value for test address %s, return value %s",
-                    self.test_address,
-                    address_value,
-                )
-                return address_value
-            if address == self.test_address_software_version:
-                data = random.randint(0, 100)
-                logger.info("reading software version data %s", data)
-                builder.add_16bit_uint(data)
+            register, _ = get_register_by_address(self.hr, address)
+            if register:
+                builder.add_16bit_uint(register.value)
                 return builder.to_registers()
-            if address == self.test_address_int8:
-                data = random.randint(0, 100)
-                logger.info("test int8 data %s", data)
-                builder.add_8bit_uint(data)
-                return builder.to_registers()
-            if address == self.test_address_int16:
-                data = random.randint(0, 100)
-                logger.info("test int16 data %s", data)
-                builder.add_16bit_uint(data)
-                return builder.to_registers()
-            if address == self.test_address_float16:
-                data = get_random_float(5, 80)
-                logger.info("test float16 data %s", data)
-                builder.add_16bit_float(data)
-                return builder.to_registers()
-            if address == self.test_address_int32:
-                data = random.randint(0, 100)
-                logger.info("test int32 data %s", data)
-                builder.add_32bit_uint(data)
-                return builder.to_registers()
-            if address == self.test_address_float32:
-                data = get_random_float(5, 180)
-                logger.info("test float32 data %s", data)
-                builder.add_32bit_float(data)
-                return builder.to_registers()
-            return [11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            return []
         except Exception as ex:
             logger.error("Error getting values from modbus address %s - %s", address, ex)
 
