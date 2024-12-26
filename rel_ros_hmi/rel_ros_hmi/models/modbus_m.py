@@ -14,6 +14,7 @@ class RegisterDataType(Enum):
 class Register(BaseModel):
     address: int
     words: int = 1
+    value: int = 0
     data_type: RegisterDataType = RegisterDataType.uint16
 
     def __post_init__(self):
