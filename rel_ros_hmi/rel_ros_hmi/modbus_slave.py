@@ -11,7 +11,7 @@ from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import SlaveTCP
+from rel_ros_hmi.models.modbus_m import Register, SlaveTCP
 
 logger = new_logger(__name__)
 
@@ -19,30 +19,30 @@ logger = new_logger(__name__)
 class ModbusServerBlock(ModbusSequentialDataBlock):
     def __init__(self, addr, values, slave: SlaveTCP):
         """Initialize."""
-        self.settings = slave
+        self.hr = slave.holding_registers
         logger.info("initializing modbus 👾 slave %s", slave)
-        self.test_address = 0
-        self.test_address_int8 = 1
-        self.test_address_int16 = 2
-        self.test_address_float16 = 3
-        self.test_address_int32 = 4
-        self.test_address_float32 = 5
-        self.test_address_software_version = 40020
         super().__init__(addr, values)
 
-    def setValues(self, address, values):
+    def setValues(self, address, value):
         """
         Set the requested values of the datastore.
         Automation Outputs (to dispenser from modbus)
         """
         logger.debug("calling SET values ...")
 
-        super().setValues(address - 1, values)
+        super().setValues(address - 1, value)
         address = address - 1
-        logger.info("setValues with address %s, value %s", address, values)
-        values = values[0]
-        if address == 100:  # TEST
-            logger.info("hitting modbus 100 address")
+        logger.debug("setValues with address %s, value %s", address, value)
+        value = value[0]
+        if address == self.hr.parameters.target_pressure_pistons.address:
+            logger.debug("write parameter target_pressure_pistons = %s", value)
+            self.hr.parameters.target_pressure_pistons.value = value
+        elif address == self.hr.parameters.target_pressure_material.address:
+            logger.debug("write parameter target_pressure_material = %s", value)
+            self.hr.parameters.target_pressure_material.value = value
+        elif address == self.hr.parameters.system_state.address:
+            logger.debug("write parameter system_state = %s", value)
+            self.hr.parameters.system_state.value = value
 
     def getValues(self, address, count=1):
         """
@@ -151,9 +151,15 @@ def run_sync_modbus_server(slave: SlaveTCP):
         raise err
 
 
-def main():
-    server = run_sync_modbus_server(
-        slave=SlaveTCP(
+def run(slave: SlaveTCP):
+    server = run_sync_modbus_server(slave=slave)
+    if server:
+        server.shutdown()
+
+
+if __name__ == "__main__":
+    run(
+        SlaveTCP(
             host="0.0.0.0",
             port=8844,  # matching one slave from config
             address_offset=0,
@@ -161,9 +167,3 @@ def main():
             timeout_seconds=5,
         )
     )
-    if server:
-        server.shutdown()
-
-
-if __name__ == "__main__":
-    main()

@@ -12,9 +12,10 @@ class RegisterDataType(Enum):
 
 
 class Register(BaseModel):
+    name: str
     address: int
-    words: int = 1
     value: int = 0
+    words: int = 1
     data_type: RegisterDataType = RegisterDataType.uint16
 
     def __post_init__(self):
@@ -24,30 +25,9 @@ class Register(BaseModel):
             self.words = 1
 
 
-class Parameters(BaseModel):
-    target_pressure_pistons: Register
-    target_pressure_material: Register
-    system_state: Register
-    pulse_train_high: Register
-    pulse_train_medium: Register
-    pulse_train_low: Register
-    emergency_stop_state: Register
-    solenoid_valves_state: Register
-    alarm_state: Register
-    alarm_pre_vacuum_limit_high: Register
-    alarm_pre_vacuum_limit_low: Register
-    alarm_pre_vacuum_distance: Register
-
-
-class Sensors(BaseModel):
-    material_pressure: Register
-    material_temperature: Register
-    laser_distance: Register
-
-
 class HoldingRegisters(BaseModel):
-    parameters: Parameters
-    sensors: Sensors
+    parameters: list[Register]
+    sensors: list[Register]
 
 
 class SlaveTCP(BaseModel):
@@ -60,3 +40,8 @@ class SlaveTCP(BaseModel):
 
 class ModbusConfig(BaseModel):
     modbus: SlaveTCP
+
+
+def get_register_by_address(registers: list[Register], address: int) -> Register:
+    print(registers)
+    # register: Register = [r for r in registers if ]

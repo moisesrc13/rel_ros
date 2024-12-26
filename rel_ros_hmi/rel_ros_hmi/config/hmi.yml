@@ -3,64 +3,64 @@ modbus:
   port: 9000
   holding_registers:
     parameters:
-      target_pressure_pistons:
+      - name: "target_pressure_pistons"
         address: 40001
         data_type: "uint16"
         value: 0
-      target_pressure_material:
+      - name: "target_pressure_material"
         address: 40002
         data_type: "uint16"
         value: 0
-      system_state:
+      - name: "system_state"
         address: 40003
         data_type: "uint16"
         value: 0
-      pulse_train_high:
+      - name: "pulse_train_high"
         address: 40004
         data_type: "uint16"
         value: 0
-      pulse_train_medium:
+      - name: "pulse_train_medium"
         address: 40005
         data_type: "uint16"
         value: 0
-      pulse_train_low:
+      - name: "pulse_train_low"
         address: 40006
         data_type: "uint16"
         value: 0
-      emergency_stop_state:
+      - name: "emergency_stop_state"
         address: 40007
         data_type: "uint16"
         value: 0
-      solenoid_valves_state:
+      - name: "solenoid_valves_state"
         address: 40008
         data_type: "uint16"
         value: 0
-      alarm_state:
+      - name: "alarm_state"
         address: 40009
         data_type: "uint16"
         value: 0
-      alarm_pre_vacuum_limit_high:
+      - name: "alarm_pre_vacuum_limit_high"
         address: 40010
         data_type: "uint16"
         value: 0
-      alarm_pre_vacuum_limit_low:
+      - name: "alarm_pre_vacuum_limit_low"
         address: 40011
         data_type: "uint16"
         value: 0
-      alarm_pre_vacuum_distance:
+      - name: "alarm_pre_vacuum_distance"
         address: 40012
         data_type: "uint16"
         value: 0
     sensors:
-      material_pressure:
+      - name: "material_pressure"
         address: 40013
         data_type: "uint16"
         value: 0
-      material_temperature:
+      - name: "material_temperature"
         address: 40014
         data_type: "uint16"
         value: 0
-      laser_distance:
+      - name: "laser_distance"
         address: 40014
         data_type: "uint16"
         value: 0
