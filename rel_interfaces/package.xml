@@ -4,10 +4,13 @@
   <name>rel_interfaces</name>
   <version>0.0.0</version>
   <description>Relant ROS Interfaces</description>
-  <maintainer email="moisesrc@mx1.ibm.com">relant</maintainer>
+  <maintainer email="jm.roco@gmail.com">relant</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
