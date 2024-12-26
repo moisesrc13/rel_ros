@@ -55,3 +55,7 @@ class SlaveTCP(BaseModel):
     framer: str = "socket"
     timeout_seconds: int = 5
     holding_registers: HoldingRegisters
+
+
+class ModbusConfig(BaseModel):
+    modbus: SlaveTCP

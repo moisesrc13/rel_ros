@@ -20,3 +20,17 @@ docker run --rm --name rel-ros -it \
  -v $(pwd)/rel_interfaces:/home/relant/ros2_ws/src/rel_interfaces \
  rel-ros:0.1.0 /bin/bash
 ```
+
+## Run on local
+
+> my local all
+```bash
+export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"
+export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_hmi"
+```
+
+> RPi4
+```bash
+export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_master_control"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
+```

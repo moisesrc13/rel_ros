@@ -1,10 +1,9 @@
 import os
-from enum import Enum
 
 import yaml
 
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import SlaveTCP
+from rel_ros_hmi.models.modbus_m import ModbusConfig
 
 logger = new_logger(__name__)
 
@@ -21,11 +20,11 @@ def load_config(file_path: str):
             config = yaml.load(file, Loader=yaml.FullLoader)
             logger.info("config file %s loaded ok", file_location)
             logger.info("converting to global config..")
-            return SlaveTCP.model_validate(config)
+            return ModbusConfig.model_validate(config)
     except Exception as err:
         logger.error("Exception loading configuration - %s", err)
         raise err
 
 
-def load_modbus_config() -> SlaveTCP:
+def load_modbus_config() -> ModbusConfig:
     return load_config("./config/hmi.yml")
