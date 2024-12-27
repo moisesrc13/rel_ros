@@ -36,8 +36,15 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 ```
 
 > for ROS image
-<mark>This is important to execute before running (only once)</mark>
+This is important to execute before running (only once)
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
+```
+## Run nodes
+
+```bash
+source install/setup.bash
+ros2 run rel_ros_master_control rel_ros_master_control_node
+ros2 run rel_ros_hmi rel_ros_hmi_node
 ```

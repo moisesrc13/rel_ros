@@ -19,7 +19,11 @@ def setup_sync_client(
     try:
         client = None
         if isinstance(slave, SlaveTCP):
-            logger.info("Creating TCP master connecion to slave ⭐ %s", slave)
+            logger.info(
+                "Creating TCP master connecion to slave on host %s port %s ⭐",
+                slave.host,
+                slave.port,
+            )
             client = modbusClient.ModbusTcpClient(
                 host=slave.host,
                 port=slave.port,
