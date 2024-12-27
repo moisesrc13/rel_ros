@@ -55,13 +55,15 @@ class DBService:
 
     def update_hmi(self, name: str, value: int = 0) -> bool:
         try:
-            stmt = f"UPDATE hmi SET {name} = {value}"
+            stmt = f"UPDATE hmi SET '{name}' = {value}"
+            logger.debug("stmt %s", stmt)
             cur = self.conn.cursor()
             res = cur.execute(stmt)
             self.conn.commit()
             if res.rowcount == 1:
                 logger.info(" %s updated ok", name)
                 return True
+            logger.warning("record not updated...")
             return False
         except Exception as err:
             logger.error("error updating %s - %s", name, err)
@@ -86,3 +88,5 @@ if __name__ == "__main__":
     logger.info("Starting sqlite db...")
     db_service = DBService()
     db_service.create_tables()
+    db_service.update_hmi("param_alarm_state", 1234)
+    assert db_service.get_name_value("param_alarm_state") == 1234
