@@ -16,7 +16,6 @@ class RelROSNode(Node):
         self.hmi = hmi_config.hmi
         self.get_logger().info("creating subscriber 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
-        self.subscription
 
     def listener_hmi_callback(self, msg):
         self.get_logger().info(f"📨 I got an HMI message {msg}")
