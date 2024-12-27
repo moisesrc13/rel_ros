@@ -2,6 +2,8 @@ import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI
+from rel_ros_hmi.config import load_modbus_config
+from rel_ros_hmi.modbus_slave import run
 
 
 class RelROSNode(Node):
@@ -10,6 +12,9 @@ class RelROSNode(Node):
         self.get_logger().info("creating publisher for hmi topic")
         self.rel_publisher = self.create_publisher(HMI, "rel/hmi", 10)
         self.create_timer(0.5, self.timer_callback)
+        self.get_logger().info("running modbus slave ...")
+        self.config = load_modbus_config()
+        run(self.config.modbus)
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")
