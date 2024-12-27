@@ -54,3 +54,10 @@ source install/setup.bash
 ros2 run rel_ros_master_control rel_ros_master_control_node
 ros2 run rel_ros_hmi rel_ros_hmi_node
 ```
+
+## Run test HMI modbus master
+
+```bash
+cd ~/ros2_ws/src
+python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
+```

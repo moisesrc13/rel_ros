@@ -20,10 +20,12 @@ class RelROSNode(Node):
     def listener_hmi_callback(self, msg):
         self.get_logger().info(f"📨 I got an HMI message {msg}")
         setattr(self.hmi, msg.name, msg.value)
-        self.get_logger().info(f"hmi config {self.hmi}")
+        updated_attr = getattr(self.hmi, msg.name)
+        self.get_logger().info(f"hmi updated config {updated_attr}")
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 Master Control 🤖 Node running 🤘 ...")
+        self.get_logger().info(f"current HMI config {self.hmi}")
 
 
 def main():
