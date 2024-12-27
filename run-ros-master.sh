@@ -3,7 +3,7 @@ source ~/.bashrc
 RELANT_PACKAGE="rel_ros_master_control"
 RELANT_NODE="rel_ros_master_control_node"
 cd ~/ros2_ws
-colcon build --symlink-install
+colcon build
 source install/setup.bash
 echo "current python path $PYTHONPATH"
 rs=$(echo $PYTHONPATH | grep "ros2_ws/src/${RELANT_PACKAGE}" | wc -l)

@@ -75,11 +75,19 @@ class RelModbusMaster:
             logger.error("❌ Error closing connection to modbus server - %s", err)
             self.connection_state = "❌ error closing"
 
+    def do_write(self, address: int, value: int):
+        respose = self.slave_conn.write_register(address=address, value=value)
+        if respose.isError():
+            logger.error("error writing register %s", address)
+        else:
+            logger.info("register written ok ✨")
+
 
 def run():
     config = load_modbus_config()
     modbus_master = RelModbusMaster(config.modbus)
     modbus_master.do_connect()
+    modbus_master.do_write(40001, 1010)
 
 
 if __name__ == "__main__":

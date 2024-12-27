@@ -40,12 +40,12 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("write register %s with value %s", register, value)
         register.value = value
         self.hr[idx] = register
-        logger.info("publishing message in ROS")
         msg = HMI()
         msg.name = register.name
         msg.type = "hmi"
         msg.value = register.value
         self.publisher.publish(msg)
+        logger.info("publishing message in ROS %s", msg)
 
     def getValues(self, address, count=1):
         """
