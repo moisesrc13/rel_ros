@@ -26,12 +26,10 @@ def load_config(file_path: str, config_type: ConfigType):
         with open(file_location, "r", encoding="utf-8") as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
             logger.info("config file %s loaded ok", file_location)
-            logger.info("converting to global config..")
+            logger.info("converting to global config...")
             if config_type == ConfigType.MODBUS:
-                print(config)
                 return ModbusConfig.model_validate(config)
-            elif config_type == ConfigType.STATUS_DEVICE:
-                return StatusDeviceConfig.model_validate(config)
+            return StatusDeviceConfig.model_validate(config)
     except Exception as err:
         logger.error("Exception loading configuration - %s", err)
         raise err

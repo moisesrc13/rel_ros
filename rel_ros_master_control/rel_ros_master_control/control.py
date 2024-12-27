@@ -53,8 +53,8 @@ class RelControl:
         port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
         logger.debug("port_num %s status_register %s", port.holding_registers.data_input_status)
         rr = self.master_io_link.slave_conn.read_holding_registers(
-            port.holding_registers.data_input_status.address,
-            port.holding_registers.data_input_status.words,
+            address=port.holding_registers.data_input_status.address,
+            count=port.holding_registers.data_input_status.words,
         )
         decoder = get_decoder(rr)
         return get_value(decoder, port.holding_registers.data_input_status)
@@ -62,8 +62,8 @@ class RelControl:
     def read_device_port_register(self, register: Register) -> int:
         logger.debug("read device register %s", register)
         rr = self.master_io_link.slave_conn.read_holding_registers(
-            register.address,
-            register.words,
+            address=register.address,
+            count=register.words,
         )
         decoder = get_decoder(rr)
         return get_value(decoder, register)
