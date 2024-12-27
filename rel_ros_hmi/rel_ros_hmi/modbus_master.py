@@ -1,3 +1,4 @@
+import argparse
 from typing import Union
 
 import pymodbus.client as modbusClient
@@ -80,18 +81,55 @@ class RelModbusMaster:
             self.connection_state = "❌ error closing"
 
     def do_write(self, address: int, value: int):
+        logger.info("writing to register %s value %s", address, value)
         respose = self.slave_conn.write_register(address=address, value=value)
         if respose.isError():
             logger.error("error writing register %s", address)
         else:
             logger.info("register written ok ✨")
 
+    def do_read(self, register: int):
+        logger.info("reading register %s", register)
+        response = self.slave_conn.read_holding_registers(address=register, count=1)
+        if response.isError():
+            logger.error("error reading register")
+            return
+        logger.info("reading ok ✨ %s", response.registers)
+
 
 def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-a",
+        "--action",
+        choices=["read", "write"],
+        help="modbus action",
+        dest="action",
+        default="write",
+        type=str,
+    )
+    parser.add_argument(
+        "-r",
+        "--register",
+        help="register address int value",
+        dest="register",
+        type=int,
+    )
+    parser.add_argument(
+        "-v",
+        "--value",
+        help="register write value",
+        dest="value",
+        type=int,
+    )
+    args = parser.parse_args()
     config = load_modbus_config()
     modbus_master = RelModbusMaster(config.modbus)
     modbus_master.do_connect()
-    modbus_master.do_write(40001, 1010)
+    if args.action == "write":
+        modbus_master.do_write(args.register, args.value)
+    elif args.action == "read":
+        modbus_master.do_read(args.register)
 
 
 if __name__ == "__main__":
