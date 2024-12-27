@@ -44,3 +44,9 @@ def get_register_by_address(
         if r.address == address:
             return (r, index)
     return (None, None)
+
+
+def get_hr_addresses(registers: list[Register]) -> list[int]:
+    addresses = [r.address for r in registers]
+    addresses.sort()
+    return addresses

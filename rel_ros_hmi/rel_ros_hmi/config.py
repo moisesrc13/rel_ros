@@ -3,7 +3,7 @@ import os
 import yaml
 
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import ModbusConfig
+from rel_ros_hmi.models.modbus_m import ModbusConfig, Register
 
 logger = new_logger(__name__)
 
