@@ -1,0 +1,16 @@
+hmi:
+  param_target_pressure_pistons: 0
+  param_target_pressure_material: 0
+  param_system_state: 0
+  param_pulse_train_high: 0
+  param_pulse_train_medium: 0
+  param_pulse_train_low: 0
+  param_emergency_stop_state: 0
+  param_solenoid_valves_state: 0
+  param_alarm_state: 0
+  param_alarm_pre_vacuum_limit_high: 0
+  param_alarm_pre_vacuum_limit_low: 0
+  param_alarm_pre_vacuum_distance: 0
+  sensor_material_pressure: 0
+  sensor_material_temperature: 0
+  sensor_laser_distance: 0
