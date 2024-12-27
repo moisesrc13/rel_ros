@@ -15,7 +15,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
     def __init__(self, addr, values, slave: SlaveTCP):
         """Initialize."""
         self.hr = slave.holding_registers
-        logger.info("initializing modbus 👾 slave %s", slave)
+        logger.info("initializing modbus 👾 slave on port %s", slave.port)
         super().__init__(addr, values)
 
     def setValues(self, address, value):
