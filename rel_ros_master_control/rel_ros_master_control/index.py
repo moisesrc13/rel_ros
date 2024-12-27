@@ -19,7 +19,7 @@ class RelROSNode(Node):
         self.get_logger().info(f"📨 I got a message {msg}")
 
     def timer_callback(self):
-        self.get_logger().info("Relant ROS2 Master Control Node running 🤖...")
+        self.get_logger().info("Relant ROS2 Master Control 🤖 Node running 🤘 ...")
 
 
 def main():
