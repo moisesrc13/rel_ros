@@ -14,7 +14,7 @@ class RelROSNode(Node):
         self.create_timer(0.5, self.timer_callback)
         self.get_logger().info("running modbus slave ...")
         self.config = load_modbus_config()
-        run(self.config.modbus)
+        run(self.config.modbus, self.rel_publisher)
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")
