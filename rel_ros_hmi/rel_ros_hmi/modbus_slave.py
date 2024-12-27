@@ -1,3 +1,7 @@
+"""
+This is a modbus slave for testing within ROS
+"""
+
 from pymodbus.constants import Endian
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
 from pymodbus.device import ModbusDeviceIdentification
