@@ -67,6 +67,20 @@ class DBService:
             logger.error("error updating %s - %s", name, err)
             return False
 
+    def get_name_value(self, name: str) -> int:
+        try:
+            stmt = f" SELECT {name} from hmi "
+            cur = self.conn.cursor()
+            res = cur.execute(stmt)
+            records = res.fetchall()
+            if len(records) == 1:
+                row = records[0]
+                return int(row[0])
+            return -1
+        except Exception as err:
+            logger.error("error getting %s - %s", name, err)
+            return -1
+
 
 if __name__ == "__main__":
     logger.info("Starting sqlite db...")
