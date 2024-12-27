@@ -5,7 +5,7 @@ import pymodbus.client as modbusClient
 from pymodbus.framer import FramerType
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from rel_ros_hmi.config import load_modbus_config
+from rel_ros_hmi.config import load_hmi_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import SlaveTCP
 
@@ -123,7 +123,7 @@ def run():
         type=int,
     )
     args = parser.parse_args()
-    config = load_modbus_config()
+    config = load_hmi_config()
     modbus_master = RelModbusMaster(config.modbus)
     modbus_master.do_connect()
     if args.action == "write":
