@@ -5,6 +5,7 @@ from pymodbus.framer import FramerType
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
+from rel_interfaces.msg import HMI
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import SlaveTCP, get_register_by_address
 
@@ -12,9 +13,10 @@ logger = new_logger(__name__)
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveTCP):
+    def __init__(self, addr, values, slave: SlaveTCP, publisher):
         """Initialize."""
         self.hr = slave.holding_registers
+        self.publisher = publisher
         logger.info("initializing modbus 👾 slave on port %s", slave.port)
         super().__init__(addr, values)
 
@@ -38,6 +40,12 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("write register %s with value %s", register, value)
         register.value = value
         self.hr[idx] = register
+        logger.info("publishing message in ROS")
+        msg = HMI()
+        msg.name = register.name
+        msg.type = "hmi"
+        msg.value = register.value
+        self.publisher.publish(msg)
 
     def getValues(self, address, count=1):
         """
@@ -70,10 +78,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveTCP):
+def run_sync_modbus_server(slave: SlaveTCP, publisher):
     try:
         nreg = 50_000  # number of registers
-        block = ModbusServerBlock(0x00, [0] * nreg, slave)
+        block = ModbusServerBlock(0x00, [0] * nreg, slave, publisher)
         store = {}
         # creating two slaves 0 & 1
         store[0] = ModbusSlaveContext(hr=block)
@@ -109,8 +117,8 @@ def run_sync_modbus_server(slave: SlaveTCP):
         raise err
 
 
-def run(slave: SlaveTCP):
-    server = run_sync_modbus_server(slave=slave)
+def run(slave: SlaveTCP, publisher):
+    server = run_sync_modbus_server(slave=slave, publisher=publisher)
     if server:
         server.shutdown()
 
@@ -123,5 +131,6 @@ if __name__ == "__main__":
             address_offset=0,
             device_ports=[],
             timeout_seconds=5,
-        )
+        ),
+        None,
     )
