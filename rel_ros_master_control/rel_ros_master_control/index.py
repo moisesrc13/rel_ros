@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI
+from rel_ros_master_control.config import load_hmi_control_config
 from rel_ros_master_control.control import RelControl
 
 
@@ -11,15 +12,20 @@ class RelROSNode(Node):
         self.get_logger().info("creating Relant master control 🚀...")
         self.create_timer(1.0, self.timer_callback)
         # self.control = RelControl()
+        hmi_config = load_hmi_control_config()
+        self.hmi = hmi_config.hmi
         self.get_logger().info("creating subscriber 📨 ...")
-        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_callback, 10)
-        self.subscription
+        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
 
-    def listener_callback(self, msg):
-        self.get_logger().info(f"📨 I got a message {msg}")
+    def listener_hmi_callback(self, msg):
+        self.get_logger().info(f"📨 I got an HMI message {msg}")
+        setattr(self.hmi, msg.name, msg.value)
+        updated_attr = getattr(self.hmi, msg.name)
+        self.get_logger().info(f"hmi updated config {updated_attr}")
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 Master Control 🤖 Node running 🤘 ...")
+        self.get_logger().info(f"current HMI config {self.hmi}")
 
 
 def main():
