@@ -41,7 +41,12 @@ This is important to execute before running (only once)
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 ```
+
+export the `rel_ros_hmi` in the path is required to run the master modbus test from hmi package
+
 ## Run nodes
+
+This is how we can run all nodes
 
 ```bash
 export PYTHONPATH=$PYTHONPATH:/home/relant/ros2_ws/venv/lib/python3.10/site-packages
