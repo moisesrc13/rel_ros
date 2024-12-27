@@ -16,7 +16,7 @@ class RelROSNode(Node):
         self.subscription
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.get_logger().info('I heard: "%s"' % msg)
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 Master Control Node running 🤖...")
