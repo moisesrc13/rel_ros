@@ -169,7 +169,7 @@ def run():
     )
     args = parser.parse_args()
     config = load_modbus_config()
-    modbus_master = RelModbusMaster(config.modbus)
+    modbus_master = RelModbusMaster(config.slaves[0])
     modbus_master.do_connect()
     if args.action == "write":
         modbus_master.do_write(args.register, args.value)

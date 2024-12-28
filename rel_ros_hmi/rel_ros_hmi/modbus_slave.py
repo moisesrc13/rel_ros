@@ -11,15 +11,15 @@ from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveTCP):
+    def __init__(self, addr, values, slave: SlaveTCP, hr: list[Register]):
         """Initialize."""
-        self.hr = slave.holding_registers
+        self.hr = hr
         logger.info("initializing modbus 👾 slave on port %s", slave.port)
         super().__init__(addr, values)
 
@@ -81,10 +81,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveTCP):
+def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register]):
     try:
         nreg = 50_000  # number of registers
-        block = ModbusServerBlock(0x00, [0] * nreg, slave)
+        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr)
         store = {}
         # creating two slaves 0 & 1
         store[0] = ModbusSlaveContext(hr=block)
@@ -120,12 +120,15 @@ def run_sync_modbus_server(slave: SlaveTCP):
         raise err
 
 
-def run(slave: SlaveTCP):
-    server = run_sync_modbus_server(slave)
+def run(slave: SlaveTCP, hr: list[Register]):
+    server = run_sync_modbus_server(slave, hr)
     if server:
         server.shutdown()
 
 
 if __name__ == "__main__":
+    """
+    note that this slave implementation is only for testing
+    """
     config = load_modbus_config()
-    run(config.modbus)
+    run(config.slaves[0], config.holding_registers)
