@@ -2,14 +2,39 @@ import argparse
 from typing import Union
 
 import pymodbus.client as modbusClient
+from pymodbus.constants import Endian
 from pymodbus.framer import FramerType
+from pymodbus.payload import BinaryPayloadDecoder
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_hr_addresses
+from rel_ros_hmi.models.modbus_m import Register, RegisterDataType, SlaveTCP, get_hr_addresses
 
 logger = new_logger(__name__)
+
+
+def get_decoder_from_rr(rr) -> BinaryPayloadDecoder:
+    return BinaryPayloadDecoder.fromRegisters(rr, wordorder=Endian.LITTLE, byteorder=Endian.BIG)
+
+
+def get_decoder(response) -> BinaryPayloadDecoder:
+    logger.debug("calling decoder with response %s", response)
+    return get_decoder_from_rr(response.registers)
+
+
+def get_value(decoder: BinaryPayloadDecoder, data_type: RegisterDataType) -> int | float:
+    match data_type:
+        case RegisterDataType.float16:
+            return decoder.decode_16bit_float()
+        case RegisterDataType.float32:
+            return decoder.decode_32bit_float()
+        case RegisterDataType.uint16:
+            return decoder.decode_16bit_uint()
+        case RegisterDataType.uint32:
+            return decoder.decode_32bit_uint()
+        case _:
+            return -1
 
 
 def setup_sync_client(
@@ -88,20 +113,22 @@ class RelModbusMaster:
         else:
             logger.info("register written ok ✨")
 
-    def do_read(self, register: int):
+    def do_read(self, register: int) -> int:
         logger.info("reading register %s", register)
-        response = self.slave_conn.read_holding_registers(address=register, count=1)
-        if response.isError():
+        rr = self.slave_conn.read_holding_registers(address=register, count=1)
+        if rr.isError():
             logger.error("error reading register")
             return
-        logger.info("reading ok ✨ %s", response.registers)
+        logger.info("reading ok ✨ %s", rr.registers)
+        decoder = get_decoder(rr)
+        return get_value(decoder, RegisterDataType.uint16)
 
     def get_holding_registers_data(self) -> list[Register]:
         logger.info("reading holding register data")
         addresses = get_hr_addresses(self.slave.holding_registers)
-        response = self.slave_conn.read_holding_registers(
-            address=addresses[0], count=len(addresses)
-        )
+        rr = self.slave_conn.read_holding_registers(address=addresses[0], count=len(addresses))
+        decoder = get_decoder(rr)
+        return get_value(decoder, RegisterDataType.uint16)
 
 
 def run():
@@ -136,7 +163,12 @@ def run():
     if args.action == "write":
         modbus_master.do_write(args.register, args.value)
     elif args.action == "read":
-        modbus_master.do_read(args.register)
+        value = -1
+        if args.register == 0:
+            value = modbus_master.get_holding_registers_data()
+        else:
+            value = modbus_master.do_read(args.register)
+        logger.info("read value %s", value)
 
 
 if __name__ == "__main__":

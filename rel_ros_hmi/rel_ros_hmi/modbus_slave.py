@@ -56,9 +56,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         try:
             address_value = super().getValues(address, count=count)
             logger.info(
-                "modbus getValues with address %s, address_value: %s",
+                "modbus getValues with address %s, address_value: %s and count: %s",
                 address,
                 address_value[0],
+                count,
             )
             register, _ = get_register_by_address(self.hr, address)
             if register:

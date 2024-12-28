@@ -60,4 +60,7 @@ ros2 run rel_ros_hmi rel_ros_hmi_node
 ```bash
 cd ~/ros2_ws/src
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
+
+# read all
+python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
