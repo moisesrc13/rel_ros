@@ -9,7 +9,7 @@ api_router = APIRouter()
 
 @api_router.get("/")
 def read_root():
-    return "modbus master connection 🤖"
+    return "modbus IOLink master connection 🤖"
 
 
 @api_router.get("/health")
