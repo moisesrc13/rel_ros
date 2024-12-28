@@ -1,5 +1,6 @@
 import argparse
 
+from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
@@ -25,8 +26,10 @@ def get_decoder(response) -> BinaryPayloadDecoder:
     return get_decoder_from_rr(response.registers)
 
 
-def get_value(decoder: BinaryPayloadDecoder, register: Register) -> int | float:
-    match register.data_type:
+def get_value(
+    decoder: BinaryPayloadDecoder, data_type: RegisterDataType = RegisterDataType.uint16
+) -> int | float:
+    match data_type:
         case RegisterDataType.float16:
             return decoder.decode_16bit_float()
         case RegisterDataType.float32:
@@ -37,6 +40,12 @@ def get_value(decoder: BinaryPayloadDecoder, register: Register) -> int | float:
             return decoder.decode_32bit_uint()
         case _:
             return -1
+
+
+class ControlStatus(BaseModel):
+    error: str = None
+    status: str = "ok"
+    value: int = -1
 
 
 class RelControl:
@@ -51,13 +60,15 @@ class RelControl:
 
     def read_device_port_input_status(self, port: str) -> int:
         port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
-        logger.debug("port_num %s status_register %s", port.holding_registers.data_input_status)
+        logger.debug(
+            "port_num %s status_register %s", port, port.holding_registers.data_input_status
+        )
         rr = self.master_io_link.slave_conn.read_holding_registers(
             address=port.holding_registers.data_input_status.address,
             count=port.holding_registers.data_input_status.words,
         )
         decoder = get_decoder(rr)
-        return get_value(decoder, port.holding_registers.data_input_status)
+        return get_value(decoder, port.holding_registers.data_input_status.data_type)
 
     def read_device_port_register(self, register: Register) -> int:
         logger.debug("read device register %s", register)
@@ -66,7 +77,7 @@ class RelControl:
             count=register.words,
         )
         decoder = get_decoder(rr)
-        return get_value(decoder, register)
+        return get_value(decoder, register.data_type)
 
     def write_device_port_register(self, register: Register, value: int) -> int:
         logger.debug("write device register %s", register)
@@ -78,21 +89,31 @@ class RelControl:
             return
         logger.info("writing ok ✨")
 
-    def write_holding_register(self, register_addr: int, value: int):
+    def write_holding_register(self, register_addr: int, value: int) -> ControlStatus:
+        status = ControlStatus()
         logger.info("writing to register %s value %s", register_addr, value)
         response = self.master_io_link.slave_conn.write_register(address=register_addr, value=value)
         if response.isError():
             logger.error("error writing register")
-            return
+            status.error = response
+            return status
         logger.info("writing ok ✨")
+        status.status = "write ok"
+        status.value = value
+        return status
 
-    def read_holding_register(self, register: int):
+    def read_holding_register(self, register: int) -> ControlStatus:
+        status = ControlStatus()
         logger.info("reading register %s", register)
         response = self.master_io_link.slave_conn.read_holding_registers(address=register, count=1)
         if response.isError():
             logger.error("error reading register")
-            return
+            status.error = response
         logger.info("reading ok ✨ %s", response.registers)
+        decoder = get_decoder(response)
+        status.value = get_value(decoder)
+        status.status = "read ok"
+        return status
 
 
 def run():
