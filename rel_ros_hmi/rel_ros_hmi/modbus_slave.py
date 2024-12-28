@@ -61,11 +61,15 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 address_value[0],
                 count,
             )
-            register, _ = get_register_by_address(self.hr, address)
-            if register:
-                builder.add_16bit_uint(register.value)
-                return builder.to_registers()
-            return []
+
+            addresses = list(range(address, address + count))
+            for addr in addresses:
+                register, _ = get_register_by_address(self.hr, addr)
+                if register:
+                    builder.add_16bit_uint(register.value)
+            values = builder.to_registers()
+            logger.info("return values %s", values)
+            return values
         except Exception as ex:
             logger.error("Error getting values from modbus address %s - %s", address, ex)
 
