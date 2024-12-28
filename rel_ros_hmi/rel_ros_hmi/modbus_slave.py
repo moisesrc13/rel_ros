@@ -63,6 +63,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
             )
 
             addresses = list(range(address, address + count))
+            logger.info("addresses to get %s", addresses)
             for addr in addresses:
                 register, _ = get_register_by_address(self.hr, addr)
                 if register:

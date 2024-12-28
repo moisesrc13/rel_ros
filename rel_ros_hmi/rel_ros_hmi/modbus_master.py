@@ -9,7 +9,13 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, RegisterDataType, SlaveTCP, get_hr_addresses
+from rel_ros_hmi.models.modbus_m import (
+    Register,
+    RegisterDataType,
+    SlaveTCP,
+    get_hr_addresses,
+    get_register_by_address,
+)
 
 logger = new_logger(__name__)
 
@@ -128,7 +134,12 @@ class RelModbusMaster:
         addresses = get_hr_addresses(self.slave.holding_registers)
         rr = self.slave_conn.read_holding_registers(address=addresses[0], count=len(addresses))
         decoder = get_decoder(rr)
-        return get_value(decoder, RegisterDataType.uint16)
+        updated_registers = []
+        for addr in addresses:
+            register, _ = get_register_by_address(self.slave.holding_registers, addr)
+            register.value = get_value(decoder, RegisterDataType.uint16)
+            updated_registers.append(register)
+        return updated_registers
 
 
 def run():

@@ -59,6 +59,6 @@ modbus:
       data_type: "uint16"
       value: 0
     - name: "sensor_laser_distance"
-      address: 40014
+      address: 40015
       data_type: "uint16"
       value: 0
