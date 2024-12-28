@@ -45,7 +45,7 @@ def test_get_uint32_value(number, register):
     builder = get_builder()
     builder.add_32bit_uint(number)
     rr = builder.to_registers()
-    assert get_value(get_decoder_from_rr(rr), register) == number
+    assert get_value(get_decoder_from_rr(rr), register.data_type) == number
 
 
 @pytest.mark.parametrize(
@@ -73,4 +73,4 @@ def test_get_float32_value(number, register):
     builder = get_builder()
     builder.add_32bit_float(number)
     rr = builder.to_registers()
-    assert round(get_value(get_decoder_from_rr(rr), register)) == round(number)
+    assert round(get_value(get_decoder_from_rr(rr), register.data_type)) == round(number)

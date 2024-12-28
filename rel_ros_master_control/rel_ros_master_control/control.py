@@ -26,8 +26,10 @@ def get_decoder(response) -> BinaryPayloadDecoder:
     return get_decoder_from_rr(response.registers)
 
 
-def get_value(decoder: BinaryPayloadDecoder, register: Register) -> int | float:
-    match register.data_type:
+def get_value(
+    decoder: BinaryPayloadDecoder, data_type: RegisterDataType = RegisterDataType.uint16
+) -> int | float:
+    match data_type:
         case RegisterDataType.float16:
             return decoder.decode_16bit_float()
         case RegisterDataType.float32:
@@ -43,7 +45,7 @@ def get_value(decoder: BinaryPayloadDecoder, register: Register) -> int | float:
 class ControlStatus(BaseModel):
     error: str = None
     status: str = "ok"
-    value: int
+    value: int = -1
 
 
 class RelControl:
@@ -66,7 +68,7 @@ class RelControl:
             count=port.holding_registers.data_input_status.words,
         )
         decoder = get_decoder(rr)
-        return get_value(decoder, port.holding_registers.data_input_status)
+        return get_value(decoder, port.holding_registers.data_input_status.data_type)
 
     def read_device_port_register(self, register: Register) -> int:
         logger.debug("read device register %s", register)
@@ -75,7 +77,7 @@ class RelControl:
             count=register.words,
         )
         decoder = get_decoder(rr)
-        return get_value(decoder, register)
+        return get_value(decoder, register.data_type)
 
     def write_device_port_register(self, register: Register, value: int) -> int:
         logger.debug("write device register %s", register)
@@ -104,7 +106,7 @@ class RelControl:
             status.error = response
         logger.info("reading ok ✨ %s", response.registers)
         decoder = get_decoder(response)
-        status.value = get_value(decoder, register)
+        status.value = get_value(decoder)
         status.status = "read ok"
         return status
 
