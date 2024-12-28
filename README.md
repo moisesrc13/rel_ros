@@ -55,9 +55,15 @@ ros2 run rel_ros_master_control rel_ros_master_control_node
 ros2 run rel_ros_hmi rel_ros_hmi_node
 ```
 
-## Run test HMI modbus master
+## Run test HMI modbus master & slave
 
 ```bash
+
+python rel_ros_hmi/rel_ros_hmi/modbus_slave.py
+
 cd ~/ros2_ws/src
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
+
+# read all
+python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
