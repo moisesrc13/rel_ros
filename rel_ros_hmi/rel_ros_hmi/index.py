@@ -12,9 +12,18 @@ class RelROSNode(Node):
         self.get_logger().info("creating publisher for rel/hmi topic 📨")
         self.rel_publisher = self.create_publisher(HMI, "rel/hmi", 10)
         self.create_timer(0.5, self.timer_callback)
+        self.create_hmi_timers()
         self.get_logger().info("running modbus slave ...")
         config = load_modbus_config()
         self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
+
+    def create_hmi_timers(self):
+        self.create_timer(0.5, self.timer_callback_hmi_0)
+
+    def timer_callback_hmi_0(self):
+        self.get_logger().info("HMI 0 timer running 👾...")
+        master = self.masters[0]
+        registers = master.get_holding_registers_data()
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")
