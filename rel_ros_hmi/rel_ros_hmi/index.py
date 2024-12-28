@@ -22,8 +22,11 @@ class RelROSNode(Node):
 
     def timer_callback_hmi_0(self):
         self.get_logger().info("HMI 0 timer running 👾...")
+        msg = HMI()
         master = self.masters[0]
         registers = master.get_holding_registers_data()
+        for reg in registers:
+            pass
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")

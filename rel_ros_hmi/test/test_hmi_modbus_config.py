@@ -7,12 +7,28 @@ from rel_ros_hmi.models.modbus_m import (
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
+    get_register_by_name,
 )
 
 
 @pytest.fixture
 def config() -> ModbusConfig:
     return load_modbus_config()
+
+
+def test_get_registers_name():
+    register = get_register_by_name(
+        [
+            Register(address=5004, value=100, name="test4"),
+            Register(address=5001, value=100, name="test1"),
+            Register(address=5002, value=100, name="test2"),
+            Register(address=5003, value=100, name="test3"),
+            Register(address=5005, value=100, name="test5"),
+        ],
+        "test2",
+    )
+    assert isinstance(register, Register)
+    assert register.address == 5002
 
 
 def test_get_registers_addrresses():
