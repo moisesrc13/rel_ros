@@ -1,5 +1,6 @@
 import argparse
 
+from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
@@ -37,6 +38,12 @@ def get_value(decoder: BinaryPayloadDecoder, register: Register) -> int | float:
             return decoder.decode_32bit_uint()
         case _:
             return -1
+
+
+class ControlStatus(BaseModel):
+    error: str = None
+    status: str = "ok"
+    value: int
 
 
 class RelControl:
@@ -88,13 +95,18 @@ class RelControl:
             return
         logger.info("writing ok ✨")
 
-    def read_holding_register(self, register: int):
+    def read_holding_register(self, register: int) -> ControlStatus:
         logger.info("reading register %s", register)
         response = self.master_io_link.slave_conn.read_holding_registers(address=register, count=1)
+        status = ControlStatus()
         if response.isError():
             logger.error("error reading register")
-            return
+            status.error = response
         logger.info("reading ok ✨ %s", response.registers)
+        decoder = get_decoder(response)
+        status.value = get_value(decoder, register)
+        status.status = "read ok"
+        return status
 
 
 def run():

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from rel_ros_master_control.control import RelControl
@@ -32,10 +32,10 @@ async def get_dispense_registers_data(
 ):
     logger.debug("getting register %s data", register)
     control: RelControl = request.app.state.control
-    data = control.read_holding_register(register)
-    if error := data.get("error"):
+    control_status = control.read_holding_register(register)
+    if control_status.error:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error getting register data from modbus slave: {error}",
+            status_code=control_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting register data: {control_status.error}",
         )
-    return data
+    return control_status.model_dump()
