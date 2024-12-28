@@ -19,10 +19,9 @@ class RelROSNode(Node):
     def create_hmi_timers(self):
         self.create_timer(0.5, self.timer_callback_hmi_0)
 
-    def timer_callback_hmi_0(self):
-        self.get_logger().info("HMI 0 timer running 👾...")
+    def publish_hmi_data(self, master_id: int):
+        master = self.masters[master_id]
         msg = HMI()
-        master = self.masters[0]
         msg.hmi_name = master.hmi_name
         msg.hmi_id = master.hmi_id
         registers = master.get_holding_registers_data()
@@ -30,6 +29,10 @@ class RelROSNode(Node):
             setattr(msg, reg.name, reg.value)
         self.rel_publisher.publish(msg)
         self.get_logger().info(f"📨 Publishing HMI message: {msg}")
+
+    def timer_callback_hmi_0(self):
+        self.get_logger().info("HMI 0 timer running 👾...")
+        self.publish_hmi_data(0)
 
 
 def main():
