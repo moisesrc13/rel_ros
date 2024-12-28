@@ -13,7 +13,7 @@ from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartSerialServer, StartTcpServer
 
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.models.modbus_m import SlaveSerial, SlaveTCP
+from rel_ros_master_control.models.modbus_m import DevicePorts, SlaveSerial, SlaveTCP
 
 logger = new_logger(__name__)
 
@@ -178,7 +178,7 @@ def main():
             host="0.0.0.0",
             port=8844,  # matching one slave from config
             address_offset=0,
-            device_ports=[],
+            device_ports=DevicePorts(),
             timeout_seconds=5,
         )
     )

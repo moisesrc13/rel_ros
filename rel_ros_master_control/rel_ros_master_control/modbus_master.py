@@ -1,10 +1,11 @@
+import os
 from typing import Union
 
 import pymodbus.client as modbusClient
+from pymodbus.framer import FramerType
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from rel_ros_master_control.logger import new_logger
-from pymodbus.framer import FramerType
 from rel_ros_master_control.models.modbus_m import SlaveSerial, SlaveTCP
 
 logger = new_logger(__name__)
@@ -16,12 +17,17 @@ def setup_sync_client(
     """Run client setup."""
     logger.info("creating modbus master 👾 ...")
     try:
+        host = slave.host
+        port = slave.port
+        if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+            host = "0.0.0.0"
+            port = 8844
         client = None
         if isinstance(slave, SlaveTCP):
             logger.info("Creating TCP master connecion to slave ⭐ %s", slave)
             client = modbusClient.ModbusTcpClient(
-                host=slave.host,
-                port=slave.port,
+                host=host,
+                port=port,
                 framer=FramerType.SOCKET,
                 timeout=slave.timeout_seconds,
             )
@@ -66,7 +72,11 @@ class RelModbusMaster:
         try:
             logger.info("connecting to modbus slave")
             assert self.slave_conn.connect()
-            logger.info("modbus slave connected 🤘 is socked opened %s, transport %s", self.slave_conn.is_socket_open(), self.slave_conn.transport)                
+            logger.info(
+                "modbus slave connected 🤘 is socked opened %s, transport %s",
+                self.slave_conn.is_socket_open(),
+                self.slave_conn.transport,
+            )
             logger.info("modbus socket %s", self.slave_conn.socket)
         except Exception as err:
             logger.error("❌ Error connecting to modbus slave - %s", err)

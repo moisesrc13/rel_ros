@@ -51,7 +51,9 @@ class RelControl:
 
     def read_device_port_input_status(self, port: str) -> int:
         port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
-        logger.debug("port_num %s status_register %s", port.holding_registers.data_input_status)
+        logger.debug(
+            "port_num %s status_register %s", port, port.holding_registers.data_input_status
+        )
         rr = self.master_io_link.slave_conn.read_holding_registers(
             address=port.holding_registers.data_input_status.address,
             count=port.holding_registers.data_input_status.words,
