@@ -47,7 +47,7 @@ def setup_sync_client(
     slave: SlaveTCP,
 ) -> Union[modbusClient.ModbusTcpClient, modbusClient.ModbusSerialClient]:
     """Run client setup."""
-    logger.info("creating modbus master 👾 ...")
+    logger.info("creating modbus master for slave %s 👾 ...", slave.id)
     try:
         client = None
         if isinstance(slave, SlaveTCP):
@@ -141,6 +141,10 @@ class RelModbusMaster:
             register.value = get_value(decoder, RegisterDataType.uint16)
             updated_registers.append(register)
         return updated_registers
+
+
+def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelModbusMaster]:
+    return [RelModbusMaster(s, hr) for s in slaves]
 
 
 def run():

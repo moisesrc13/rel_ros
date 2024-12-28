@@ -2,8 +2,8 @@ import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI
-from rel_ros_hmi.config import load_hmi_config
-from rel_ros_hmi.modbus_slave import run
+from rel_ros_hmi.config import load_modbus_config
+from rel_ros_hmi.modbus_master import create_masters_for_hmis
 
 
 class RelROSNode(Node):
@@ -13,18 +13,18 @@ class RelROSNode(Node):
         self.rel_publisher = self.create_publisher(HMI, "rel/hmi", 10)
         self.create_timer(0.5, self.timer_callback)
         self.get_logger().info("running modbus slave ...")
-        self.config = load_hmi_config()
-        run(self.config.modbus, self.rel_publisher)
+        config = load_modbus_config()
+        self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")
         # msg = HMIMsg()
-        msg = HMI()
-        msg.name = "target_pressure_pistons"
-        msg.type = "parameter"
-        msg.value = 1200
-        self.rel_publisher.publish(msg)
-        self.get_logger().info(f"Publishing: {msg}")
+        # msg = HMI()
+        # msg.name = "target_pressure_pistons"
+        # msg.type = "parameter"
+        # msg.value = 1200
+        # self.rel_publisher.publish(msg)
+        # self.get_logger().info(f"Publishing: {msg}")
 
 
 def main():
