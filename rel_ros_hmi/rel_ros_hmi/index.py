@@ -24,19 +24,16 @@ class RelROSNode(Node):
         self.get_logger().info("HMI 0 timer running 👾...")
         msg = HMI()
         master = self.masters[0]
+        msg.hmi_name = master.hmi_name
+        msg.hmi_id = master.hmi_id
         registers = master.get_holding_registers_data()
         for reg in registers:
-            pass
+            setattr(msg, reg.name, reg.value)
+        self.rel_publisher.publish(msg)
+        self.get_logger().info(f"📨 Publishing HMI message: {msg}")
 
     def timer_callback(self):
         self.get_logger().info("Relant ROS2 HMI Node running 🤖...")
-        # msg = HMIMsg()
-        # msg = HMI()
-        # msg.name = "target_pressure_pistons"
-        # msg.type = "parameter"
-        # msg.value = 1200
-        # self.rel_publisher.publish(msg)
-        # self.get_logger().info(f"Publishing: {msg}")
 
 
 def main():
