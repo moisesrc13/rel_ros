@@ -1,9 +1,28 @@
+from dataclasses import dataclass
+
 import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI
-from rel_ros_master_control.config import load_hmi_control_config
 from rel_ros_master_control.control import RelControl
+
+
+@dataclass
+class HMIData:
+    id: int = 0
+    hmi: HMI = None
+
+
+@dataclass
+class HMICluster:
+    cluster: list[HMIData]
+
+
+def create_hmi_cluster(size: int) -> HMICluster:
+    cluster = []
+    for n in range(size):
+        cluster.append(HMIData(id=n))
+    return cluster
 
 
 class RelROSNode(Node):
@@ -11,9 +30,8 @@ class RelROSNode(Node):
         super().__init__("rel_ros_master_control_node")
         self.get_logger().info("creating Relant master control 🚀...")
         self.create_timer(1.0, self.timer_callback)
+        self.hmi_cluster = create_hmi_cluster(1)
         # self.control = RelControl()
-        hmi_config = load_hmi_control_config()
-        self.hmi = hmi_config.hmi
         self.get_logger().info("creating subscriber 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
 

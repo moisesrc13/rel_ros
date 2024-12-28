@@ -14,7 +14,6 @@ logger = new_logger(__name__)
 class ConfigType(Enum):
     MODBUS = "modbus"
     STATUS_DEVICE = "status_device"
-    HMI = "hmi"
 
 
 def abs_path(path: str) -> str:
@@ -31,16 +30,10 @@ def load_config(file_path: str, config_type: ConfigType):
             logger.info("converting to global config...")
             if config_type == ConfigType.MODBUS:
                 return ModbusConfig.model_validate(config)
-            if config_type == ConfigType.HMI:
-                return HMIConfig.model_validate(config)
             return StatusDeviceConfig.model_validate(config)
     except Exception as err:
         logger.error("Exception loading configuration - %s", err)
         raise err
-
-
-def load_hmi_control_config() -> HMIConfig:
-    return load_config("./config/hmi.yml", ConfigType.HMI)
 
 
 def load_modbus_config() -> ModbusConfig:
