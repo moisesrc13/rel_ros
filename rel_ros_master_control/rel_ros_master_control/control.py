@@ -89,18 +89,23 @@ class RelControl:
             return
         logger.info("writing ok ✨")
 
-    def write_holding_register(self, register_addr: int, value: int):
+    def write_holding_register(self, register_addr: int, value: int) -> ControlStatus:
+        status = ControlStatus()
         logger.info("writing to register %s value %s", register_addr, value)
         response = self.master_io_link.slave_conn.write_register(address=register_addr, value=value)
         if response.isError():
             logger.error("error writing register")
-            return
+            status.error = response
+            return status
         logger.info("writing ok ✨")
+        status.status = "write ok"
+        status.value = value
+        return status
 
     def read_holding_register(self, register: int) -> ControlStatus:
+        status = ControlStatus()
         logger.info("reading register %s", register)
         response = self.master_io_link.slave_conn.read_holding_registers(address=register, count=1)
-        status = ControlStatus()
         if response.isError():
             logger.error("error reading register")
             status.error = response

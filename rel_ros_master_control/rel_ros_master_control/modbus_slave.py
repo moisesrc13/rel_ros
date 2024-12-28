@@ -37,9 +37,15 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         super().setValues(address - 1, values)
         address = address - 1
         logger.info("setValues with address %s, value %s", address, values)
-        values = values[0]
-        if address == 100:  # TEST
-            logger.info("hitting modbus 100 address")
+        value = values[0]
+        if address == self.test_address_software_version:
+            logger.info("write test_address_software_version")
+            self.test_address_software_version = value
+            return
+        if address == self.test_address_uint16:
+            logger.info("write test_address_uint16")
+            self.test_address_uint16 = value
+            return
 
     def getValues(self, address, count=1):
         """
@@ -58,14 +64,12 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 address_value[0],
             )
             if address == self.test_address_software_version:
-                data = random.randint(0, 100)
                 logger.info("reading software version data %s", data)
-                builder.add_16bit_uint(data)
+                builder.add_16bit_uint(self.test_address_software_version)
                 return builder.to_registers()
             if address == self.test_address_uint16:
-                data = random.randint(0, 100)
                 logger.info("test int16 data %s", data)
-                builder.add_16bit_uint(data)
+                builder.add_16bit_uint(self.test_address_uint16)
                 return builder.to_registers()
             return [255]
         except Exception as ex:
