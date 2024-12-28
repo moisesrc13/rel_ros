@@ -36,7 +36,7 @@ class RelROSNode(Node):
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
 
     def listener_hmi_callback(self, msg: HMI):
-        self.get_logger().info(f"📨 I got an HMI message {msg}")
+        self.get_logger().info(f"📨 I got an HMI message")
         hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
