@@ -10,3 +10,5 @@ tenacity==8.5.0
 pyaml==24.9.0
 pytest==8.3.3
 lark==1.2.2
+fastapi==0.111.1
+uvicorn==0.30.6
