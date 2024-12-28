@@ -72,10 +72,11 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveTCP) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
         logger.info("✨ Starting modbus master ...")
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
+        self.hr = hr
 
     def connection_state(self):
         if self.slave_conn.connected:
@@ -131,12 +132,12 @@ class RelModbusMaster:
 
     def get_holding_registers_data(self) -> list[Register]:
         logger.info("reading holding register data")
-        addresses = get_hr_addresses(self.slave.holding_registers)
+        addresses = get_hr_addresses(self.hr)
         rr = self.slave_conn.read_holding_registers(address=addresses[0], count=len(addresses))
         decoder = get_decoder(rr)
         updated_registers = []
         for addr in addresses:
-            register, _ = get_register_by_address(self.slave.holding_registers, addr)
+            register, _ = get_register_by_address(self.hr, addr)
             register.value = get_value(decoder, RegisterDataType.uint16)
             updated_registers.append(register)
         return updated_registers
@@ -169,7 +170,7 @@ def run():
     )
     args = parser.parse_args()
     config = load_modbus_config()
-    modbus_master = RelModbusMaster(config.slaves[0])
+    modbus_master = RelModbusMaster(config.slaves[0], config.holding_registers)
     modbus_master.do_connect()
     if args.action == "write":
         modbus_master.do_write(args.register, args.value)
