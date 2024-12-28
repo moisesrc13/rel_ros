@@ -26,15 +26,17 @@ class Register(BaseModel):
 
 
 class SlaveTCP(BaseModel):
+    name: str
     host: str
     port: int
+    id: int
     framer: str = "socket"
     timeout_seconds: int = 5
-    holding_registers: list[Register]
 
 
 class ModbusConfig(BaseModel):
-    modbus: SlaveTCP
+    slaves: list[SlaveTCP]
+    holding_registers: list[Register]
 
 
 def get_register_by_address(

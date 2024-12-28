@@ -1,6 +1,8 @@
-modbus:
-  host: 0.0.0.0  # this will be the HMI's IP
-  port: 9000  # 502 is the standard
+  slaves:
+    - name: "HMI 1"
+      id: 1
+      host: 0.0.0.0  # this will be the HMI's IP
+      port: 9000  # 502 is the standard
   holding_registers:
     - name: "param_target_pressure_pistons"
       address: 40001
