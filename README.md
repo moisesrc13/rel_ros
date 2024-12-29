@@ -77,6 +77,9 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
+## Build interfaces package
+Make sure you install `numpy` in the virtual env
+
 ## Sym links in RPi
 
 ```bash
