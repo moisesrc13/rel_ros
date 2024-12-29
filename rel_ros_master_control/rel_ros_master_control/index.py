@@ -31,7 +31,7 @@ class RelROSNode(Node):
         self.get_logger().info("creating Relant master control 🚀...")
         self.create_timer(1.0, self.timer_callback)
         self.hmi_cluster = create_hmi_cluster(size=1)
-        # self.control = RelControl()
+        self.control = RelControl()
         self.get_logger().info("creating subscriber 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
 
