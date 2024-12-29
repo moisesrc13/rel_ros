@@ -76,3 +76,11 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 
 # read all
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
+
+## Sym links in RPi
+
+```bash
+ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi
+ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control
+ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
+```
