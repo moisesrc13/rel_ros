@@ -2,7 +2,7 @@
     - name: "HMI 1"
       id: 0
       host: 0.0.0.0  # this will be the HMI's IP
-      port: 9000  # 502 is the standard
+      port: 502  # 502 is the standard
       offset: 0
   holding_registers:
     - name: "param_target_pressure_pistons"

@@ -121,14 +121,14 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register]):
 
 
 def run(slave: SlaveTCP, hr: list[Register]):
+    slave.host = "0.0.0.0"
+    slave.port = 8845
     server = run_sync_modbus_server(slave, hr)
     if server:
         server.shutdown()
 
 
 if __name__ == "__main__":
-    """
-    note that this slave implementation is only for testing
-    """
+    #  note that this slave implementation is only for testing
     config = load_modbus_config()
     run(config.slaves[0], config.holding_registers)
