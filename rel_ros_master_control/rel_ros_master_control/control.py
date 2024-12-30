@@ -44,7 +44,7 @@ def get_value(
 
 class ControlStatus(BaseModel):
     error: str = None
-    status: str = "ok"
+    status: str = ""
     value: int = -1
 
 
