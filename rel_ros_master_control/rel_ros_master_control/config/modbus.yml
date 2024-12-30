@@ -4,6 +4,7 @@ slaves:
     port: 502
     framer: "socket"
     timeout_seconds: 10
+    offset: -1
     device_ports:
       port_8:
         init_address: 8000

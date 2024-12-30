@@ -52,6 +52,7 @@ class SlaveTCP(BaseModel):
     port: int
     framer: str = "socket"
     timeout_seconds: int = 5
+    offset: int = 0
     device_ports: DevicePorts
 
 
