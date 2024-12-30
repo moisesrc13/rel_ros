@@ -2,6 +2,7 @@
 this is our modbus slave(s) implementation, mainly for testing
 """
 import os
+import random
 import time
 
 from pymodbus.constants import Endian
@@ -74,7 +75,9 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 logger.info("test int16 data %s", self.test_address_uint16_value)
                 builder.add_16bit_uint(self.test_address_uint16_value)
                 return builder.to_registers()
-            return [255]
+
+            builder.add_16bit_uint(random.randint(100, 255))
+            return builder.to_registers()
         except Exception as ex:
             logger.error("Error getting values from modbus address %s - %s", address, ex)
 
