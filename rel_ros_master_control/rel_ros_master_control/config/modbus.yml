@@ -16,6 +16,8 @@ holding_registers:
       words: 1
 slaves:
   master_io_link:
+    hmi_id: 0
+    hmi_name: "HMI 1"
     host: 192.168.0.21
     port: 502
     framer: "socket"

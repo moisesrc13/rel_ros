@@ -62,6 +62,8 @@ class RelModbusMaster:
         logger.info("✨ Starting modbus master ...")
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
+        self.hmi_id = slave.hmi_id
+        self.hmi_name = slave.hmi_name
 
     def connection_state(self):
         if self.slave_conn.connected:

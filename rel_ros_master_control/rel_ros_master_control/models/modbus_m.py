@@ -52,6 +52,8 @@ class DevicePorts(BaseModel):
 class SlaveTCP(BaseModel):
     host: str
     port: int
+    hmi_id: int
+    hmi_name: str
     framer: str = "socket"
     timeout_seconds: int = 5
     offset: int = 0

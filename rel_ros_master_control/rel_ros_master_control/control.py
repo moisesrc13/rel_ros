@@ -45,7 +45,7 @@ def get_value(
 class ControlStatus(BaseModel):
     error: str = None
     status: str = ""
-    value: int = -1
+    value: int = 0
 
 
 class RelControl:
@@ -127,7 +127,11 @@ class RelControl:
         return status
 
     def get_data(self) -> list[Register]:
-        pass
+        updated_registers = []
+        for register in self.hr:
+            register.value = self.read_holding_register(register.address)
+            updated_registers.append(register)
+        return updated_registers
 
 
 def run():
