@@ -25,7 +25,7 @@ class Register(BaseModel):
             self.words = 1
 
 
-class HoldingRegisters(BaseModel):
+class DevicePortHoldingRegisters(BaseModel):
     data_input_status: Optional[Register] = None
     data_input: Optional[Register] = None
     data_output_status: Optional[Register] = None
@@ -35,7 +35,7 @@ class HoldingRegisters(BaseModel):
 class DevicePort(BaseModel):
     init_address: int
     name: Optional[str] = None
-    holding_registers: HoldingRegisters
+    holding_registers: DevicePortHoldingRegisters
 
 
 class DevicePorts(BaseModel):
@@ -74,3 +74,4 @@ class ModbusSlaves(BaseModel):
 
 class ModbusConfig(BaseModel):
     slaves: ModbusSlaves
+    holding_registers: list[Register]
