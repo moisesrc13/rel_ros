@@ -73,7 +73,7 @@ def setup_sync_client(
 
 class RelModbusMaster:
     def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
-        logger.info("✨ Starting modbus master ...")
+        logger.info("✨ Starting modbus HMI master ...")
         self.hmi_name = slave.name
         self.hmi_id = slave.id
         self.slave_conn = setup_sync_client(slave)
@@ -92,10 +92,10 @@ class RelModbusMaster:
     )
     def do_connect(self):
         try:
-            logger.info("connecting to modbus slave")
+            logger.info("connecting to modbus HMI slave")
             assert self.slave_conn.connect()
             logger.info(
-                "modbus slave connected 🤘 is socked opened %s, transport %s",
+                "modbus HMI slave connected 🤘 is socked opened %s, transport %s",
                 self.slave_conn.is_socket_open(),
                 self.slave_conn.transport,
             )
@@ -140,7 +140,7 @@ class RelModbusMaster:
         updated_registers = []
         for addr in addresses:
             register, _ = get_register_by_address(self.hr, addr)
-            register.value = get_value(decoder, RegisterDataType.uint16)
+            register.value = get_value(decoder, register.data_type)
             updated_registers.append(register)
         return updated_registers
 
