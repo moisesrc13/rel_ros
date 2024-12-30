@@ -103,4 +103,4 @@ Replace `localhost` by host IP
 
 curl "http://localhost:9080/read/8001"
 
-curl -X POST "http://localhost:9080/write" -d '{"register": 5051, "value": 1}'
+curl -X POST "http://localhost:9080/write" -H "Content-Type:application/json" -d '{"register": 5051, "value": 1}'
