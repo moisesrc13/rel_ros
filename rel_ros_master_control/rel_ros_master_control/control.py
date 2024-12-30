@@ -51,9 +51,11 @@ class ControlStatus(BaseModel):
 class RelControl:
     def __init__(self) -> None:
         logger.info("starting main control...")
+        config = load_modbus_config()
         self.master_io_link: RelModbusMaster = get_master(
-            load_modbus_config().slaves, "master_io_link"
+            config.slaves, "master_io_link"
         )  # this is open to work with other masters in the future
+        self.hr = config.holding_registers
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
@@ -124,7 +126,7 @@ class RelControl:
         status.status = "read ok"
         return status
 
-    def get_data(self):
+    def get_data(self) -> list[Register]:
         pass
 
 
