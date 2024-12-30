@@ -1,0 +1,3 @@
+int32 sensor_material_pressure
+int32 sensor_material_temperature
+int32 sensor_laser_distance

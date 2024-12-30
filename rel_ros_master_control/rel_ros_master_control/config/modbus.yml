@@ -8,7 +8,7 @@ slaves:
     device_ports:
       port_8:
         init_address: 8000
-        name: "laser sensor"
+        name: "sensor_laser_distance"
         holding_registers:
           data_input_status:
             address: 8000
@@ -28,7 +28,7 @@ slaves:
             data_type: "uint16"
       port_5:
         init_address: 5000
-        name: "status device"
+        name: "status_device"  # torreta
         holding_registers:
           data_output_satus:
             address: 5050
