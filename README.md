@@ -87,3 +87,12 @@ ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi 
 ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control && \
 ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
 ```
+
+## Config REST Service
+```bash
+sudo cp rel_ros_master_control/rel_ros_master_control/rest/rel-iolink-rest.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable rel-iolink-rest.service
+sudo systemctl status rel-iolink-rest.service
+sudo systemctl rel-iolink-rest.service
+```
