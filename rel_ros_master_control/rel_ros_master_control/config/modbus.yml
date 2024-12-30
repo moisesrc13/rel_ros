@@ -1,6 +1,6 @@
 slaves:
   master_io_link:
-    host: 192.168.0.1
+    host: 192.168.0.21
     port: 502
     framer: "socket"
     timeout_seconds: 10
