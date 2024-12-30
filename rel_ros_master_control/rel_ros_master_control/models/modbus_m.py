@@ -15,9 +15,11 @@ class Register(BaseModel):
     address: int
     words: int
     data_type: RegisterDataType = RegisterDataType.uint16
+    name: str = ""
+    value: int = 0
 
     def __post_init__(self):
-        if self.data_type == RegisterDataType.uint32 or self.data_type == RegisterDataType.float32:
+        if self.data_type in [RegisterDataType.uint32, RegisterDataType.float32]:
             self.words = 2
         else:
             self.words = 1

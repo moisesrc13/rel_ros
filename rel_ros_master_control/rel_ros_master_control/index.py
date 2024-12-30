@@ -29,7 +29,7 @@ class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.get_logger().info("creating Relant master control 🚀...")
-        self.create_timer(1.0, self.timer_callback)
+        self.create_timer(1.0, self.timer_callback_iolink_data)
         self.hmi_cluster = create_hmi_cluster(size=1)
         self.control = RelControl()
         self.get_logger().info("creating subscriber 📨 ...")
@@ -41,8 +41,8 @@ class RelROSNode(Node):
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
 
-    def timer_callback(self):
-        self.get_logger().info("Relant ROS2 Master Control 🤖 Node running 🤘 ...")
+    def timer_callback_iolink_data(self):
+        self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
         self.get_logger().info(f"this is the current HMI cluster {self.hmi_cluster}")
 
 

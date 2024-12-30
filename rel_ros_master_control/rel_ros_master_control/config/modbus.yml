@@ -1,3 +1,19 @@
+holding_registers:
+    - name: "sensor_material_pressure"
+      address: 40013
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_material_temperature"
+      address: 40014
+      data_type: "uint16"
+      value: 0
+      words: 1
+    - name: "sensor_laser_distance"
+      address: 40015
+      data_type: "uint16"
+      value: 0
+      words: 1
 slaves:
   master_io_link:
     host: 192.168.0.21

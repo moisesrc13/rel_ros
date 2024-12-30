@@ -124,6 +124,9 @@ class RelControl:
         status.status = "read ok"
         return status
 
+    def get_data(self):
+        pass
+
 
 def run():
     parser = argparse.ArgumentParser()
