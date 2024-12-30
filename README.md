@@ -96,3 +96,11 @@ sudo systemctl enable rel-iolink-rest.service
 sudo systemctl status rel-iolink-rest.service
 sudo systemctl rel-iolink-rest.service
 ```
+
+### calling service
+Replace `localhost` by host IP
+
+
+curl "http://localhost:9080/read/8001"
+
+curl -X POST "http://localhost:9080/write/8001" -d '{"register": 5051, "value": 1}'
