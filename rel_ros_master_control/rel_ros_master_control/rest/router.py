@@ -25,7 +25,7 @@ def health():
     return "OK"
 
 
-@api_router.post("/read/{register}")
+@api_router.get("/read/{register}")
 async def read_register(
     request: Request,
     register: int,
