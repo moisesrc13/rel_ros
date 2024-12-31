@@ -32,8 +32,9 @@ class RelROSNode(Node):
         self.create_timer(1.0, self.timer_callback_iolink_data)
         self.hmi_cluster = create_hmi_cluster(size=1)
         self.control = RelControl()
-        self.get_logger().info("creating subscriber 📨 ...")
+        self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
+        self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
 
     def listener_hmi_callback(self, msg: HMI):
