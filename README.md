@@ -66,6 +66,8 @@ python rel_ros_master_control/rel_ros_master_control/rest/app.py
 
 ## Run test HMI modbus master & slave
 
+### HMI
+
 ```bash
 
 python rel_ros_hmi/rel_ros_hmi/modbus_slave.py
@@ -75,6 +77,19 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 
 
 # read all
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
+```
+
+### IOLink
+
+```bash
+
+python rel_ros_master_control/rel_ros_master_control/control.py
+
+cd ~/ros2_ws/src
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40010 --value 1200
+
+# read all
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0
 ```
 
 ## Build interfaces package

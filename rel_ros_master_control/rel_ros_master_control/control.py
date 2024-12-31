@@ -164,7 +164,12 @@ def run():
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":
-        control.read_holding_register(args.register)
+        value = -1
+        if args.register == 0:
+            value = control.get_data()
+        else:
+            value = control.read_holding_register(args.register)
+        logger.info("read value %s", value)
 
 
 # for testing outside ROS
