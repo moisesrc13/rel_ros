@@ -25,6 +25,7 @@ class RelROSNode(Node):
 
     def listener_iolink_data_callback(self, msg: IOLinkData):
         self.get_logger().info(f"📨 I got an IOLinkData message {msg}")
+        self.save_hmi_iolink_data(msg.hmi_id, msg)
 
     def save_hmi_iolink_data(self, master_id: int, msg: IOLinkData):
         master = self.masters[master_id]
@@ -34,6 +35,7 @@ class RelROSNode(Node):
                     f"writing iolink data into hmi with address: {register.address}, value: {value}"
                 )
                 master.do_write(register.address, value)
+        self.get_logger().info(f"complete write into hmi master id {master_id}")
 
     def publish_hmi_data(self, master_id: int):
         master = self.masters[master_id]
