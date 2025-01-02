@@ -69,6 +69,9 @@ python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ### HMI
 
 ```bash
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi" \
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control" \
+export USE_TEST_MODBUS="true"
 
 python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py
 

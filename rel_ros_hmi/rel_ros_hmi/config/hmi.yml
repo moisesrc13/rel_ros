@@ -1,7 +1,7 @@
   slaves:
     - name: "HMI 1"
       id: 0
-      host: 0.0.0.0  # this will be the HMI's IP
+      host: 192.168.0.41  # this will be the HMI's IP
       port: 502  # 502 is the standard
       offset: 0
   holding_registers:

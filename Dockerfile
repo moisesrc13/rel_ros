@@ -45,7 +45,7 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/relant/ros2_ws/venv/bin/activate" >> ~/.bashrc
 RUN echo "export PYTHONPATH=${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi" >> ~/.bashrc
 RUN echo "export PYTHONPATH=${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"  >> ~/.bashrc
-
+RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
 
 
 # launch ros package
