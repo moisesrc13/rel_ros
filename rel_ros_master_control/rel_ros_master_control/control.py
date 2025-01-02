@@ -120,6 +120,7 @@ class RelControl:
         if response.isError():
             logger.error("error reading register")
             status.error = response
+            return status
         logger.info("reading ok ✨ %s", response.registers)
         decoder = get_decoder(response)
         status.value = get_value(decoder)
@@ -129,8 +130,9 @@ class RelControl:
     def get_data(self) -> list[Register]:
         updated_registers = []
         for register in self.hr:
-            register.value = self.read_holding_register(register.address)
+            register.value = self.read_holding_register(register.address).value
             updated_registers.append(register)
+        logger.info("getting data from master %s", updated_registers)
         return updated_registers
 
 

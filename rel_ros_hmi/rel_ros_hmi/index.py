@@ -28,14 +28,17 @@ class RelROSNode(Node):
         self.save_hmi_iolink_data(msg.hmi_id, msg)
 
     def save_hmi_iolink_data(self, master_id: int, msg: IOLinkData):
-        master = self.masters[master_id]
-        for register in master.hr:
-            if value := getattr(msg, register.name):
-                self.get_logger().info(
-                    f"writing iolink data into hmi with address: {register.address}, value: {value}"
-                )
-                master.do_write(register.address, value)
-        self.get_logger().info(f"complete write into hmi master id {master_id}")
+        try:
+            master = self.masters[master_id]
+            for register in master.hr:
+                if value := getattr(msg, register.name, None):
+                    self.get_logger().info(
+                        f"writing iolink data into hmi with address: {register.address}, value: {value}"
+                    )
+                    master.do_write(register.address, value)
+            self.get_logger().info(f"complete write into hmi master id {master_id}")
+        except Exception as err:
+            self.get_logger().error(f"error saving iolink data {err}")
 
     def publish_hmi_data(self, master_id: int):
         master = self.masters[master_id]
