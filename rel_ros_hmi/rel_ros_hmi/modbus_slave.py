@@ -1,6 +1,7 @@
 """
 This is a modbus slave for testing within ROS
 """
+import random
 
 from pymodbus.constants import Endian
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusServerContext, ModbusSlaveContext
@@ -66,7 +67,12 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
             logger.info("addresses to get %s", addresses)
             for addr in addresses:
                 register, _ = get_register_by_address(self.hr, addr)
-                if register:
+                if not register:
+                    continue
+                if register.name.startswith("param") and register.value == 0:
+                    # generate random
+                    builder.add_16bit_uint(random.randint(10, 555))
+                else:
                     builder.add_16bit_uint(register.value)
             values = builder.to_registers()
             logger.info("return values %s", values)
