@@ -1,5 +1,6 @@
 import argparse
 
+import trio
 from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
@@ -130,6 +131,7 @@ class RelControl:
     def get_data(self) -> list[Register]:
         updated_registers = []
         for register in self.hr:
+
             register.value = self.read_holding_register(register.address).value
             updated_registers.append(register)
         logger.info("getting data from master %s", updated_registers)
