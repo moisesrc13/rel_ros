@@ -20,11 +20,16 @@ def setup_sync_client(
         host = slave.host
         port = slave.port
         if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+            logger.info("connecting to test modbus slave")
             host = "0.0.0.0"
             port = 8844
         client = None
         if isinstance(slave, SlaveTCP):
-            logger.info("Creating TCP master connecion to slave ⭐ %s", slave)
+            logger.info(
+                "Creating TCP master connecion to slave on host %s port %s ⭐",
+                host,
+                port,
+            )
             client = modbusClient.ModbusTcpClient(
                 host=host,
                 port=port,
@@ -57,6 +62,8 @@ class RelModbusMaster:
         logger.info("✨ Starting modbus master ...")
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
+        self.hmi_id = slave.hmi_id
+        self.hmi_name = slave.hmi_name
 
     def connection_state(self):
         if self.slave_conn.connected:

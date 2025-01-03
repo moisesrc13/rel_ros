@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 
 from pydantic import BaseModel
 from pymodbus.constants import Endian
@@ -44,19 +45,26 @@ def get_value(
 
 class ControlStatus(BaseModel):
     error: str = None
-    status: str = "ok"
-    value: int = -1
+    status: str = ""
+    value: int = 0
 
 
 class RelControl:
     def __init__(self) -> None:
         logger.info("starting main control...")
+        config = load_modbus_config()
         self.master_io_link: RelModbusMaster = get_master(
-            load_modbus_config().slaves, "master_io_link"
+            config.slaves, "master_io_link"
         )  # this is open to work with other masters in the future
+        self.hr = config.holding_registers
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
+
+    def get_register_with_offset(self, register: int) -> int:
+        register = register + self.master_io_link.slave.offset
+        logger.debug("register with offset %s", register)
+        return register
 
     def read_device_port_input_status(self, port: str) -> int:
         port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
@@ -64,7 +72,7 @@ class RelControl:
             "port_num %s status_register %s", port, port.holding_registers.data_input_status
         )
         rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=port.holding_registers.data_input_status.address,
+            address=self.get_register_with_offset(port.holding_registers.data_input_status.address),
             count=port.holding_registers.data_input_status.words,
         )
         decoder = get_decoder(rr)
@@ -73,7 +81,7 @@ class RelControl:
     def read_device_port_register(self, register: Register) -> int:
         logger.debug("read device register %s", register)
         rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=register.address,
+            address=self.get_register_with_offset(register.address),
             count=register.words,
         )
         decoder = get_decoder(rr)
@@ -82,17 +90,19 @@ class RelControl:
     def write_device_port_register(self, register: Register, value: int) -> int:
         logger.debug("write device register %s", register)
         response = self.master_io_link.slave_conn.write_register(
-            address=register.address, value=value
+            address=self.get_register_with_offset(register.address), value=value
         )
         if response.isError():
             logger.error("error writing register")
             return
         logger.info("writing ok ✨")
 
-    def write_holding_register(self, register_addr: int, value: int) -> ControlStatus:
+    def write_holding_register(self, register: int, value: int) -> ControlStatus:
         status = ControlStatus()
-        logger.info("writing to register %s value %s", register_addr, value)
-        response = self.master_io_link.slave_conn.write_register(address=register_addr, value=value)
+        logger.info("writing to register %s value %s", register, value)
+        response = self.master_io_link.slave_conn.write_register(
+            address=self.get_register_with_offset(register), value=value
+        )
         if response.isError():
             logger.error("error writing register")
             status.error = response
@@ -105,15 +115,45 @@ class RelControl:
     def read_holding_register(self, register: int) -> ControlStatus:
         status = ControlStatus()
         logger.info("reading register %s", register)
-        response = self.master_io_link.slave_conn.read_holding_registers(address=register, count=1)
+        response = self.master_io_link.slave_conn.read_holding_registers(
+            address=self.get_register_with_offset(register), count=1
+        )
         if response.isError():
             logger.error("error reading register")
             status.error = response
+            return status
         logger.info("reading ok ✨ %s", response.registers)
         decoder = get_decoder(response)
         status.value = get_value(decoder)
         status.status = "read ok"
         return status
+
+    def get_data_slow(self) -> list[Register]:
+        updated_registers = []
+        for register in self.hr:
+            register.value = self.read_holding_register(register.address).value
+            updated_registers.append(register)
+        logger.info(
+            "getting data total %s from master %s", len(updated_registers), updated_registers
+        )
+        return updated_registers
+
+    def get_data(self) -> list[Register]:
+        updated_registers = []
+
+        def worker(register: Register):
+            register.value = self.read_holding_register(register.address).value
+            updated_registers.append(register)
+
+        futures = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for register in self.hr:
+                futures.append(executor.submit(worker, register))
+        concurrent.futures.wait(futures)
+        logger.info(
+            "getting data total %s from master %s", len(updated_registers), updated_registers
+        )
+        return updated_registers
 
 
 def run():
@@ -146,7 +186,13 @@ def run():
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":
-        control.read_holding_register(args.register)
+        value = -1
+        if args.register == 0:
+            value = control.get_data()
+            logger.info("value size %s", len(value))
+        else:
+            value = control.read_holding_register(args.register)
+        logger.info("read value %s", value)
 
 
 # for testing outside ROS

@@ -1,13 +1,32 @@
+holding_registers:
+    - name: "sensor_material_pressure"
+      address: 40013
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_material_temperature"
+      address: 40014
+      data_type: "uint16"
+      value: 0
+      words: 1
+    - name: "sensor_laser_distance"
+      address: 40015
+      data_type: "uint16"
+      value: 0
+      words: 1
 slaves:
   master_io_link:
-    host: 192.168.0.1
+    hmi_id: 0
+    hmi_name: "HMI 1"
+    host: 192.168.0.21
     port: 502
     framer: "socket"
     timeout_seconds: 10
+    offset: -1
     device_ports:
       port_8:
         init_address: 8000
-        name: "laser sensor"
+        name: "sensor_laser_distance"
         holding_registers:
           data_input_status:
             address: 8000
@@ -27,7 +46,7 @@ slaves:
             data_type: "uint16"
       port_5:
         init_address: 5000
-        name: "status device"
+        name: "status_device"  # torreta
         holding_registers:
           data_output_satus:
             address: 5050

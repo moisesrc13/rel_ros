@@ -75,7 +75,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 logger.info("test int16 data %s", self.test_address_uint16_value)
                 builder.add_16bit_uint(self.test_address_uint16_value)
                 return builder.to_registers()
-            return [255]
+            value = random.randint(100, 255)
+            logger.info("💡 returning value %s for address %s", value, address)
+            builder.add_16bit_uint(value)
+            return builder.to_registers()
         except Exception as ex:
             logger.error("Error getting values from modbus address %s - %s", address, ex)
 

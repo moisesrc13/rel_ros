@@ -15,15 +15,17 @@ class Register(BaseModel):
     address: int
     words: int
     data_type: RegisterDataType = RegisterDataType.uint16
+    name: str = ""
+    value: int = 0
 
     def __post_init__(self):
-        if self.data_type == RegisterDataType.uint32 or self.data_type == RegisterDataType.float32:
+        if self.data_type in [RegisterDataType.uint32, RegisterDataType.float32]:
             self.words = 2
         else:
             self.words = 1
 
 
-class HoldingRegisters(BaseModel):
+class DevicePortHoldingRegisters(BaseModel):
     data_input_status: Optional[Register] = None
     data_input: Optional[Register] = None
     data_output_status: Optional[Register] = None
@@ -33,7 +35,7 @@ class HoldingRegisters(BaseModel):
 class DevicePort(BaseModel):
     init_address: int
     name: Optional[str] = None
-    holding_registers: HoldingRegisters
+    holding_registers: DevicePortHoldingRegisters
 
 
 class DevicePorts(BaseModel):
@@ -50,8 +52,11 @@ class DevicePorts(BaseModel):
 class SlaveTCP(BaseModel):
     host: str
     port: int
+    hmi_id: int = 0
+    hmi_name: str = "HMI"
     framer: str = "socket"
     timeout_seconds: int = 5
+    offset: int = 0
     device_ports: DevicePorts
 
 
@@ -71,3 +76,4 @@ class ModbusSlaves(BaseModel):
 
 class ModbusConfig(BaseModel):
     slaves: ModbusSlaves
+    holding_registers: list[Register]

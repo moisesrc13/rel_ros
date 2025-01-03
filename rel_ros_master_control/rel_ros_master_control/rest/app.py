@@ -1,6 +1,5 @@
 """ main fast api application """
 from contextlib import asynccontextmanager
-from threading import Thread
 
 import uvicorn
 from fastapi import FastAPI

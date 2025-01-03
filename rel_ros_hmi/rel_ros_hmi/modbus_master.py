@@ -1,4 +1,5 @@
 import argparse
+import os
 from typing import Union
 
 import pymodbus.client as modbusClient
@@ -49,16 +50,22 @@ def setup_sync_client(
     """Run client setup."""
     logger.info("creating modbus master for slave %s 👾 ...", slave.id)
     try:
+        host = slave.host
+        port = slave.port
+        if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+            logger.info("connecting to test modbus slave")
+            host = "0.0.0.0"
+            port = 8845
         client = None
         if isinstance(slave, SlaveTCP):
             logger.info(
                 "Creating TCP master connecion to slave on host %s port %s ⭐",
-                slave.host,
-                slave.port,
+                host,
+                port,
             )
             client = modbusClient.ModbusTcpClient(
-                host=slave.host,
-                port=slave.port,
+                host=host,
+                port=port,
                 framer=FramerType.SOCKET,
                 timeout=slave.timeout_seconds,
             )
@@ -73,7 +80,7 @@ def setup_sync_client(
 
 class RelModbusMaster:
     def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
-        logger.info("✨ Starting modbus master ...")
+        logger.info("✨ Starting modbus HMI master ...")
         self.hmi_name = slave.name
         self.hmi_id = slave.id
         self.slave_conn = setup_sync_client(slave)
@@ -92,10 +99,10 @@ class RelModbusMaster:
     )
     def do_connect(self):
         try:
-            logger.info("connecting to modbus slave")
+            logger.info("connecting to modbus HMI slave")
             assert self.slave_conn.connect()
             logger.info(
-                "modbus slave connected 🤘 is socked opened %s, transport %s",
+                "modbus HMI slave connected 🤘 is socked opened %s, transport %s",
                 self.slave_conn.is_socket_open(),
                 self.slave_conn.transport,
             )
@@ -140,7 +147,7 @@ class RelModbusMaster:
         updated_registers = []
         for addr in addresses:
             register, _ = get_register_by_address(self.hr, addr)
-            register.value = get_value(decoder, RegisterDataType.uint16)
+            register.value = get_value(decoder, register.data_type)
             updated_registers.append(register)
         return updated_registers
 
