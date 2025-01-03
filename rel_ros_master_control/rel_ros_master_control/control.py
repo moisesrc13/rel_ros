@@ -1,6 +1,6 @@
 import argparse
+import concurrent.futures
 
-import trio
 from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
@@ -128,13 +128,31 @@ class RelControl:
         status.status = "read ok"
         return status
 
-    def get_data(self) -> list[Register]:
+    def get_data_slow(self) -> list[Register]:
         updated_registers = []
         for register in self.hr:
-
             register.value = self.read_holding_register(register.address).value
             updated_registers.append(register)
-        logger.info("getting data from master %s", updated_registers)
+        logger.info(
+            "getting data total %s from master %s", len(updated_registers), updated_registers
+        )
+        return updated_registers
+
+    def get_data(self) -> list[Register]:
+        updated_registers = []
+
+        def worker(register: Register):
+            register.value = self.read_holding_register(register.address).value
+            updated_registers.append(register)
+
+        futures = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for register in self.hr:
+                futures.append(executor.submit(worker, register))
+        concurrent.futures.wait(futures)
+        logger.info(
+            "getting data total %s from master %s", len(updated_registers), updated_registers
+        )
         return updated_registers
 
 
@@ -171,6 +189,7 @@ def run():
         value = -1
         if args.register == 0:
             value = control.get_data()
+            logger.info("value size %s", len(value))
         else:
             value = control.read_holding_register(args.register)
         logger.info("read value %s", value)
