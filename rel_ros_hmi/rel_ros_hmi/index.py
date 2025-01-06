@@ -23,7 +23,7 @@ class RelROSNode(Node):
     def create_hmi_publishers(self, count: int = 1) -> dict:
         publishers = {}
         for p in range(count):
-            topic = f"rel/hmi/{p}"
+            topic = f"rel/hmi_{p}"
             self.get_logger().info(f"creating publisher for {topic} topic 📨")
             publishers[p] = self.create_publisher(HMI, topic, 10)
         return publishers
