@@ -69,11 +69,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 register, _ = get_register_by_address(self.hr, addr)
                 if not register:
                     continue
-                if register.name.startswith("param") and register.value == 0:
-                    # generate random
-                    builder.add_16bit_uint(random.randint(10, 555))
-                else:
-                    builder.add_16bit_uint(register.value)
+                builder.add_16bit_uint(register.value)
             values = builder.to_registers()
             logger.info("return values %s", values)
             return values
