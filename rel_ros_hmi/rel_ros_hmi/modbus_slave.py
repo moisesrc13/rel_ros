@@ -153,7 +153,9 @@ def run(slave: SlaveTCP, publisher=None):
 def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[Register], publishers: dict):
     queue = Queue()
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
+        slave_thread = ModbusSlaveThread(
+            slave=slave, hr=hr, queue=queue, publisher=publishers.get(slave.id)
+        )
         queue.put(slave_thread)
         slave_thread.start()
     try:
