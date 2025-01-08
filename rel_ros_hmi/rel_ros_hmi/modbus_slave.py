@@ -11,6 +11,7 @@ from pymodbus.framer import FramerType
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
+from rel_interfaces.msg import HMI
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
 
@@ -21,6 +22,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
     def __init__(self, addr, values, slave: SlaveTCP, hr: list[Register], publisher):
         """Initialize."""
         self.hr = hr
+        self.slave = slave
         self.publisher = publisher
         logger.info("initializing modbus 👾 slave on port %s", slave.port)
         super().__init__(addr, values)
@@ -45,6 +47,13 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("write register %s with value %s", register, value)
         register.value = value
         self.hr[idx] = register
+        # publish the data
+        msg = HMI()
+        msg.hmi_name = self.slave.name
+        msg.hmi_id = self.slave.id
+        for register in self.hr:
+            setattr(msg, register.name, register.value)
+        self.publisher.publish(msg)
 
     def getValues(self, address, count=1):
         """
@@ -159,6 +168,7 @@ def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[Register], publishers: di
         queue.put(slave_thread)
         slave_thread.start()
     try:
+        logger.info("all slaves has been started...")
         queue.join()
     except Exception as err:
         logger.error("Error running slave threads %s", err)
