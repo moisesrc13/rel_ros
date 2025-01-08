@@ -53,6 +53,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         msg.hmi_id = self.slave.id
         for register in self.hr:
             setattr(msg, register.name, register.value)
+        logger.info("📨 publishing message from HMI set value %s", msg)
         self.publisher.publish(msg)
 
     def getValues(self, address, count=1):

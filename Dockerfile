@@ -44,6 +44,7 @@ RUN cd ~/ros2_ws/src && source /opt/ros/humble/setup.bash && ros2 pkg create --b
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/relant/ros2_ws/venv/bin/activate" >> ~/.bashrc
 RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
+RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
 
 
 # launch ros package
