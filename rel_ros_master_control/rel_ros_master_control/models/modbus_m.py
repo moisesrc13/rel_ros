@@ -70,10 +70,10 @@ class SlaveSerial(BaseModel):
     port: str = "/dev/ptyp0"
 
 
-class ModbusSlaves(BaseModel):
+class ModbusIOLinkSlaves(BaseModel):
     master_io_link: SlaveTCP | SlaveSerial
 
 
 class ModbusConfig(BaseModel):
-    slaves: ModbusSlaves
+    slaves: list[ModbusIOLinkSlaves]
     holding_registers: list[Register]

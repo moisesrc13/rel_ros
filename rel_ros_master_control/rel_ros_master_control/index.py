@@ -37,8 +37,12 @@ class RelROSNode(Node):
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
 
+    def create_subscribers(self):
+        self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
+        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
+
     def listener_hmi_callback(self, msg: HMI):
-        self.get_logger().info(f"📨 I got an HMI message")
+        self.get_logger().info("📨 I got an HMI message")
         hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData

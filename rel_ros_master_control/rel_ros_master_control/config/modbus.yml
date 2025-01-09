@@ -15,44 +15,44 @@ holding_registers:
       value: 0
       words: 1
 slaves:
-  master_io_link:
-    hmi_id: 0
-    hmi_name: "HMI 1"
-    host: 192.168.0.21
-    port: 502
-    framer: "socket"
-    timeout_seconds: 10
-    offset: -1
-    device_ports:
-      port_8:
-        init_address: 8000
-        name: "sensor_laser_distance"
-        holding_registers:
-          data_input_status:
-            address: 8000
-            words: 1  # 16 bits
-            data_type: "uint16"
-          data_input:
-            address: 8001
-            words: 1
-            data_type: "uint16"
-          data_output_satus:
-            address: 8050
-            words: 1
-            data_type: "uint16"
-          data_output:
-            address: 8051
-            words: 1
-            data_type: "uint16"
-      port_5:
-        init_address: 5000
-        name: "status_device"  # torreta
-        holding_registers:
-          data_output_satus:
-            address: 5050
-            words: 1
-            data_type: "uint16"
-          data_output:
-            address: 5051
-            words: 1
-            data_type: "uint16"
+  - master_io_link:
+      hmi_id: 0
+      hmi_name: "HMI 1"
+      host: 192.168.0.21
+      port: 502
+      framer: "socket"
+      timeout_seconds: 10
+      offset: -1
+      device_ports:
+        port_8:
+          init_address: 8000
+          name: "sensor_laser_distance"
+          holding_registers:
+            data_input_status:
+              address: 8000
+              words: 1  # 16 bits
+              data_type: "uint16"
+            data_input:
+              address: 8001
+              words: 1
+              data_type: "uint16"
+            data_output_satus:
+              address: 8050
+              words: 1
+              data_type: "uint16"
+            data_output:
+              address: 8051
+              words: 1
+              data_type: "uint16"
+        port_5:
+          init_address: 5000
+          name: "status_device"  # torreta
+          holding_registers:
+            data_output_satus:
+              address: 5050
+              words: 1
+              data_type: "uint16"
+            data_output:
+              address: 5051
+              words: 1
+              data_type: "uint16"
