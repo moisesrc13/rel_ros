@@ -77,3 +77,12 @@ class SlaveSerial(BaseModel):
 class ModbusConfig(BaseModel):
     slaves: list[SlaveTCP | SlaveSerial]
     holding_registers: list[Register]
+
+
+def get_register_by_address(
+    registers: list[Register], address: int
+) -> Optional[tuple[Register, int]]:
+    for index, r in enumerate(registers):
+        if r.address == address:
+            return (r, index)
+    return (None, None)

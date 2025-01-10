@@ -12,16 +12,24 @@ from pymodbus.framer import FramerType
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartSerialServer, StartTcpServer
 
+from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.models.modbus_m import DevicePorts, SlaveSerial, SlaveTCP
+from rel_ros_master_control.models.modbus_m import (
+    DevicePorts,
+    Register,
+    SlaveSerial,
+    SlaveTCP,
+    get_register_by_address,
+)
 
 logger = new_logger(__name__)
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveSerial | SlaveTCP):
+    def __init__(self, addr, values, slave: SlaveSerial | SlaveTCP, hr: list[Register]):
         """Initialize."""
         self.settings = slave
+        self.hr = hr
         logger.info("initializing modbus 👾 local slave %s", slave)
         self.test_address_uint16 = 40021
         self.test_address_software_version = 40020
@@ -61,24 +69,22 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         try:
             address_value = super().getValues(address, count=count)
             logger.info(
-                "modbus getValues with address %s, address_value: %s",
+                "modbus getValues with address %s, address_value: %s and count: %s",
                 address,
                 address_value[0],
+                count,
             )
-            if address == self.test_address_software_version:
-                logger.info(
-                    "reading software version data %s", self.test_address_software_version_value
-                )
-                builder.add_16bit_uint(self.test_address_software_version_value)
-                return builder.to_registers()
-            if address == self.test_address_uint16:
-                logger.info("test int16 data %s", self.test_address_uint16_value)
-                builder.add_16bit_uint(self.test_address_uint16_value)
-                return builder.to_registers()
-            value = random.randint(100, 255)
-            logger.info("💡 returning value %s for address %s", value, address)
-            builder.add_16bit_uint(value)
-            return builder.to_registers()
+
+            addresses = list(range(address, address + count))
+            logger.info("addresses to get %s", addresses)
+            for addr in addresses:
+                register, _ = get_register_by_address(self.hr, addr)
+                if not register:
+                    continue
+                builder.add_16bit_uint(register.value)
+            values = builder.to_registers()
+            logger.info("return values %s", values)
+            return values
         except Exception as ex:
             logger.error("Error getting values from modbus address %s - %s", address, ex)
 
@@ -89,10 +95,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP):
+def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[Register]):
     try:
         nreg = 50_000  # number of registers
-        block = ModbusServerBlock(0x00, [0] * nreg, slave)
+        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr)
         store = {}
         # creating two slaves 0 & 1
         store[0] = ModbusSlaveContext(hr=block)
@@ -148,6 +154,7 @@ def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP):
 
 
 def main():
+    config = load_modbus_config()
     server = run_sync_modbus_server(
         slave=SlaveTCP(
             host="0.0.0.0",
@@ -155,7 +162,8 @@ def main():
             address_offset=0,
             device_ports=DevicePorts(),
             timeout_seconds=5,
-        )
+        ),
+        hr=config.holding_registers,
     )
     if server:
         server.shutdown()

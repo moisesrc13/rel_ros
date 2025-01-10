@@ -1,16 +1,16 @@
 holding_registers:
     - name: "sensor_material_pressure"
-      address: 40013
+      address: 5051
       words: 1
       data_type: "uint16"
       value: 0
     - name: "sensor_material_temperature"
-      address: 40014
+      address: 5052
       data_type: "uint16"
       value: 0
       words: 1
     - name: "sensor_laser_distance"
-      address: 40015
+      address: 5053
       data_type: "uint16"
       value: 0
       words: 1
