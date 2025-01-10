@@ -6,7 +6,8 @@ import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
-from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 
 
 @dataclass
@@ -29,14 +30,35 @@ def get_hmi_from_cluster_with_id(cluster: list[HMIData], hmi_id: int) -> Optiona
 class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
+        self.config = load_modbus_config()
         self.get_logger().info("creating Relant master control 🚀...")
-        self.create_timer(0.5, functools.partial(self.timer_callback_iolink_data, hmi_id=1))
+        self.masters = run_masters_to_iolinks(
+            slaves=self.config.slaves, hr=self.config.holding_registers
+        )
+        self.create_timers_for_iolink_masters()
         self.hmi_cluster = create_hmi_cluster(size=1)
         # self.control = RelControl()
         self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+
+    def create_timers_for_iolink_masters(self):
+        if not self.masters:
+            self.get_logger().error("no iolink masters available")
+            return
+        self.get_logger().info("creating timers ⏱ ...")
+        for master in self.masters:
+            if isinstance(master, RelControl):
+                self.get_logger().info(
+                    f"creating timer for iolink master with hmi id {master.master_io_link.hmi_id}"
+                )
+                self.create_timer(
+                    0.5,
+                    functools.partial(
+                        self.timer_callback_iolink_data, hmi_id=master.master_io_link.hmi_id
+                    ),
+                )
 
     def create_subscribers(self):
         self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")

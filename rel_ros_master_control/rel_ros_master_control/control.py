@@ -151,10 +151,10 @@ class RelControl:
         return updated_registers
 
 
-def run_masters_to_iolinks(slaves: list[SlaveTCP]) -> list[RelControl]:
+def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelControl]:
     masters = []
     for slave in slaves:
-        masters.append[RelControl(slave)]
+        masters.append[RelControl(slave=slave, hr=hr)]
     return masters
 
 
