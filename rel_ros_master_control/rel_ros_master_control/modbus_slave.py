@@ -45,17 +45,17 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("calling SET values ...")
 
         super().setValues(address - 1, values)
-        address = address - 1
         logger.info("setValues with address %s, value %s", address, values)
         value = values[0]
-        if address == self.test_address_software_version:
-            logger.info("write test_address_software_version")
-            self.test_address_software_version_value = value
+        logger.debug("getting register by address ...")
+        register, idx = get_register_by_address(self.hr, address)
+        if not register:
+            logger.debug("Not getting a valid register for address %s", address)
             return
-        if address == self.test_address_uint16:
-            logger.info("write test_address_uint16")
-            self.test_address_uint16_value = value
-            return
+
+        logger.debug("write register %s with value %s", register, value)
+        register.value = value
+        self.hr[idx] = register
 
     def getValues(self, address, count=1):
         """
@@ -63,8 +63,6 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         Automation inputs (from dispenser to modbus)
         """
         logger.debug("calling GET values ...")
-
-        address = address - 1
         builder = BinaryPayloadBuilder(wordorder=Endian.LITTLE, byteorder=Endian.BIG)
         try:
             address_value = super().getValues(address, count=count)

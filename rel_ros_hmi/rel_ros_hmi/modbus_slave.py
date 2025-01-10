@@ -38,7 +38,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         address = address - 1
         logger.debug("setValues with address %s, value %s", address, value)
         value = value[0]
-        logger.debug("getting from parameters ...")
+        logger.debug("getting register by address ...")
         register, idx = get_register_by_address(self.hr, address)
         if not register:
             logger.debug("Not getting a valid register for address %s", address)
