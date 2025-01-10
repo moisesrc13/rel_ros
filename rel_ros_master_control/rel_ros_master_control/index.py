@@ -1,3 +1,4 @@
+import functools
 from dataclasses import dataclass
 from typing import Optional
 
@@ -29,9 +30,9 @@ class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.get_logger().info("creating Relant master control 🚀...")
-        self.create_timer(1.0, self.timer_callback_iolink_data)
+        self.create_timer(0.5, functools.partial(self.timer_callback_iolink_data, hmi_id=1))
         self.hmi_cluster = create_hmi_cluster(size=1)
-        self.control = RelControl()
+        # self.control = RelControl()
         self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
@@ -47,17 +48,19 @@ class RelROSNode(Node):
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
 
-    def timer_callback_iolink_data(self):
+    def timer_callback_iolink_data(self, hmi_id: int = 0):
         self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
-        self.get_logger().info(f"this is the current HMI cluster {self.hmi_cluster}")
-        msg = IOLinkData()
-        msg.hmi_name = self.control.master_io_link.hmi_name
-        msg.hmi_id = self.control.master_io_link.hmi_id
-        registers = self.control.get_data()
-        for reg in registers:
-            setattr(msg, reg.name, reg.value)
-        self.rel_publisher.publish(msg)
-        self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
+        self.get_logger().info(f"hmi_id {hmi_id}")
+        # self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
+        # self.get_logger().info(f"this is the current HMI cluster {self.hmi_cluster}")
+        # msg = IOLinkData()
+        # msg.hmi_name = self.control.master_io_link.hmi_name
+        # msg.hmi_id = self.control.master_io_link.hmi_id
+        # registers = self.control.get_data()
+        # for reg in registers:
+        #    setattr(msg, reg.name, reg.value)
+        # self.rel_publisher.publish(msg)
+        # self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
 
 
 def main():
