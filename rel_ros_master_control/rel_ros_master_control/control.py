@@ -154,7 +154,8 @@ class RelControl:
 def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelControl]:
     masters = []
     for slave in slaves:
-        masters.append[RelControl(slave=slave, hr=hr)]
+        masters.append(RelControl(slave=slave, hr=hr))
+    logger.info("finish to run masters ...")
     return masters
 
 

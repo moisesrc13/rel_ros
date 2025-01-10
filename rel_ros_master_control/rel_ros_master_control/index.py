@@ -36,14 +36,21 @@ class RelROSNode(Node):
             slaves=self.config.slaves, hr=self.config.holding_registers
         )
         self.create_timers_for_iolink_masters()
-        self.hmi_cluster = create_hmi_cluster(size=1)
-        # self.control = RelControl()
+        self.hmi_cluster = create_hmi_cluster(size=len(self.masters))
+        # we need only one subscriber and publisher bcz message has the hmi id
         self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
         self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
 
     def create_timers_for_iolink_masters(self):
+        test_ids = [0, 1, 2]
+        for id in test_ids:
+            self.create_timer(
+                0.5,
+                functools.partial(self.timer_callback_iolink_test, hmi_id=id),
+            )
+
         if not self.masters:
             self.get_logger().error("no iolink masters available")
             return
@@ -70,19 +77,25 @@ class RelROSNode(Node):
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
 
+    def get_io_link_data(self, hmi_id: int = 0):
+        master: RelControl = self.masters[hmi_id]
+        msg = IOLinkData()
+        msg.hmi_name = master.master_io_link.slave.hmi_name
+        msg.hmi_id = master.master_io_link.slave.hmi_id
+        registers = master.get_data()
+        for reg in registers:
+            setattr(msg, reg.name, reg.value)
+        self.rel_publisher.publish(msg)
+        self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
+
+    def timer_callback_iolink_test(self, hmi_id: int = 0):
+        self.get_logger().info(f"test hmi_id {hmi_id}")
+
     def timer_callback_iolink_data(self, hmi_id: int = 0):
-        self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
-        self.get_logger().info(f"hmi_id {hmi_id}")
+        pass
         # self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
-        # self.get_logger().info(f"this is the current HMI cluster {self.hmi_cluster}")
-        # msg = IOLinkData()
-        # msg.hmi_name = self.control.master_io_link.hmi_name
-        # msg.hmi_id = self.control.master_io_link.hmi_id
-        # registers = self.control.get_data()
-        # for reg in registers:
-        #    setattr(msg, reg.name, reg.value)
-        # self.rel_publisher.publish(msg)
-        # self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
+        # self.get_logger().info(f"hmi_id {hmi_id}")
+        # self.get_io_link_data(hmi_id)
 
 
 def main():
