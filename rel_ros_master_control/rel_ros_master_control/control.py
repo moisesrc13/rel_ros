@@ -161,6 +161,14 @@ def run_masters_to_iolinks(slaves: list[SlaveTCP]) -> list[RelControl]:
 def run():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-i",
+        "--id",
+        help="modbus master iolink id",
+        dest="id",
+        default=0,
+        type=int,
+    )
+    parser.add_argument(
         "-a",
         "--action",
         choices=["read", "write"],
@@ -184,9 +192,9 @@ def run():
         type=int,
     )
     args = parser.parse_args()
-    logger.info("starting main control...")
+    logger.info("starting main control for master io link %s ...", args.id)
     config = load_modbus_config()
-    control = RelControl(config.slaves[0])
+    control = RelControl(slave=config.slaves[args.id], hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":
