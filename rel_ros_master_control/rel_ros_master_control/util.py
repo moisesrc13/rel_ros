@@ -2,11 +2,6 @@ from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import ModbusConfig, SlaveTCP
 
 
-def get_master(config: ModbusConfig, slave: str) -> RelModbusMaster:
-    slave_config: SlaveTCP = getattr(config, slave)
-    return RelModbusMaster(slave_config)
-
-
 def is_bit_on(num: int, bit_position: int) -> bool:
     """
     Checks if the bit at the specified position is set (1) or not (0).

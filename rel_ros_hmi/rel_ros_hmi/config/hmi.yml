@@ -1,8 +1,8 @@
   slaves:
     - name: "HMI 1"
       id: 0
-      host: 192.168.0.41  # this will be the HMI's IP
-      port: 502  # 502 is the standard
+      host: 0.0.0.0  # localhost for ROS working as HMI slave
+      port: 8845  # 502 is the standard
       offset: 0
   holding_registers:
     - name: "param_target_pressure_pistons"

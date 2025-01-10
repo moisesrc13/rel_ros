@@ -52,15 +52,19 @@ class DevicePorts(BaseModel):
 class SlaveTCP(BaseModel):
     host: str
     port: int
+    device_ports: DevicePorts
+    name: str = ""
     hmi_id: int = 0
     hmi_name: str = "HMI"
     framer: str = "socket"
     timeout_seconds: int = 5
     offset: int = 0
-    device_ports: DevicePorts
 
 
 class SlaveSerial(BaseModel):
+    name: str = ""
+    hmi_id: int = 0
+    hmi_name: str = "HMI"
     baudrate: int = 115_200
     data_bit: int = 8
     stop_bit: int = 1
@@ -70,10 +74,15 @@ class SlaveSerial(BaseModel):
     port: str = "/dev/ptyp0"
 
 
-class ModbusSlaves(BaseModel):
-    master_io_link: SlaveTCP | SlaveSerial
-
-
 class ModbusConfig(BaseModel):
-    slaves: ModbusSlaves
+    slaves: list[SlaveTCP | SlaveSerial]
     holding_registers: list[Register]
+
+
+def get_register_by_address(
+    registers: list[Register], address: int
+) -> Optional[tuple[Register, int]]:
+    for index, r in enumerate(registers):
+        if r.address == address:
+            return (r, index)
+    return (None, None)

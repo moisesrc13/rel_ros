@@ -26,7 +26,7 @@ def setup_sync_client(
         client = None
         if isinstance(slave, SlaveTCP):
             logger.info(
-                "Creating TCP master connecion to slave on host %s port %s ⭐",
+                "Creating TCP master connection to slave on host %s port %s ⭐",
                 host,
                 port,
             )

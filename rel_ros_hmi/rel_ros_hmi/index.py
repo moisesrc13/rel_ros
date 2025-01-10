@@ -3,14 +3,12 @@ from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
-from rel_ros_hmi.modbus_master import create_masters_for_hmis
+from rel_ros_hmi.modbus_slave import run_modbus_slaves
 
 
 class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_hmi_node")
-        self.get_logger().info("creating publisher for rel/hmi topic 📨")
-        self.rel_publisher = self.create_publisher(HMI, "rel/hmi", 10)
         self.get_logger().info("creating subscriber for rel/iolink topic 📨")
         self.subscription = self.create_subscription(
             IOLinkData, "rel/iolink", self.listener_iolink_data_callback, 10
@@ -18,7 +16,17 @@ class RelROSNode(Node):
         self.create_hmi_timers()
         self.get_logger().info("running modbus slave ...")
         config = load_modbus_config()
-        self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
+        run_modbus_slaves(
+            config.slaves, config.holding_registers, self.create_hmi_publishers(len(config.slaves))
+        )
+
+    def create_hmi_publishers(self, count: int = 1) -> dict:
+        publishers = {}
+        for p in range(count):
+            topic = f"rel/hmi_{p}"
+            self.get_logger().info(f"creating publisher for {topic} topic 📨")
+            publishers[p] = self.create_publisher(HMI, topic, 10)
+        return publishers
 
     def create_hmi_timers(self):
         self.create_timer(0.5, self.timer_callback_hmi_0)

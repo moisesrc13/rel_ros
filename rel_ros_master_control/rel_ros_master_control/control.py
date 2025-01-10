@@ -8,8 +8,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
-from rel_ros_master_control.models.modbus_m import DevicePort, Register, RegisterDataType
-from rel_ros_master_control.util import get_master
+from rel_ros_master_control.models.modbus_m import DevicePort, Register, RegisterDataType, SlaveTCP
 
 logger = new_logger(__name__)
 
@@ -50,13 +49,9 @@ class ControlStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self) -> None:
-        logger.info("starting main control...")
-        config = load_modbus_config()
-        self.master_io_link: RelModbusMaster = get_master(
-            config.slaves, "master_io_link"
-        )  # this is open to work with other masters in the future
-        self.hr = config.holding_registers
+    def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
+        self.master_io_link = RelModbusMaster(slave)
+        self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
@@ -156,8 +151,24 @@ class RelControl:
         return updated_registers
 
 
+def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelControl]:
+    masters = []
+    for slave in slaves:
+        masters.append(RelControl(slave=slave, hr=hr))
+    logger.info("finish to run masters ...")
+    return masters
+
+
 def run():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i",
+        "--id",
+        help="modbus master iolink id",
+        dest="id",
+        default=0,
+        type=int,
+    )
     parser.add_argument(
         "-a",
         "--action",
@@ -182,7 +193,9 @@ def run():
         type=int,
     )
     args = parser.parse_args()
-    control = RelControl()
+    logger.info("starting main control for master io link %s ...", args.id)
+    config = load_modbus_config()
+    control = RelControl(slave=config.slaves[args.id], hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

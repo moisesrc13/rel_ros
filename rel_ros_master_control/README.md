@@ -84,12 +84,16 @@ network:
 The run
 `sudo netplan apply`
 
-## Control test examples
+## CONTROL test examples
 port 5 => tower, octect 1 5051
 port 8 => sensor, 8000 status 8001 => data => 8002 - 8017
 
 ```bash
-python rel_ros_master_control/control.py --action read --register 8001
-python rel_ros_master_control/control.py --action write --register 5051 --value 1`
-python rel_ros_master_control/control.py --action write --register 5052 --value 1`
+# READ
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 8001
+
+# WRITE
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5051 --value 1`
+
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5052 --value 1`
 ```
