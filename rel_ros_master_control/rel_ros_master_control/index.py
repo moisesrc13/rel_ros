@@ -44,13 +44,6 @@ class RelROSNode(Node):
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
 
     def create_timers_for_iolink_masters(self):
-        test_ids = [0, 1, 2]
-        for id in test_ids:
-            self.create_timer(
-                0.5,
-                functools.partial(self.timer_callback_iolink_test, hmi_id=id),
-            )
-
         if not self.masters:
             self.get_logger().error("no iolink masters available")
             return
@@ -92,10 +85,9 @@ class RelROSNode(Node):
         self.get_logger().info(f"test hmi_id {hmi_id}")
 
     def timer_callback_iolink_data(self, hmi_id: int = 0):
-        pass
-        # self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
-        # self.get_logger().info(f"hmi_id {hmi_id}")
-        # self.get_io_link_data(hmi_id)
+        self.get_logger().info("Relant ROS2 Master Control 🤖 - get iolink data 🤘 ...")
+        self.get_logger().info(f"hmi_id {hmi_id}")
+        self.get_io_link_data(hmi_id)
 
 
 def main():
