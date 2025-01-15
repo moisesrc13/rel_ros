@@ -18,27 +18,21 @@ logger = new_logger(__name__)
 
 
 class PublishHMIData:
-    def __init__(self, slave: SlaveTCP, publisher) -> None:
-        self.publisher = publisher
-        self.slave = slave
+    def __init__(self, slave_name: str, slave_id: str) -> None:
+        self.slave_name = slave_name
+        self.slave_id = slave_id
+        self.msg = None
 
     def __enter__(self):
-        pass
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
-
-    def do_publish(self):
         from rel_interfaces.msg import HMI
 
-        # publish the data
-        msg = HMI()
-        msg.hmi_name = self.slave.name
-        msg.hmi_id = self.slave.id
-        for register in self.hr:
-            setattr(msg, register.name, register.value)
-        logger.info("📨 publishing message from HMI set value %s", msg)
-        self.publisher.publish(msg)
+        self.msg = HMI()
+        self.hmi_name = self.slave_name
+        self.hmi_id = self.slave_id
+        return self.msg
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.msg = None
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
@@ -71,8 +65,11 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register.value = value
         self.hr[idx] = register
         # publish the data
-        with PublishHMIData(self.slave, self.publisher) as hmi_publisher:
-            hmi_publisher.do_publish()
+        with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
+            for register in self.hr:
+                setattr(hmi_msg, register.name, register.value)
+            logger.info("📨 publishing message from HMI set value %s", hmi_msg)
+            self.publisher.publish(hmi_msg)
 
     def getValues(self, address, count=1):
         """

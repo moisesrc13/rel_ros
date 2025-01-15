@@ -21,7 +21,7 @@ class RelROSNode(Node):
         run_modbus_slaves(
             config.slaves, config.holding_registers, self.create_hmi_publishers(len(config.slaves))
         )
-        time.sleep(5)
+        time.sleep(1)
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
         self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
 
