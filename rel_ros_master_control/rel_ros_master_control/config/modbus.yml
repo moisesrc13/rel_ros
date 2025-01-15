@@ -14,7 +14,7 @@ holding_registers:
       data_type: "uint16"
       value: 0
       words: 1
-slaves:
+iolinks:
   -   name: "master io link 0"
       hmi_id: 0
       hmi_name: "HMI 0"

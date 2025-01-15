@@ -33,7 +33,7 @@ class RelROSNode(Node):
         self.config = load_modbus_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
-            slaves=self.config.slaves, hr=self.config.holding_registers
+            slaves=self.config.iolinks, hr=self.config.holding_registers
         )
         self.create_timers_for_iolink_masters()
         self.hmi_cluster = create_hmi_cluster(size=len(self.masters))

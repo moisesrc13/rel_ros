@@ -75,7 +75,7 @@ class SlaveSerial(BaseModel):
 
 
 class ModbusConfig(BaseModel):
-    slaves: list[SlaveTCP | SlaveSerial]
+    iolinks: list[SlaveTCP | SlaveSerial]
     holding_registers: list[Register]
 
 

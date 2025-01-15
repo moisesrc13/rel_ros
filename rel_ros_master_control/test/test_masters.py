@@ -10,4 +10,4 @@ def test_config():
 
 
 def test_masters(test_config):
-    assert isinstance(test_config.slaves[0], SlaveTCP)
+    assert isinstance(test_config.iolinks[0], SlaveTCP)
