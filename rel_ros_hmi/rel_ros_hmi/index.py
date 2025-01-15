@@ -3,6 +3,7 @@ from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
+from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
 
 
@@ -14,11 +15,13 @@ class RelROSNode(Node):
             IOLinkData, "rel/iolink", self.listener_iolink_data_callback, 10
         )
         self.create_hmi_timers()
-        self.get_logger().info("running modbus slave ...")
+        self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
         run_modbus_slaves(
             config.slaves, config.holding_registers, self.create_hmi_publishers(len(config.slaves))
         )
+        self.get_logger().info("creating modbus hmi master connections 👾 ...")
+        self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
 
     def create_hmi_publishers(self, count: int = 1) -> dict:
         publishers = {}
