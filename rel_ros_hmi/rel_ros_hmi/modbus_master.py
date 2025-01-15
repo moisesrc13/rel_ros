@@ -142,7 +142,9 @@ class RelModbusMaster:
     def get_holding_registers_data(self) -> list[Register]:
         logger.info("reading holding register data")
         addresses = get_hr_addresses(self.hr)
-        rr = self.slave_conn.read_holding_registers(address=addresses[0], count=len(addresses))
+        rr = self.slave_conn.read_holding_registers(
+            address=addresses[0], count=len(addresses)
+        )  # start with first address
         decoder = get_decoder(rr)
         updated_registers = []
         for addr in addresses:
