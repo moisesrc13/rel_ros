@@ -1,3 +1,4 @@
+import functools
 import time
 
 import rclpy
@@ -25,6 +26,15 @@ class RelROSNode(Node):
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
         self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
 
+    def create_iolink_subscribers(self, count: int = 1):
+        for s in range(count):
+            topic = f"rel/iolink_{s}"
+            self.get_logger().info(f"creating iolink subscriber for {topic} topic 📨")
+            self.create_subscription(
+                IOLinkData, topic, functools.partial(self.listener_hmi_callback, hmi_id=s), 10
+            )
+        self.get_logger().info("creating hmi consumers is done ...")
+
     def create_hmi_publishers(self, count: int = 1) -> dict:
         publishers = {}
         for p in range(count):
@@ -32,6 +42,10 @@ class RelROSNode(Node):
             self.get_logger().info(f"creating publisher for {topic} topic 📨")
             publishers[p] = self.create_publisher(HMI, topic, 10)
         return publishers
+
+    def listener_iolink_data(self, msg: IOLinkData, id: int = 0):
+        self.get_logger().info(f"📨 I got an IOLinkData {id} message {msg}")
+        self.save_hmi_iolink_data(msg.hmi_id, msg)
 
     def listener_iolink_data_callback(self, msg: IOLinkData):
         self.get_logger().info(f"📨 I got an IOLinkData message {msg}")

@@ -40,14 +40,15 @@ class RelROSNode(Node):
         self.get_logger().info("creating subscriber for rel/hmi topics 📨 ...")
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
+        self.iolink_publishers = self.create_iolink_publishers(len(self.masters))
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
 
     def create_hmi_subscribers(self, count: int = 1):
-        for c in range(count):
-            topic = f"rel/hmi_{c}"
+        for s in range(count):
+            topic = f"rel/hmi_{s}"
             self.get_logger().info(f"creating hmi subscriber for {topic} topic 📨")
             self.create_subscription(
-                HMI, topic, functools.partial(self.listener_hmi_callback, hmi_id=c), 10
+                HMI, topic, functools.partial(self.listener_hmi_callback, hmi_id=s), 10
             )
         self.get_logger().info("creating hmi consumers is done ...")
 
@@ -68,15 +69,22 @@ class RelROSNode(Node):
                     ),
                 )
 
-    def create_subscribers(self):
-        self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
-        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
-
     def listener_hmi_callback(self, msg: HMI, hmi_id: int = 0):
         self.get_logger().info(f"📨 I got an HMI {hmi_id} message 📺 {msg}")
         hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
+
+    def create_iolink_publishers(self, count: int = 1) -> dict:
+        """
+        Each publisher has its own topic with id
+        """
+        publishers = {}
+        for p in range(count):
+            topic = f"rel/iolink_{p}"
+            self.get_logger().info(f"creating publisher for {topic} topic 📨")
+            publishers[p] = self.create_publisher(IOLinkData, topic, 10)
+        return publishers
 
     def get_io_link_data(self, hmi_id: int = 0):
         master: RelControl = self.masters[hmi_id]
@@ -86,7 +94,9 @@ class RelROSNode(Node):
         registers = master.get_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
-        self.rel_publisher.publish(msg)
+        # self.rel_publisher.publish(msg)
+        publisher = self.iolink_publishers[hmi_id]
+        publisher.publish(msg)
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
 
     def timer_callback_iolink_test(self, hmi_id: int = 0):
