@@ -195,7 +195,7 @@ def run():
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
     config = load_modbus_config()
-    control = RelControl(slave=config.slaves[args.id], hr=config.holding_registers)
+    control = RelControl(slave=config.iolinks[args.id], hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

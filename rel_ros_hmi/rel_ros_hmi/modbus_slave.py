@@ -1,7 +1,6 @@
 """
 This is a modbus slave for testing within ROS
 """
-from queue import Queue
 from threading import Thread
 
 from pymodbus.constants import Endian
@@ -11,11 +10,29 @@ from pymodbus.framer import FramerType
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartTcpServer
 
-from rel_interfaces.msg import HMI
+from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
+
+
+class PublishHMIData:
+    def __init__(self, slave_name: str, slave_id: str) -> None:
+        self.slave_name = slave_name
+        self.slave_id = slave_id
+        self.msg = None
+
+    def __enter__(self):
+        from rel_interfaces.msg import HMI
+
+        self.msg = HMI()
+        self.hmi_name = self.slave_name
+        self.hmi_id = self.slave_id
+        return self.msg
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.msg = None
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
@@ -48,13 +65,11 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register.value = value
         self.hr[idx] = register
         # publish the data
-        msg = HMI()
-        msg.hmi_name = self.slave.name
-        msg.hmi_id = self.slave.id
-        for register in self.hr:
-            setattr(msg, register.name, register.value)
-        logger.info("📨 publishing message from HMI set value %s", msg)
-        self.publisher.publish(msg)
+        with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
+            for register in self.hr:
+                setattr(hmi_msg, register.name, register.value)
+            logger.info("📨 publishing message from HMI set value %s", hmi_msg)
+            self.publisher.publish(hmi_msg)
 
     def getValues(self, address, count=1):
         """
@@ -136,21 +151,20 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveTCP, hr: list[Register], queue: Queue, publisher) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[Register], publisher) -> None:
         Thread.__init__(self)
-        self.queue = queue
         self.slave = slave
         self.hr = hr
         self.publisher = publisher
 
     def run(self):
-        logger.info("running slave thread %s", self.queue.get())
+        logger.info("running slave thread %s", self.slave.id)
         try:
             server = run_sync_modbus_server(slave=self.slave, hr=self.hr, publisher=self.publisher)
             if server:
                 server.shutdown()
         except Exception as ex:
-            logger.error("Error %s running slave thread %s", ex, self.queue.get())
+            logger.error("Error %s running slave thread %s", ex, self.slave.id)
         self.queue.task_done()
 
 
@@ -161,30 +175,24 @@ def run(slave: SlaveTCP, publisher=None):
 
 
 def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[Register], publishers: dict):
-    queue = Queue()
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(
-            slave=slave, hr=hr, queue=queue, publisher=publishers.get(slave.id)
-        )
-        queue.put(slave_thread)
+        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
+        slave_thread.daemon = True
         slave_thread.start()
     try:
         logger.info("all slaves has been started...")
-        queue.join()
     except Exception as err:
         logger.error("Error running slave threads %s", err)
-        queue.task_done()
         raise err
 
 
 if __name__ == "__main__":
-    run(
-        SlaveTCP(
-            host="0.0.0.0",
-            port=8845,
-            address_offset=0,
-            device_ports=[],
-            timeout_seconds=5,
-        ),
-        None,
-    )
+    # this main method is basically for local test
+    try:
+        config = load_modbus_config()
+        run_modbus_slaves(config.slaves, config.holding_registers, {})
+        logger.info("slaves launched ...")
+        while True:
+            pass
+    except KeyboardInterrupt:
+        logger.info("bye 👋...")

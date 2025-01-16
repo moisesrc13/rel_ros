@@ -33,15 +33,23 @@ class RelROSNode(Node):
         self.config = load_modbus_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
-            slaves=self.config.slaves, hr=self.config.holding_registers
+            slaves=self.config.iolinks, hr=self.config.holding_registers
         )
         self.create_timers_for_iolink_masters()
         self.hmi_cluster = create_hmi_cluster(size=len(self.masters))
-        # we need only one subscriber and publisher bcz message has the hmi id
-        self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
-        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
+        self.get_logger().info("creating subscriber for rel/hmi topics 📨 ...")
+        self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+
+    def create_hmi_subscribers(self, count: int = 1):
+        for s in range(count):
+            topic = f"rel/hmi_{s}"
+            self.get_logger().info(f"creating hmi subscriber for {topic} topic 📨")
+            self.create_subscription(
+                HMI, topic, functools.partial(self.listener_hmi_callback, hmi_id=s), 10
+            )
+        self.get_logger().info("creating hmi consumers is done ...")
 
     def create_timers_for_iolink_masters(self):
         if not self.masters:
@@ -60,12 +68,8 @@ class RelROSNode(Node):
                     ),
                 )
 
-    def create_subscribers(self):
-        self.get_logger().info("creating subscriber for rel/hmi topic 📨 ...")
-        self.subscription = self.create_subscription(HMI, "rel/hmi", self.listener_hmi_callback, 10)
-
-    def listener_hmi_callback(self, msg: HMI):
-        self.get_logger().info("📨 I got an HMI message")
+    def listener_hmi_callback(self, msg: HMI, hmi_id: int = 0):
+        self.get_logger().info(f"📨 I got an HMI {hmi_id} message 📺 {msg}")
         hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
         hmiData.hmi = msg
         self.hmi_cluster[msg.hmi_id] = hmiData

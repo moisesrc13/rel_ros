@@ -1,8 +1,11 @@
+import time
+
 import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
+from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
 
 
@@ -13,12 +16,14 @@ class RelROSNode(Node):
         self.subscription = self.create_subscription(
             IOLinkData, "rel/iolink", self.listener_iolink_data_callback, 10
         )
-        self.create_hmi_timers()
-        self.get_logger().info("running modbus slave ...")
+        self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
         run_modbus_slaves(
             config.slaves, config.holding_registers, self.create_hmi_publishers(len(config.slaves))
         )
+        time.sleep(1)
+        self.get_logger().info("creating modbus hmi master connections 👾 ...")
+        self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
 
     def create_hmi_publishers(self, count: int = 1) -> dict:
         publishers = {}
@@ -28,8 +33,9 @@ class RelROSNode(Node):
             publishers[p] = self.create_publisher(HMI, topic, 10)
         return publishers
 
-    def create_hmi_timers(self):
-        self.create_timer(0.5, self.timer_callback_hmi_0)
+    def listener_iolink_data(self, msg: IOLinkData, id: int = 0):
+        self.get_logger().info(f"📨 I got an IOLinkData {id} message {msg}")
+        self.save_hmi_iolink_data(msg.hmi_id, msg)
 
     def listener_iolink_data_callback(self, msg: IOLinkData):
         self.get_logger().info(f"📨 I got an IOLinkData message {msg}")
@@ -50,21 +56,6 @@ class RelROSNode(Node):
             self.get_logger().info(f"complete write into hmi master id {master_id}")
         except Exception as err:
             self.get_logger().error(f"error saving iolink data {err}")
-
-    def publish_hmi_data(self, master_id: int):
-        master = self.masters[master_id]
-        msg = HMI()
-        msg.hmi_name = master.hmi_name
-        msg.hmi_id = master.hmi_id
-        registers = master.get_holding_registers_data()
-        for reg in registers:
-            setattr(msg, reg.name, reg.value)
-        self.rel_publisher.publish(msg)
-        self.get_logger().info(f"📨 Publishing HMI message: {msg}")
-
-    def timer_callback_hmi_0(self):
-        self.get_logger().info("HMI 0 timer running 👾...")
-        self.publish_hmi_data(0)
 
 
 def main():
