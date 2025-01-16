@@ -38,6 +38,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 > for ROS image
 This is important to execute before running (only once)
 ```bash
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 ```
@@ -82,7 +83,7 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
-### IOLink
+### IOLink test slave
 
 ```bash
 
