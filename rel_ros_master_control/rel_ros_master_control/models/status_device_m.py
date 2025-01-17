@@ -3,6 +3,11 @@ from enum import Enum
 from pydantic import BaseModel
 
 
+class StatusRegister(BaseModel):
+    address: int
+    value: int
+
+
 class BasicActions(Enum):
     TURN_OFF = 0
     TURN_ON = 1
@@ -36,3 +41,12 @@ class StatusDevice(BaseModel):
 
 class StatusDeviceConfig(BaseModel):
     basic: StatusDevice
+
+
+class ControlStatus(BaseModel):
+    full: list[StatusRegister]
+    medium_high: list[StatusRegister]
+    medium: list[StatusRegister]
+    pre_vacuum: list[StatusRegister]
+    vacuum: list[StatusRegister]
+    bucket_change: list[StatusRegister]
