@@ -105,9 +105,9 @@ def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[Register]):
         context = ModbusServerContext(slaves=store, single=False)
         # initialize the server information
         identity = ModbusDeviceIdentification()
-        identity.VendorName = "TestGasStation"
-        identity.ProductName = "Test"
-        identity.ModelName = "Test Modbus Server"
+        identity.VendorName = "Relant"
+        identity.ProductName = "Iolink Slave Test"
+        identity.ModelName = "relros"
         identity.MajorMinorRevision = "0.1.0"
         modbus_slave = None
         if isinstance(slave, SlaveTCP):

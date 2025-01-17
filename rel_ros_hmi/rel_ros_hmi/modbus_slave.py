@@ -113,18 +113,14 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
     try:
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, publisher)
-        store = {}
         # creating two slaves 0 & 1
-        store[0] = ModbusSlaveContext(hr=block)
-
         store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
-
         context = ModbusServerContext(slaves=store, single=True)
         # initialize the server information
         identity = ModbusDeviceIdentification()
-        identity.VendorName = "TestGasStation"
-        identity.ProductName = "Test"
-        identity.ModelName = "Test Modbus Server"
+        identity.VendorName = f"Relant HMI - {slave.id}"
+        identity.ProductName = "Relant-On-ROS"
+        identity.ModelName = "relros"
         identity.MajorMinorRevision = "0.1.0"
         modbus_slave = None
         if isinstance(slave, SlaveTCP):
