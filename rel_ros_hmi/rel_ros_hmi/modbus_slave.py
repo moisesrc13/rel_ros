@@ -116,9 +116,10 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
         store = {}
         # creating two slaves 0 & 1
         store[0] = ModbusSlaveContext(hr=block)
-        store[1] = ModbusSlaveContext(hr=block)
-        store[2] = ModbusSlaveContext(hr=block)
-        context = ModbusServerContext(slaves=store, single=False)
+
+        store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
+
+        context = ModbusServerContext(slaves=store, single=True)
         # initialize the server information
         identity = ModbusDeviceIdentification()
         identity.VendorName = "TestGasStation"
