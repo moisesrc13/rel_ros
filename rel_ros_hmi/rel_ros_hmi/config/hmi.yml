@@ -5,16 +5,12 @@
       port: 8845  # 502 is the standard
       offset: 0
   holding_registers:
+    - name: "param_target_pressure_hyd"
+      address: 40006
+      data_type: "uint16"
+      value: 0
     - name: "param_target_pressure_pistons"
-      address: 40001
-      data_type: "uint16"
-      value: 0
-    - name: "param_target_pressure_material"
-      address: 40002
-      data_type: "uint16"
-      value: 0
-    - name: "param_system_state"
-      address: 40003
+      address: 40007
       data_type: "uint16"
       value: 0
     - name: "param_pulse_train_high"
