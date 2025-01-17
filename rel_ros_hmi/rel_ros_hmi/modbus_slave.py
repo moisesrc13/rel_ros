@@ -1,6 +1,7 @@
 """
 This is a modbus slave for testing within ROS
 """
+import os
 from threading import Thread
 
 from pymodbus.constants import Endian
@@ -53,8 +54,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
 
         super().setValues(address - 1, value)
         address = address - 1
-        logger.debug("setValues with address %s, value %s", address, value)
         value = value[0]
+        if isinstance(value, bool):
+            value = int(value)
+        logger.debug("setValues with address %s, value %s", address, value)
         logger.debug("getting register by address ...")
         register, idx = get_register_by_address(self.hr, address)
         if not register:
@@ -65,6 +68,9 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register.value = value
         self.hr[idx] = register
         # publish the data
+        if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+            return
+
         with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
             for register in self.hr:
                 setattr(hmi_msg, register.name, register.value)
@@ -114,7 +120,9 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, publisher)
         # creating two slaves 0 & 1
-        store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
+        store = ModbusSlaveContext(
+            di=block, co=block, hr=block, ir=block
+        )  # coils only write 1 (True) or 0 (False)
         context = ModbusServerContext(slaves=store, single=True)
         # initialize the server information
         identity = ModbusDeviceIdentification()
