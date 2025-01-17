@@ -1,3 +1,112 @@
+status:
+  full:
+    - address: 6060
+      value: 22
+    - address: 6061
+      value: 3628
+    - address: 6062
+      value: 256
+    - address: 6063
+      value: 1
+    - address: 6064
+      value: 0
+    - address: 6065
+      value: 256
+    - address: 6066
+      value: 1
+    - address: 6067
+      value: 0
+  medium_high:
+    - address: 6060
+      value: 16
+    - address: 6061
+      value: 3328
+    - address: 6062
+      value: 5645
+    - address: 6063
+      value: 1
+    - address: 6064
+      value: 0
+    - address: 6065
+      value: 256
+    - address: 6066
+      value: 1
+    - address: 6067
+      value: 0
+  medium:
+    - address: 6060
+      value: 0
+    - address: 6061
+      value: 0
+    - address: 6062
+      value: 0
+    - address: 6063
+      value: 1046
+    - address: 6064
+      value: 3328
+    - address: 6065
+      value: 260
+    - address: 6066
+      value: 1
+    - address: 6067
+      value: 1024
+  pre_vacuum:
+    - address: 6060
+      value: 0
+    - address: 6061
+      value: 0
+    - address: 6062
+      value: 0
+    - address: 6063
+      value: 0
+    - address: 6064
+      value: 3332
+    - address: 6065
+      value: 1549
+    - address: 6066
+      value: 1
+    - address: 6067
+      value: 1024
+  vacuum:
+    - address: 6060
+      value: 0
+    - address: 6061
+      value: 0
+    - address: 6062
+      value: 0
+    - address: 6063
+      value: 0
+    - address: 6064
+      value: 0
+    - address: 6065
+      value: 13
+    - address: 6066
+      value: 15
+    - address: 6067
+      value: 256
+  bucket_change:
+    - address: 6060
+      value: 23
+    - address: 6061
+      value: 1024
+    - address: 6062
+      value: 5892
+    - address: 6063
+      value: 23
+    - address: 6064
+      value: 1024
+    - address: 6065
+      value: 5892
+    - address: 6066
+      value: 4119
+    - address: 6067
+      value: 1024
+  sound_alarm_on:
+    - address: 6052
+    - value: 256
+  sound_alarm_off:
+    - address: 6052
+    - value: 0
 basic:  # mode
   segments:
     audible:
