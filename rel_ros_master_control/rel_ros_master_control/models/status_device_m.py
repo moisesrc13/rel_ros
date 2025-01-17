@@ -39,10 +39,6 @@ class StatusDevice(BaseModel):
     segments: BasicSegments
 
 
-class StatusDeviceConfig(BaseModel):
-    basic: StatusDevice
-
-
 class ControlStatus(BaseModel):
     full: list[StatusRegister]
     medium_high: list[StatusRegister]
@@ -50,3 +46,8 @@ class ControlStatus(BaseModel):
     pre_vacuum: list[StatusRegister]
     vacuum: list[StatusRegister]
     bucket_change: list[StatusRegister]
+
+
+class StatusDeviceConfig(BaseModel):
+    basic: StatusDevice
+    control_status: ControlStatus

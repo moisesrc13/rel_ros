@@ -1,4 +1,4 @@
-status:
+control_status:
   full:
     - address: 6060
       value: 22
@@ -107,6 +107,12 @@ status:
   sound_alarm_off:
     - address: 6052
     - value: 0
+  valve_hyd_on:
+    - address: 7051
+    - value: 3
+  valve_hyd_off:
+    - address: 7051
+    - value: 1
 basic:  # mode
   segments:
     audible:
