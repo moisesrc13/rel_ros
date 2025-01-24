@@ -1,6 +1,5 @@
 import argparse
 import os
-from enum import Enum
 from typing import Union
 
 import pymodbus.client as modbusClient
@@ -14,17 +13,13 @@ from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import (
     Register,
     RegisterDataType,
+    RegisterModbusType,
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
 )
 
 logger = new_logger(__name__)
-
-
-class RegisterType(Enum):
-    HR = "hr"
-    CO = "co"
 
 
 def get_decoder_from_rr(rr) -> BinaryPayloadDecoder:
@@ -127,9 +122,9 @@ class RelModbusMaster:
             logger.error("❌ Error closing connection to modbus server - %s", err)
             self.connection_state = "❌ error closing"
 
-    def do_write(self, address: int, value: int, reg_type=RegisterType.HR):
+    def do_write(self, address: int, value: int, reg_type=RegisterModbusType.HR):
         def _write():
-            if reg_type == RegisterType.HR:
+            if reg_type == RegisterModbusType.HR:
                 return self.slave_conn.write_register(address=address, value=value)
             else:
                 return self.slave_conn.write_coil(address=address, value=value)
@@ -209,7 +204,7 @@ def run():
     modbus_master = RelModbusMaster(config.slaves[0], config.holding_registers)
     modbus_master.do_connect()
     if args.action == "write":
-        modbus_master.do_write(args.register, args.value, RegisterType(args.type))
+        modbus_master.do_write(args.register, args.value, RegisterModbusType(args.type))
     elif args.action == "read":
         value = -1
         if args.register == 0:

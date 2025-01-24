@@ -4,6 +4,11 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class RegisterModbusType(Enum):
+    HR = "hr"
+    CO = "co"
+
+
 class RegisterDataType(Enum):
     float16 = "float16"
     uint16 = "uint16"
