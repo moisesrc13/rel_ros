@@ -8,7 +8,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
-from rel_ros_master_control.models.modbus_m import DevicePort, Register, RegisterDataType, SlaveTCP
+from rel_ros_master_control.models.modbus_m import DevicePort, HRegister, RegisterDataType, SlaveTCP
 
 logger = new_logger(__name__)
 
@@ -49,7 +49,7 @@ class ControlStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
         self.master_io_link = RelModbusMaster(slave)
         self.hr = hr
         logger.info("connecting master io_link")
@@ -73,7 +73,7 @@ class RelControl:
         decoder = get_decoder(rr)
         return get_value(decoder, port.holding_registers.data_input_status.data_type)
 
-    def read_device_port_register(self, register: Register) -> int:
+    def read_device_port_register(self, register: HRegister) -> int:
         logger.debug("read device register %s", register)
         rr = self.master_io_link.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register.address),
@@ -82,7 +82,7 @@ class RelControl:
         decoder = get_decoder(rr)
         return get_value(decoder, register.data_type)
 
-    def write_device_port_register(self, register: Register, value: int) -> int:
+    def write_device_port_register(self, register: HRegister, value: int) -> int:
         logger.debug("write device register %s", register)
         response = self.master_io_link.slave_conn.write_register(
             address=self.get_register_with_offset(register.address), value=value
@@ -123,7 +123,7 @@ class RelControl:
         status.status = "read ok"
         return status
 
-    def get_data_slow(self) -> list[Register]:
+    def get_data_slow(self) -> list[HRegister]:
         updated_registers = []
         for register in self.hr:
             register.value = self.read_holding_register(register.address).value
@@ -133,10 +133,10 @@ class RelControl:
         )
         return updated_registers
 
-    def get_data(self) -> list[Register]:
+    def get_data(self) -> list[HRegister]:
         updated_registers = []
 
-        def worker(register: Register):
+        def worker(register: HRegister):
             register.value = self.read_holding_register(register.address).value
             updated_registers.append(register)
 
@@ -151,7 +151,7 @@ class RelControl:
         return updated_registers
 
 
-def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelControl]:
+def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelControl]:
     masters = []
     for slave in slaves:
         masters.append(RelControl(slave=slave, hr=hr))

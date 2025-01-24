@@ -1,5 +1,5 @@
   slaves:
-    - name: "HMI 1"
+    - name: "HMI 0"
       id: 0
       host: 0.0.0.0  # localhost for ROS working as HMI slave
       port: 8845  # 502 is the standard

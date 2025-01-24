@@ -11,7 +11,7 @@ class RegisterDataType(Enum):
     uint32 = "uint32"
 
 
-class Register(BaseModel):
+class HRegister(BaseModel):
     address: int
     words: int
     data_type: RegisterDataType = RegisterDataType.uint16
@@ -26,10 +26,10 @@ class Register(BaseModel):
 
 
 class DevicePortHoldingRegisters(BaseModel):
-    data_input_status: Optional[Register] = None
-    data_input: Optional[Register] = None
-    data_output_status: Optional[Register] = None
-    data_output: Optional[Register] = None
+    data_input_status: Optional[HRegister] = None
+    data_input: Optional[HRegister] = None
+    data_output_status: Optional[HRegister] = None
+    data_output: Optional[HRegister] = None
 
 
 class DevicePort(BaseModel):
@@ -76,12 +76,12 @@ class SlaveSerial(BaseModel):
 
 class ModbusConfig(BaseModel):
     iolinks: list[SlaveTCP | SlaveSerial]
-    holding_registers: list[Register]
+    holding_registers: list[HRegister]
 
 
 def get_register_by_address(
-    registers: list[Register], address: int
-) -> Optional[tuple[Register, int]]:
+    registers: list[HRegister], address: int
+) -> Optional[tuple[HRegister, int]]:
     for index, r in enumerate(registers):
         if r.address == address:
             return (r, index)
