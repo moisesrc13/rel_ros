@@ -13,51 +13,39 @@
       address: 40007
       data_type: "uint16"
       value: 0
-    - name: "param_pulse_train_high"
-      address: 40004
-      data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_medium"
-      address: 40005
-      data_type: "uint16"
-      value: 0
     - name: "param_pulse_train_low"
-      address: 40006
-      data_type: "uint16"
-      value: 0
-    - name: "param_emergency_stop_state"
-      address: 40007
-      data_type: "uint16"
-      value: 0
-    - name: "param_solenoid_valves_state"
       address: 40008
       data_type: "uint16"
       value: 0
-    - name: "param_alarm_state"
+    - name: "param_pulse_train_medium"
       address: 40009
       data_type: "uint16"
       value: 0
-    - name: "param_alarm_pre_vacuum_limit_high"
+    - name: "param_pulse_train_high"
       address: 40010
       data_type: "uint16"
       value: 0
-    - name: "param_alarm_pre_vacuum_limit_low"
+    - name: "param_alarm_pre_vacuum_limit_high"
       address: 40011
       data_type: "uint16"
       value: 0
-    - name: "param_alarm_pre_vacuum_distance"
+    - name: "param_alarm_pre_vacuum_limit_low"
       address: 40012
       data_type: "uint16"
       value: 0
-    - name: "sensor_material_pressure"
+    - name: "param_alarm_pre_vacuum_distance"
       address: 40013
       data_type: "uint16"
       value: 0
-    - name: "sensor_material_temperature"
+    - name: "param_security_distance"
       address: 40014
       data_type: "uint16"
       value: 0
-    - name: "sensor_laser_distance"
+    - name: "param_recycle_time"
       address: 40015
+      data_type: "uint16"
+      value: 0
+    - name: "param_pulse_train_selection"
+      address: 40016
       data_type: "uint16"
       value: 0
