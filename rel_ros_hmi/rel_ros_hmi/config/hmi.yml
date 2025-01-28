@@ -4,6 +4,76 @@
       host: 0.0.0.0  # localhost for ROS working as HMI slave
       port: 8845  # 502 is the standard
       offset: 0
+  coil_registers:
+    - name: "enter_screen_1_0"
+      address: 0
+      value: 0
+    - name: "open_local_window_1_1"
+      address: 1
+      value: 0
+    - name: "open_local_window_1_2"
+      address: 2
+      value: 0
+    - name: "open_local_window_1_3"
+      address: 3
+      value: 0
+    - name: "close_local_window_1_1"
+      address: 4
+      value: 0
+    - name: "close_local_window_1_2"
+      address: 5
+      value: 0
+    - name: "close_local_window_1_3"
+      address: 6
+      value: 0
+    - name: "enter_screen_2_0"
+      address: 7
+      value: 0
+    - name: "turn_on_pumping_process"
+      address: 8
+      value: 0
+    - name: "save_button"
+      address: 9
+      value: 0
+    - name: "enter_screen_3_0"
+      address: 10
+      value: 0
+    - name: "enter_screen_4_0"
+      address: 11
+      value: 0
+    - name: "open_local_window_2_1"
+      address: 12
+      value: 0
+    - name: "open_local_window_2_2"
+      address: 13
+      value: 0
+    - name: "open_local_window_2_3"
+      address: 14
+      value: 0
+    - name: "close_local_window_2_1"
+      address: 15
+      value: 0
+    - name: "close_local_window_2_2"
+      address: 16
+      value: 0
+    - name: "close_local_window_2_3"
+      address: 17
+      value: 0
+    - name: "down_pistons"
+      address: 18
+      value: 0
+    - name: "up_pistons"
+      address: 19
+      value: 0
+    - name: "turn_on_pump"
+      address: 20
+      value: 0
+    - name: "recycle"
+      address: 21
+      value: 0
+    - name: "vacuum_air"
+      address: 22
+      value: 0
   holding_registers:
     - name: "param_target_pressure_hyd"
       address: 40006

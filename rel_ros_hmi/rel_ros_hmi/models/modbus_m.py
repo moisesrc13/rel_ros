@@ -16,6 +16,12 @@ class RegisterDataType(Enum):
     uint32 = "uint32"
 
 
+class CRegister(BaseModel):
+    name: str
+    address: int
+    value: int = 0
+
+
 class HRegister(BaseModel):
     name: str
     address: int
