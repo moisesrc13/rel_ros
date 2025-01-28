@@ -48,6 +48,7 @@ class SlaveTCP(BaseModel):
 class ModbusConfig(BaseModel):
     slaves: list[SlaveTCP]
     holding_registers: list[HRegister]
+    coil_registers: list[CRegister]
 
 
 def get_register_by_address(
