@@ -11,6 +11,11 @@ class RegisterDataType(Enum):
     uint32 = "uint32"
 
 
+class CRegister(BaseModel):
+    address: int
+    value: int = 0  # this will be only valid for 0 or 1
+
+
 class HRegister(BaseModel):
     address: int
     words: int

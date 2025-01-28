@@ -11,7 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import (
-    Register,
+    HRegister,
     RegisterDataType,
     RegisterModbusType,
     SlaveTCP,
@@ -80,7 +80,7 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
         logger.info("✨ Starting modbus HMI master ...")
         self.hmi_name = slave.name
         self.hmi_id = slave.id
@@ -146,7 +146,7 @@ class RelModbusMaster:
         decoder = get_decoder(rr)
         return get_value(decoder, RegisterDataType.uint16)
 
-    def get_holding_registers_data(self) -> list[Register]:
+    def get_holding_registers_data(self) -> list[HRegister]:
         logger.info("reading holding register data")
         addresses = get_hr_addresses(self.hr)
         rr = self.slave_conn.read_holding_registers(
@@ -161,7 +161,7 @@ class RelModbusMaster:
         return updated_registers
 
 
-def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelModbusMaster]:
+def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelModbusMaster]:
     return [RelModbusMaster(s, hr) for s in slaves]
 
 

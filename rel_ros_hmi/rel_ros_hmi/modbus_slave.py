@@ -13,7 +13,7 @@ from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import HRegister, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
@@ -37,7 +37,7 @@ class PublishHMIData:
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveTCP, hr: list[Register], publisher):
+    def __init__(self, addr, values, slave: SlaveTCP, hr: list[HRegister], publisher):
         """Initialize."""
         self.hr = hr
         self.slave = slave
@@ -115,7 +115,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
+def run_sync_modbus_server(slave: SlaveTCP, hr: list[HRegister], publisher):
     try:
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, publisher)
@@ -156,7 +156,7 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveTCP, hr: list[Register], publisher) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister], publisher) -> None:
         Thread.__init__(self)
         self.slave = slave
         self.hr = hr
@@ -179,7 +179,7 @@ def run(slave: SlaveTCP, publisher=None):
         server.shutdown()
 
 
-def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[Register], publishers: dict):
+def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[HRegister], publishers: dict):
     for slave in slaves:
         slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
         slave_thread.daemon = True
