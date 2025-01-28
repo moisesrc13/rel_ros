@@ -55,7 +55,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         super().setValues(address - 1, value)
         address = address - 1
         value = value[0]
-        if isinstance(value, bool):
+        if isinstance(value, bool):  # this is required for coils
             value = int(value)
         logger.debug("setValues with address %s, value %s", address, value)
         logger.debug("getting register by address ...")
