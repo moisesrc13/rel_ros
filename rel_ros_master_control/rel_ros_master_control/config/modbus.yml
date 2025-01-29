@@ -49,6 +49,16 @@ holding_registers:
       words: 1
       data_type: "uint16"
       value: 0
+    - name: "acoustic_alarm"
+      address: 6052
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "digital_out_hyd_valve"
+      address: 7051
+      words: 1
+      data_type: "uint16"
+      value: 0
 iolinks:
   -   name: "master io link 0"
       hmi_id: 0
