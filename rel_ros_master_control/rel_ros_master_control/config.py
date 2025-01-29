@@ -4,9 +4,8 @@ from enum import Enum
 import yaml
 
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.models.hmi_m import HMIConfig
 from rel_ros_master_control.models.modbus_m import ModbusConfig
-from rel_ros_master_control.models.status_device_m import StatusDeviceConfig
+from rel_ros_master_control.models.status_device_m import TowerStatus
 
 logger = new_logger(__name__)
 
@@ -30,7 +29,7 @@ def load_config(file_path: str, config_type: ConfigType):
             logger.info("converting to global config...")
             if config_type == ConfigType.MODBUS:
                 return ModbusConfig.model_validate(config)
-            return StatusDeviceConfig.model_validate(config)
+            return TowerStatus.model_validate(config)
     except Exception as err:
         logger.error("Exception loading configuration - %s", err)
         raise err
@@ -40,5 +39,5 @@ def load_modbus_config() -> ModbusConfig:
     return load_config("./config/modbus.yml", ConfigType.MODBUS)
 
 
-def load_status_device_config() -> StatusDeviceConfig:
+def load_status_device_config() -> TowerStatus:
     return load_config("./config/status_device.yml", ConfigType.STATUS_DEVICE)

@@ -53,7 +53,7 @@ class StatusDeviceConfig(BaseModel):
     control_status: ControlStatus
 
 
-class TowerControlStatus(BaseModel):
+class TowerControlStates(BaseModel):
     full: list[int]
     medium_high: list[int]
     medium: list[int]
@@ -62,10 +62,14 @@ class TowerControlStatus(BaseModel):
     bucket_change: list[int]
 
 
-class TowerStatusDevice:
-    status_start_address: int
-    status_total_registers: int
+class TowerStatus(BaseModel):
+    start_address: int
+    total_registers: int
+    states: TowerControlStates
 
-    def __init__(self, status_start_address: int = 6060, status_total_registers: int = 8):
-        self.status_start_address = status_start_address
-        self.status_total_registers = status_total_registers
+
+class TowerStatusDevice:
+    tower_status: TowerStatus
+
+    def __init__(self, tower_status: TowerStatus):
+        self.tower_status = tower_status

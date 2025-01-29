@@ -123,16 +123,6 @@ class RelControl:
         status.status = "read ok"
         return status
 
-    def get_data_slow(self) -> list[HRegister]:
-        updated_registers = []
-        for register in self.hr:
-            register.value = self.read_holding_register(register.address).value
-            updated_registers.append(register)
-        logger.info(
-            "getting data total %s from master %s", len(updated_registers), updated_registers
-        )
-        return updated_registers
-
     def get_data(self) -> list[HRegister]:
         updated_registers = []
 
