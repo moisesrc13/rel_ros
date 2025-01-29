@@ -39,6 +39,16 @@ holding_registers:
       words: 1
       data_type: "uint16"
       value: 0
+    - name: "manifold"
+      address: 5052
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "status_tower"
+      address: 6060
+      words: 1
+      data_type: "uint16"
+      value: 0
 iolinks:
   -   name: "master io link 0"
       hmi_id: 0
