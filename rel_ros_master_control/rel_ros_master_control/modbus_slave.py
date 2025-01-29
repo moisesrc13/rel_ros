@@ -15,7 +15,6 @@ from pymodbus.server import StartSerialServer, StartTcpServer
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.modbus_m import (
-    DevicePorts,
     HRegister,
     SlaveSerial,
     SlaveTCP,
@@ -158,7 +157,6 @@ def main():
             host="0.0.0.0",
             port=8844,  # matching one slave from config
             address_offset=0,
-            device_ports=DevicePorts(),
             timeout_seconds=5,
         ),
         hr=config.holding_registers,

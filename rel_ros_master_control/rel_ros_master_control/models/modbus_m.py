@@ -43,21 +43,9 @@ class DevicePort(BaseModel):
     holding_registers: DevicePortHoldingRegisters
 
 
-class DevicePorts(BaseModel):
-    port_1: Optional[DevicePort] = None
-    port_2: Optional[DevicePort] = None
-    port_3: Optional[DevicePort] = None
-    port_4: Optional[DevicePort] = None
-    port_5: Optional[DevicePort] = None
-    port_6: Optional[DevicePort] = None
-    port_7: Optional[DevicePort] = None
-    port_8: Optional[DevicePort] = None
-
-
 class SlaveTCP(BaseModel):
     host: str
     port: int
-    device_ports: DevicePorts
     name: str = ""
     hmi_id: int = 0
     hmi_name: str = "HMI"
