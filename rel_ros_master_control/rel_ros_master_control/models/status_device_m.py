@@ -51,3 +51,12 @@ class ControlStatus(BaseModel):
 class StatusDeviceConfig(BaseModel):
     basic: StatusDevice
     control_status: ControlStatus
+
+
+class TowerStatusDevice:
+    status_start_address: int
+    status_total_registers: int
+
+    def __init__(self, status_start_address: int = 6060, status_total_registers: int = 8):
+        self.status_start_address = status_start_address
+        self.status_total_registers = status_total_registers
