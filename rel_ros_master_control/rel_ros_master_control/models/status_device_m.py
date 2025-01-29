@@ -53,6 +53,15 @@ class StatusDeviceConfig(BaseModel):
     control_status: ControlStatus
 
 
+class TowerControlStatus(BaseModel):
+    full: list[int]
+    medium_high: list[int]
+    medium: list[int]
+    pre_vacuum: list[int]
+    vacuum: list[int]
+    bucket_change: list[int]
+
+
 class TowerStatusDevice:
     status_start_address: int
     status_total_registers: int
