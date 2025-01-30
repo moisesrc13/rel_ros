@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import (
     RelControl,
     RelModbusMaster,
@@ -10,28 +11,42 @@ from rel_ros_master_control.control import (
     get_decoder_from_rr,
     get_value,
 )
-from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType
+from rel_ros_master_control.models.modbus_m import (
+    DigitalHydValve,
+    HRegister,
+    IOLinkHR,
+    RegisterDataType,
+    get_register_by_name,
+)
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 from rel_ros_master_control.util import is_bit_on
 
 
 @pytest.fixture
 def rel_control(monkeypatch):
-    hr = [HRegister(address=100, value=0)]
+    config = load_modbus_config()
     slave_tcp = SlaveTCP(
         host="0.0.0.0",
         port=9090,
     )
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
-    return RelControl(slave=slave_tcp, hr=hr)
+    return RelControl(slave=slave_tcp, hr=config.holding_registers)
 
 
 def test_control_hyd_valve(rel_control: RelControl):
+    digital_valve = DigitalHydValve()
     slave_conn_mock = MagicMock()
-    write_registers = MagicMock(return_value=True)
-    slave_conn_mock.write_registers = write_registers
+    write_register = MagicMock(return_value=True)
+    slave_conn_mock.write_register = write_register
     rel_control.master_io_link.slave_conn = slave_conn_mock
-    assert 1 == 1
+    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
+    print()
+    for _, value in digital_valve.model_dump().items():
+        rel_control.apply_hyd_valve_state(value)
+        write_register.assert_called_with(
+            hr.address,
+            value,
+        )
 
 
 def test_control_instance(rel_control: RelControl):

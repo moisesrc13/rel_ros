@@ -17,13 +17,6 @@ class IOLinkHR(Enum):
     DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
 
 
-class DigitalHydValveState(Enum):
-    OUT1_OFF_OUT2_OFF = "out1_off_out2_off"
-    OUT1_ON_OUT2_OFF = "out1_on_out2_off"
-    OUT1_OFF_OUT2_ON = "out1_off_out2_on"
-    OUT1_ON_OUT2_ON = "out1_on_out2_on"
-
-
 class DigitalHydValve(BaseModel):
     out1_off_out2_off: int = 1
     out1_on_out2_off: int = 3
@@ -93,3 +86,7 @@ def get_register_by_address(
         if r.address == address:
             return (r, index)
     return (None, None)
+
+
+def get_register_by_name(registers: list[HRegister], name: str) -> Optional[HRegister]:
+    return next((r for r in registers if r.name == name), None)

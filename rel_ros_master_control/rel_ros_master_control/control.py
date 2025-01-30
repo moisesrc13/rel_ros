@@ -10,11 +10,11 @@ from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import (
     DigitalHydValve,
-    DigitalHydValveState,
     HRegister,
     IOLinkHR,
     RegisterDataType,
     SlaveTCP,
+    get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
@@ -66,15 +66,15 @@ class RelControl:
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
 
-    def apply_hyd_valve_state(self, state: DigitalHydValveState):
-        hr: HRegister = getattr(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE)
+    def apply_hyd_valve_state(self, state_value: int):
+        hr: HRegister = get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
         try:
             self.master_io_link.slave_conn.write_register(
                 hr.address,
-                state.value,
+                state_value,
             )
         except Exception as err:
-            logger.error("error writing hyd valve state %s - %s", state.value, err)
+            logger.error("error writing hyd valve state %s - %s", state_value, err)
 
     def apply_tower_state(self, state: TowerState):
         registers = []
