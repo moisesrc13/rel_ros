@@ -8,6 +8,16 @@ class StatusRegister(BaseModel):
     value: int
 
 
+class TowerState(Enum):
+    FULL = "full"
+    MEDIUM_HIGH = "medium_high"
+    MEDIUM = "medium"
+    PRE_VACUUM = "pre_vacuum"
+    VACUUM = "vacuum"
+    BUCKET_CHANGE = "bucket_change"
+    ACOSTIC_ALARM = "acoustic_alarm"
+
+
 class BasicActions(Enum):
     TURN_OFF = 0
     TURN_ON = 1
@@ -28,6 +38,7 @@ class TowerControlStates(BaseModel):
     pre_vacuum: list[int]
     vacuum: list[int]
     bucket_change: list[int]
+    acoustic_alarm: list[int]
 
 
 class TowerStatus(BaseModel):

@@ -9,7 +9,7 @@ from rel_ros_master_control.config import load_modbus_config, load_status_device
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType, SlaveTCP
-from rel_ros_master_control.models.status_device_m import TowerStatusDevice
+from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
 logger = new_logger(__name__)
 
@@ -57,6 +57,31 @@ class RelControl:
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
+
+    def apply_tower_state(self, state: TowerState):
+        registers = []
+        match state.value:
+            case TowerState.FULL:
+                registers = self.tower_devive.tower_status.states.full
+            case TowerState.MEDIUM_HIGH:
+                registers = self.tower_devive.tower_status.states.medium_high
+            case TowerState.MEDIUM:
+                registers = self.tower_devive.tower_status.states.medium
+            case TowerState.PRE_VACUUM:
+                registers = self.tower_devive.tower_status.states.pre_vacuum
+            case TowerState.VACUUM:
+                registers = self.tower_devive.tower_status.states.vacuum
+            case TowerState.BUCKET_CHANGE:
+                registers = self.tower_devive.tower_status.states.bucket_change
+            case TowerState.ACOSTIC_ALARM:
+                registers = self.tower_devive.tower_status.states.acoustic_alarm
+            case _:
+                logger.warning("no mtach state found for tower device - %s", state.value)
+        if registers:
+            self.master_io_link.slave_conn.write_registers(
+                self.tower_devive.tower_status.start_address,
+                registers,
+            )
 
     def get_register_with_offset(self, register: int) -> int:
         register = register + self.master_io_link.slave.offset
