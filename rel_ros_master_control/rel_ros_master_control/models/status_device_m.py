@@ -21,38 +21,6 @@ class StatusSegment(BaseModel):
     bits: list[int]
 
 
-class BasicSegments(BaseModel):
-    audible: StatusSegment
-    segment_1: StatusSegment
-    segment_2: StatusSegment
-    segment_3: StatusSegment
-    segment_4: StatusSegment
-    segment_5: StatusSegment
-    segment_6: StatusSegment
-    segment_7: StatusSegment
-    segment_8: StatusSegment
-    segment_9: StatusSegment
-    segment_10: StatusSegment
-
-
-class StatusDevice(BaseModel):
-    segments: BasicSegments
-
-
-class ControlStatus(BaseModel):
-    full: list[StatusRegister]
-    medium_high: list[StatusRegister]
-    medium: list[StatusRegister]
-    pre_vacuum: list[StatusRegister]
-    vacuum: list[StatusRegister]
-    bucket_change: list[StatusRegister]
-
-
-class StatusDeviceConfig(BaseModel):
-    basic: StatusDevice
-    control_status: ControlStatus
-
-
 class TowerControlStates(BaseModel):
     full: list[int]
     medium_high: list[int]
