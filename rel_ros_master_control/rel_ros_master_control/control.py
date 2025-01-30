@@ -76,12 +76,15 @@ class RelControl:
             case TowerState.ACOSTIC_ALARM:
                 registers = self.tower_devive.tower_status.states.acoustic_alarm
             case _:
-                logger.warning("no mtach state found for tower device - %s", state.value)
+                logger.warning("no match state found for tower device - %s", state.value)
         if registers:
-            self.master_io_link.slave_conn.write_registers(
-                self.tower_devive.tower_status.start_address,
-                registers,
-            )
+            try:
+                self.master_io_link.slave_conn.write_registers(
+                    self.tower_devive.tower_status.start_address,
+                    registers,
+                )
+            except Exception as err:
+                logger.error("error writing tower state status %s - %s", state.value, err)
 
     def get_register_with_offset(self, register: int) -> int:
         register = register + self.master_io_link.slave.offset
