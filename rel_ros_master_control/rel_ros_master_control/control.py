@@ -5,10 +5,11 @@ from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import DevicePort, HRegister, RegisterDataType, SlaveTCP
+from rel_ros_master_control.models.status_device_m import TowerStatusDevice
 
 logger = new_logger(__name__)
 
@@ -50,6 +51,7 @@ class ControlStatus(BaseModel):
 
 class RelControl:
     def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
+        self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.master_io_link = RelModbusMaster(slave)
         self.hr = hr
         logger.info("connecting master io_link")

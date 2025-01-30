@@ -18,7 +18,7 @@ class CRegister(BaseModel):
 
 class HRegister(BaseModel):
     address: int
-    words: int
+    words: int = 1
     data_type: RegisterDataType = RegisterDataType.uint16
     name: str = ""
     value: int = 0

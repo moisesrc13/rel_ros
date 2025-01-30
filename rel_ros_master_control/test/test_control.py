@@ -1,8 +1,29 @@
+from unittest.mock import MagicMock
+
 import pytest
 
-from rel_ros_master_control.control import get_builder, get_decoder_from_rr, get_value
+from rel_ros_master_control.control import (
+    RelControl,
+    RelModbusMaster,
+    SlaveTCP,
+    get_builder,
+    get_decoder_from_rr,
+    get_value,
+)
 from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType
+from rel_ros_master_control.models.status_device_m import TowerStatusDevice
 from rel_ros_master_control.util import is_bit_on
+
+
+def test_control_instance(monkeypatch):
+    hr = [HRegister(address=100, value=0)]
+    slave_tcp = SlaveTCP(
+        host="0.0.0.0",
+        port=9090,
+    )
+    monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
+    rel_control = RelControl(slave=slave_tcp, hr=hr)
+    assert isinstance(rel_control.tower_devive, TowerStatusDevice)
 
 
 @pytest.mark.parametrize(
