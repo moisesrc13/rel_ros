@@ -8,7 +8,13 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
-from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType, SlaveTCP
+from rel_ros_master_control.models.modbus_m import (
+    DigitalHydValve,
+    DigitalHydValveState,
+    HRegister,
+    RegisterDataType,
+    SlaveTCP,
+)
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
 logger = new_logger(__name__)
@@ -52,11 +58,22 @@ class ControlStatus(BaseModel):
 class RelControl:
     def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
+        self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(slave)
         self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
+
+    def apply_hyd_valve_state(self, state: DigitalHydValveState):
+        value = getattr(self.hyd_valve_io, state.value)
+        try:
+            self.master_io_link.slave_conn.write_register(
+                self.tower_devive.tower_status.start_address,
+                200,
+            )
+        except Exception as err:
+            logger.error("error writing tower state status %s - %s", state.value, err)
 
     def apply_tower_state(self, state: TowerState):
         registers = []

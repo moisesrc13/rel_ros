@@ -4,6 +4,20 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class DigitalHydValveState(Enum):
+    OUT1_OFF_OUT2_OFF = "out1_off_out2_off"
+    OUT1_ON_OUT2_OFF = "out1_on_out2_off"
+    OUT1_OFF_OUT2_ON = "out1_off_out2_on"
+    OUT1_ON_OUT2_ON = "out1_on_out2_on"
+
+
+class DigitalHydValve(BaseModel):
+    out1_off_out2_off: int = 1
+    out1_on_out2_off: int = 3
+    out1_off_out2_on: int = 5
+    out1_on_out2_on: int = 7
+
+
 class RegisterDataType(Enum):
     float16 = "float16"
     uint16 = "uint16"
