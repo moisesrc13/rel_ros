@@ -11,7 +11,7 @@ from rel_ros_master_control.control import (
     get_value,
 )
 from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType
-from rel_ros_master_control.models.status_device_m import TowerStatusDevice
+from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 from rel_ros_master_control.util import is_bit_on
 
 
@@ -24,6 +24,19 @@ def test_control_instance(monkeypatch):
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
     rel_control = RelControl(slave=slave_tcp, hr=hr)
     assert isinstance(rel_control.tower_devive, TowerStatusDevice)
+    slave_conn_mock = MagicMock()
+    write_registers = MagicMock(return_value=True)
+    slave_conn_mock.write_registers = write_registers
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+
+    # apply all tower states
+    for _, state in enumerate(TowerState):
+        state_addresses = getattr(rel_control.tower_devive.tower_status.states, state.value)
+        rel_control.apply_tower_state(state)
+        write_registers.assert_called_with(
+            rel_control.tower_devive.tower_status.start_address,
+            state_addresses,
+        )
 
 
 @pytest.mark.parametrize(

@@ -60,7 +60,7 @@ class RelControl:
 
     def apply_tower_state(self, state: TowerState):
         registers = []
-        match state.value:
+        match state:
             case TowerState.FULL:
                 registers = self.tower_devive.tower_status.states.full
             case TowerState.MEDIUM_HIGH:
