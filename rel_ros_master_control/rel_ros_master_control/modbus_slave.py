@@ -15,8 +15,7 @@ from pymodbus.server import StartSerialServer, StartTcpServer
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.modbus_m import (
-    DevicePorts,
-    Register,
+    HRegister,
     SlaveSerial,
     SlaveTCP,
     get_register_by_address,
@@ -26,7 +25,7 @@ logger = new_logger(__name__)
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveSerial | SlaveTCP, hr: list[Register]):
+    def __init__(self, addr, values, slave: SlaveSerial | SlaveTCP, hr: list[HRegister]):
         """Initialize."""
         self.settings = slave
         self.hr = hr
@@ -93,7 +92,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[Register]):
+def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[HRegister]):
     try:
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr)
@@ -105,9 +104,9 @@ def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[Register]):
         context = ModbusServerContext(slaves=store, single=False)
         # initialize the server information
         identity = ModbusDeviceIdentification()
-        identity.VendorName = "TestGasStation"
-        identity.ProductName = "Test"
-        identity.ModelName = "Test Modbus Server"
+        identity.VendorName = "Relant"
+        identity.ProductName = "Iolink Slave Test"
+        identity.ModelName = "relros"
         identity.MajorMinorRevision = "0.1.0"
         modbus_slave = None
         if isinstance(slave, SlaveTCP):
@@ -158,7 +157,6 @@ def main():
             host="0.0.0.0",
             port=8844,  # matching one slave from config
             address_offset=0,
-            device_ports=DevicePorts(),
             timeout_seconds=5,
         ),
         hr=config.holding_registers,

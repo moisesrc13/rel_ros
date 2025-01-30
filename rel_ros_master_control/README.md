@@ -14,6 +14,14 @@ $ cd ~/vs-workspace/rel_ros_master_control
 `docker run --rm --name rel-ros -it -v $(pwd):/home/relant/ros2_ws/src/rel_ros_master_control rel-ros:0.1.0 /bin/bash`
 
 
+## Local Env Vars in .envrc
+```bash
+export LOGLEVEL="DEBUG"
+export USE_TEST_MODBUS="true"
+export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"
+export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_hmi"
+```
+
 ## ROS
 
 ### create package

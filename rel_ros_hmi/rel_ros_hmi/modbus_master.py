@@ -11,8 +11,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import (
-    Register,
+    HRegister,
     RegisterDataType,
+    RegisterModbusType,
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
@@ -79,7 +80,7 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveTCP, hr: list[Register]) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
         logger.info("✨ Starting modbus HMI master ...")
         self.hmi_name = slave.name
         self.hmi_id = slave.id
@@ -121,9 +122,15 @@ class RelModbusMaster:
             logger.error("❌ Error closing connection to modbus server - %s", err)
             self.connection_state = "❌ error closing"
 
-    def do_write(self, address: int, value: int):
-        logger.info("writing to register %s value %s", address, value)
-        respose = self.slave_conn.write_register(address=address, value=value)
+    def do_write(self, address: int, value: int, reg_type=RegisterModbusType.HR):
+        def _write():
+            if reg_type == RegisterModbusType.HR:
+                return self.slave_conn.write_register(address=address, value=value)
+            else:
+                return self.slave_conn.write_coil(address=address, value=value)
+
+        logger.info("writing %s to register %s value %s", reg_type, address, value)
+        respose = _write()
         if respose.isError():
             logger.error("error writing register %s", address)
         else:
@@ -139,7 +146,7 @@ class RelModbusMaster:
         decoder = get_decoder(rr)
         return get_value(decoder, RegisterDataType.uint16)
 
-    def get_holding_registers_data(self) -> list[Register]:
+    def get_holding_registers_data(self) -> list[HRegister]:
         logger.info("reading holding register data")
         addresses = get_hr_addresses(self.hr)
         rr = self.slave_conn.read_holding_registers(
@@ -154,7 +161,7 @@ class RelModbusMaster:
         return updated_registers
 
 
-def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[Register]) -> list[RelModbusMaster]:
+def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelModbusMaster]:
     return [RelModbusMaster(s, hr) for s in slaves]
 
 
@@ -183,12 +190,21 @@ def run():
         dest="value",
         type=int,
     )
+    parser.add_argument(
+        "-t",
+        "--type",
+        help="register type",
+        dest="type",
+        type=str,
+        choices=["hr", "co"],
+        default="hr",
+    )
     args = parser.parse_args()
     config = load_modbus_config()
     modbus_master = RelModbusMaster(config.slaves[0], config.holding_registers)
     modbus_master.do_connect()
     if args.action == "write":
-        modbus_master.do_write(args.register, args.value)
+        modbus_master.do_write(args.register, args.value, RegisterModbusType(args.type))
     elif args.action == "read":
         value = -1
         if args.register == 0:

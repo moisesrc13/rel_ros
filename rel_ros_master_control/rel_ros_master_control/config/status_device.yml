@@ -1,35 +1,9 @@
-basic:  # mode
-  segments:
-    audible:
-      octect: 5
-      bits: [1, 0]
-    segment_1:
-      octect: 3
-      bits: [1, 0]
-    segment_2:
-      octect: 3
-      bits: [3, 2]
-    segment_3:
-      octect: 3
-      bits: [5, 4]
-    segment_4:
-      octect: 3
-      bits: [7, 6]
-    segment_5:
-      octect: 2
-      bits: [9, 8]
-    segment_6:
-      octect: 2
-      bits: [11, 10]
-    segment_7:
-      octect: 2
-      bits: [13, 12]
-    segment_8:
-      octect: 2
-      bits: [15, 14]
-    segment_9:
-      octect: 1
-      bits: [1, 0]
-    segment_10:
-      octect: 1
-      bits: [3, 2]
+start_address: 6060
+total_registers: 8
+states:
+  full: [22, 3628, 256, 1, 0, 256, 1, 0]
+  medium_high: [16, 3328, 5645, 1, 0, 256, 1, 0]
+  medium: [0, 0, 0, 1046, 3328, 260, 1, 1024]
+  pre_vacuum: [0, 0, 0, 0, 3332, 1549, 1, 1024]
+  vacuum: [0, 0, 0, 0, 0, 13, 15, 256]
+  bucket_change: [23, 1024, 5892, 23, 1024, 5892, 4119, 1024]

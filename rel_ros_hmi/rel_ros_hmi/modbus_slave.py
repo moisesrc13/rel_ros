@@ -1,6 +1,7 @@
 """
 This is a modbus slave for testing within ROS
 """
+import os
 from threading import Thread
 
 from pymodbus.constants import Endian
@@ -12,7 +13,7 @@ from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import Register, SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import HRegister, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
@@ -36,7 +37,7 @@ class PublishHMIData:
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveTCP, hr: list[Register], publisher):
+    def __init__(self, addr, values, slave: SlaveTCP, hr: list[HRegister], publisher):
         """Initialize."""
         self.hr = hr
         self.slave = slave
@@ -53,8 +54,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
 
         super().setValues(address - 1, value)
         address = address - 1
-        logger.debug("setValues with address %s, value %s", address, value)
         value = value[0]
+        if isinstance(value, bool):  # this is required for coils
+            value = int(value)
+        logger.debug("setValues with address %s, value %s", address, value)
         logger.debug("getting register by address ...")
         register, idx = get_register_by_address(self.hr, address)
         if not register:
@@ -65,6 +68,9 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register.value = value
         self.hr[idx] = register
         # publish the data
+        if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+            return
+
         with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
             for register in self.hr:
                 setattr(hmi_msg, register.name, register.value)
@@ -109,21 +115,20 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
+def run_sync_modbus_server(slave: SlaveTCP, hr: list[HRegister], publisher):
     try:
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, publisher)
-        store = {}
         # creating two slaves 0 & 1
-        store[0] = ModbusSlaveContext(hr=block)
-        store[1] = ModbusSlaveContext(hr=block)
-        store[2] = ModbusSlaveContext(hr=block)
-        context = ModbusServerContext(slaves=store, single=False)
+        store = ModbusSlaveContext(
+            di=block, co=block, hr=block, ir=block
+        )  # coils only write 1 (True) or 0 (False)
+        context = ModbusServerContext(slaves=store, single=True)
         # initialize the server information
         identity = ModbusDeviceIdentification()
-        identity.VendorName = "TestGasStation"
-        identity.ProductName = "Test"
-        identity.ModelName = "Test Modbus Server"
+        identity.VendorName = f"Relant HMI - {slave.id}"
+        identity.ProductName = "Relant-On-ROS"
+        identity.ModelName = "relros"
         identity.MajorMinorRevision = "0.1.0"
         modbus_slave = None
         if isinstance(slave, SlaveTCP):
@@ -151,7 +156,7 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[Register], publisher):
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveTCP, hr: list[Register], publisher) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister], publisher) -> None:
         Thread.__init__(self)
         self.slave = slave
         self.hr = hr
@@ -174,7 +179,7 @@ def run(slave: SlaveTCP, publisher=None):
         server.shutdown()
 
 
-def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[Register], publishers: dict):
+def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[HRegister], publishers: dict):
     for slave in slaves:
         slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
         slave_thread.daemon = True

@@ -11,7 +11,12 @@ class RegisterDataType(Enum):
     uint32 = "uint32"
 
 
-class Register(BaseModel):
+class CRegister(BaseModel):
+    address: int
+    value: int = 0  # this will be only valid for 0 or 1
+
+
+class HRegister(BaseModel):
     address: int
     words: int
     data_type: RegisterDataType = RegisterDataType.uint16
@@ -26,10 +31,10 @@ class Register(BaseModel):
 
 
 class DevicePortHoldingRegisters(BaseModel):
-    data_input_status: Optional[Register] = None
-    data_input: Optional[Register] = None
-    data_output_status: Optional[Register] = None
-    data_output: Optional[Register] = None
+    data_input_status: Optional[HRegister] = None
+    data_input: Optional[HRegister] = None
+    data_output_status: Optional[HRegister] = None
+    data_output: Optional[HRegister] = None
 
 
 class DevicePort(BaseModel):
@@ -38,21 +43,9 @@ class DevicePort(BaseModel):
     holding_registers: DevicePortHoldingRegisters
 
 
-class DevicePorts(BaseModel):
-    port_1: Optional[DevicePort] = None
-    port_2: Optional[DevicePort] = None
-    port_3: Optional[DevicePort] = None
-    port_4: Optional[DevicePort] = None
-    port_5: Optional[DevicePort] = None
-    port_6: Optional[DevicePort] = None
-    port_7: Optional[DevicePort] = None
-    port_8: Optional[DevicePort] = None
-
-
 class SlaveTCP(BaseModel):
     host: str
     port: int
-    device_ports: DevicePorts
     name: str = ""
     hmi_id: int = 0
     hmi_name: str = "HMI"
@@ -76,12 +69,12 @@ class SlaveSerial(BaseModel):
 
 class ModbusConfig(BaseModel):
     iolinks: list[SlaveTCP | SlaveSerial]
-    holding_registers: list[Register]
+    holding_registers: list[HRegister]
 
 
 def get_register_by_address(
-    registers: list[Register], address: int
-) -> Optional[tuple[Register, int]]:
+    registers: list[HRegister], address: int
+) -> Optional[tuple[HRegister, int]]:
     for index, r in enumerate(registers):
         if r.address == address:
             return (r, index)

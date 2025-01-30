@@ -1,19 +1,64 @@
 holding_registers:
     - name: "sensor_material_pressure"
-      address: 5051
+      address: 1002
       words: 1
       data_type: "uint16"
       value: 0
     - name: "sensor_material_temperature"
-      address: 5052
+      address: 1003
+      words: 1
       data_type: "uint16"
       value: 0
-      words: 1
     - name: "sensor_laser_distance"
-      address: 5053
+      address: 2002
+      words: 1
       data_type: "uint16"
       value: 0
+    - name: "sensor_pressure_regulator_read_set"
+      address: 3002
       words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_pressure_regulator_real"
+      address: 3003
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_pressure_regulator_valve_state"
+      address: 3004
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_pressure_regulator_write_set"
+      address: 3052
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "sensor_pressure_regulator_activate_valve"
+      address: 3053
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "manifold"
+      address: 5052
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "status_tower"
+      address: 6060
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "acoustic_alarm"
+      address: 6052
+      words: 1
+      data_type: "uint16"
+      value: 0
+    - name: "digital_out_hyd_valve"
+      address: 7051
+      words: 1
+      data_type: "uint16"
+      value: 0
 iolinks:
   -   name: "master io link 0"
       hmi_id: 0
@@ -23,36 +68,3 @@ iolinks:
       framer: "socket"
       timeout_seconds: 10
       offset: -1
-      device_ports:
-        port_8:
-          init_address: 8000
-          name: "sensor_laser_distance"
-          holding_registers:
-            data_input_status:
-              address: 8000
-              words: 1  # 16 bits
-              data_type: "uint16"
-            data_input:
-              address: 8001
-              words: 1
-              data_type: "uint16"
-            data_output_satus:
-              address: 8050
-              words: 1
-              data_type: "uint16"
-            data_output:
-              address: 8051
-              words: 1
-              data_type: "uint16"
-        port_5:
-          init_address: 5000
-          name: "status_device"  # torreta
-          holding_registers:
-            data_output_satus:
-              address: 5050
-              words: 1
-              data_type: "uint16"
-            data_output:
-              address: 5051
-              words: 1
-              data_type: "uint16"

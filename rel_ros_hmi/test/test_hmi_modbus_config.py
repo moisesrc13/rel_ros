@@ -2,8 +2,8 @@ import pytest
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.models.modbus_m import (
+    HRegister,
     ModbusConfig,
-    Register,
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
@@ -19,26 +19,26 @@ def config() -> ModbusConfig:
 def test_get_registers_name():
     register = get_register_by_name(
         [
-            Register(address=5004, value=100, name="test4"),
-            Register(address=5001, value=100, name="test1"),
-            Register(address=5002, value=100, name="test2"),
-            Register(address=5003, value=100, name="test3"),
-            Register(address=5005, value=100, name="test5"),
+            HRegister(address=5004, value=100, name="test4"),
+            HRegister(address=5001, value=100, name="test1"),
+            HRegister(address=5002, value=100, name="test2"),
+            HRegister(address=5003, value=100, name="test3"),
+            HRegister(address=5005, value=100, name="test5"),
         ],
         "test2",
     )
-    assert isinstance(register, Register)
+    assert isinstance(register, HRegister)
     assert register.address == 5002
 
 
 def test_get_registers_addrresses():
     addresses = get_hr_addresses(
         [
-            Register(address=5004, value=100, name="test4"),
-            Register(address=5001, value=100, name="test1"),
-            Register(address=5002, value=100, name="test2"),
-            Register(address=5003, value=100, name="test3"),
-            Register(address=5005, value=100, name="test5"),
+            HRegister(address=5004, value=100, name="test4"),
+            HRegister(address=5001, value=100, name="test1"),
+            HRegister(address=5002, value=100, name="test2"),
+            HRegister(address=5003, value=100, name="test3"),
+            HRegister(address=5005, value=100, name="test5"),
         ]
     )
     assert addresses == [5001, 5002, 5003, 5004, 5005]
@@ -53,8 +53,8 @@ def test_config(config):
 
 def test_get_register_by_address():
     test_registers = [
-        Register(name="test1", address=1000, data_type="uint16", value=30),
-        Register(name="test2", address=2000, data_type="uint16", value=40),
+        HRegister(name="test1", address=1000, data_type="uint16", value=30),
+        HRegister(name="test2", address=2000, data_type="uint16", value=40),
     ]
     r, idx = get_register_by_address(test_registers, 40001)
     assert not r

@@ -1,7 +1,7 @@
 import pytest
 
 from rel_ros_master_control.control import get_builder, get_decoder_from_rr, get_value
-from rel_ros_master_control.models.modbus_m import Register, RegisterDataType
+from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType
 from rel_ros_master_control.util import is_bit_on
 
 
@@ -25,7 +25,7 @@ def test_bit(number, test_bit, expected_bit):
     [
         (
             1234,
-            Register(
+            HRegister(
                 address=100,
                 data_type=RegisterDataType.uint32,
                 words=1,
@@ -33,7 +33,7 @@ def test_bit(number, test_bit, expected_bit):
         ),
         (
             123444,
-            Register(
+            HRegister(
                 address=100,
                 data_type=RegisterDataType.uint32,
                 words=1,
@@ -53,7 +53,7 @@ def test_get_uint32_value(number, register):
     [
         (
             1234.44,
-            Register(
+            HRegister(
                 address=100,
                 data_type=RegisterDataType.float32,
                 words=1,
@@ -61,7 +61,7 @@ def test_get_uint32_value(number, register):
         ),
         (
             12.3444,
-            Register(
+            HRegister(
                 address=100,
                 data_type=RegisterDataType.float32,
                 words=1,
