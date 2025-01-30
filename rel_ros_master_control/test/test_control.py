@@ -15,14 +15,37 @@ from rel_ros_master_control.models.status_device_m import TowerState, TowerStatu
 from rel_ros_master_control.util import is_bit_on
 
 
-def test_control_instance(monkeypatch):
+@pytest.fixture
+def slave_tcp():
+    return SlaveTCP(
+        host="0.0.0.0",
+        port=9090,
+    )
+
+
+@pytest.fixture
+def rel_control(monkeypatch):
     hr = [HRegister(address=100, value=0)]
     slave_tcp = SlaveTCP(
         host="0.0.0.0",
         port=9090,
     )
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
-    rel_control = RelControl(slave=slave_tcp, hr=hr)
+    return RelControl(slave=slave_tcp, hr=hr)
+
+
+def test_control_hyd_valve(rel_control):
+    slave_conn_mock = MagicMock()
+    write_registers = MagicMock(return_value=True)
+    slave_conn_mock.write_registers = write_registers
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+    assert 1 == 1
+
+
+def test_control_instance(monkeypatch, slave_tcp: SlaveTCP):
+    hr = [HRegister(address=100, value=0)]
+    monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
+    rel_control = rel_control = RelControl(slave=slave_tcp, hr=hr)
     assert isinstance(rel_control.tower_devive, TowerStatusDevice)
     slave_conn_mock = MagicMock()
     write_registers = MagicMock(return_value=True)

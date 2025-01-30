@@ -4,6 +4,19 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class IOLinkHR(Enum):
+    SENSOR_MATERIAL_PRESSURE = "sensor_material_pressure"
+    SENSOR_MATERIAL_TEMPERATURE = "sensor_material_temperature"
+    SENSOR_LASER_DISTANCE = "sensor_laser_distance"
+    SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
+    SENSOR_PRESSURE_REGULATOR_REAL = "sensor_pressure_regulator_real"
+    SENSOR_PRESSURE_REGULATOR_VALVE_STATE = "sensor_pressure_regulator_valve_state"
+    SENSOR_PRESSURE_REGULATOR_WRITE_SET = "sensor_pressure_regulator_write_set"
+    SENSOR_PRESSURE_REGULATOR_ACTIVATE_VALVE = "sensor_pressure_regulator_activate_valve"
+    MANIFOLD = "manifold"
+    DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
+
+
 class DigitalHydValveState(Enum):
     OUT1_OFF_OUT2_OFF = "out1_off_out2_off"
     OUT1_ON_OUT2_OFF = "out1_on_out2_off"
