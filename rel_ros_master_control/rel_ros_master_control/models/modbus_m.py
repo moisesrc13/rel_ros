@@ -30,19 +30,6 @@ class HRegister(BaseModel):
             self.words = 1
 
 
-class DevicePortHoldingRegisters(BaseModel):
-    data_input_status: Optional[HRegister] = None
-    data_input: Optional[HRegister] = None
-    data_output_status: Optional[HRegister] = None
-    data_output: Optional[HRegister] = None
-
-
-class DevicePort(BaseModel):
-    init_address: int
-    name: Optional[str] = None
-    holding_registers: DevicePortHoldingRegisters
-
-
 class SlaveTCP(BaseModel):
     host: str
     port: int

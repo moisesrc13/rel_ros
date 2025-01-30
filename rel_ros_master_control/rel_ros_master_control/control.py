@@ -8,7 +8,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
-from rel_ros_master_control.models.modbus_m import DevicePort, HRegister, RegisterDataType, SlaveTCP
+from rel_ros_master_control.models.modbus_m import HRegister, RegisterDataType, SlaveTCP
 from rel_ros_master_control.models.status_device_m import TowerStatusDevice
 
 logger = new_logger(__name__)
@@ -62,18 +62,6 @@ class RelControl:
         register = register + self.master_io_link.slave.offset
         logger.debug("register with offset %s", register)
         return register
-
-    def read_device_port_input_status(self, port: str) -> int:
-        port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
-        logger.debug(
-            "port_num %s status_register %s", port, port.holding_registers.data_input_status
-        )
-        rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=self.get_register_with_offset(port.holding_registers.data_input_status.address),
-            count=port.holding_registers.data_input_status.words,
-        )
-        decoder = get_decoder(rr)
-        return get_value(decoder, port.holding_registers.data_input_status.data_type)
 
     def read_device_port_register(self, register: HRegister) -> int:
         logger.debug("read device register %s", register)
