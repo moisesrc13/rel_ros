@@ -16,6 +16,7 @@ from rel_ros_master_control.models.modbus_m import (
     DigitalHydValve,
     HRegister,
     IOLinkHR,
+    ManifoldActions,
     RegisterDataType,
     get_register_by_name,
 )
@@ -54,6 +55,21 @@ def test_get_data(rel_control: RelControl, test_value):
         assert register.value == test_value
 
 
+def test_manifold_actions(rel_control: RelControl):
+    manifold = ManifoldActions()
+    slave_conn_mock = MagicMock()
+    write_register = MagicMock(return_value=True)
+    slave_conn_mock.write_register = write_register
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.MANIFOLD.value)
+    for _, value in manifold.model_dump().items():
+        rel_control.apply_manifold_state(value)
+        write_register.assert_called_with(
+            hr.address,
+            value,
+        )
+
+
 def test_control_hyd_valve(rel_control: RelControl):
     digital_valve = DigitalHydValve()
     slave_conn_mock = MagicMock()
@@ -61,7 +77,6 @@ def test_control_hyd_valve(rel_control: RelControl):
     slave_conn_mock.write_register = write_register
     rel_control.master_io_link.slave_conn = slave_conn_mock
     hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
-    print()
     for _, value in digital_valve.model_dump().items():
         rel_control.apply_hyd_valve_state(value)
         write_register.assert_called_with(

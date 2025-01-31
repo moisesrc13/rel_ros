@@ -4,12 +4,12 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class ManifoldActions(Enum):
-    PISTONS_UP = 1
-    PISTONS_DOWN = 2
-    ACOUSTIC_SIGNAL = 4
-    RECYCLE = 8
-    ACTIVATE_ELECTRO_VALVE = 16
+class ManifoldActions(BaseModel):
+    PISTONS_UP: int = 1
+    PISTONS_DOWN: int = 2
+    ACOUSTIC_SIGNAL: int = 4
+    RECYCLE: int = 8
+    ACTIVATE_ELECTRO_VALVE: int = 16
 
 
 class IOLinkHR(Enum):
