@@ -4,6 +4,7 @@ import pytest
 
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import (
+    ModbusStatus,
     RelControl,
     RelModbusMaster,
     SlaveTCP,
@@ -31,6 +32,26 @@ def rel_control(monkeypatch):
     )
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
     return RelControl(slave=slave_tcp, hr=config.holding_registers)
+
+
+@pytest.mark.parametrize(
+    "test_value",
+    [
+        (100),
+        (110),
+        (14),
+    ],
+)
+def test_get_data(rel_control: RelControl, test_value):
+    rel_control.read_holding_register = MagicMock(
+        return_value=ModbusStatus(
+            status="ok",
+            value=test_value,
+        )
+    )
+    registers = rel_control.get_data()
+    for register in registers:
+        assert register.value == test_value
 
 
 def test_control_hyd_valve(rel_control: RelControl):
