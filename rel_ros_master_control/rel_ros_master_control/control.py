@@ -50,7 +50,7 @@ def get_value(
             return -1
 
 
-class ControlStatus(BaseModel):
+class ModbusStatus(BaseModel):
     error: str = None
     status: str = ""
     value: int = 0
@@ -128,8 +128,8 @@ class RelControl:
             return
         logger.info("writing ok ✨")
 
-    def write_holding_register(self, register: int, value: int) -> ControlStatus:
-        status = ControlStatus()
+    def write_holding_register(self, register: int, value: int) -> ModbusStatus:
+        status = ModbusStatus()
         logger.info("writing to register %s value %s", register, value)
         response = self.master_io_link.slave_conn.write_register(
             address=self.get_register_with_offset(register), value=value
@@ -143,8 +143,8 @@ class RelControl:
         status.value = value
         return status
 
-    def read_holding_register(self, register: int) -> ControlStatus:
-        status = ControlStatus()
+    def read_holding_register(self, register: int) -> ModbusStatus:
+        status = ModbusStatus()
         logger.info("reading register %s", register)
         response = self.master_io_link.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register), count=1
