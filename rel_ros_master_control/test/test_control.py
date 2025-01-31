@@ -24,6 +24,32 @@ from rel_ros_master_control.models.status_device_m import TowerState, TowerStatu
 from rel_ros_master_control.util import is_bit_on
 
 
+class ModbusMockResponse:
+    registers: list[int]
+
+    def __init__(self, registers: list[int]):
+        self.registers = registers
+
+    def isError(self):
+        return False
+
+
+def writer_register_mock(rel_control: RelControl) -> MagicMock:
+    slave_conn_mock = MagicMock()
+    write_register = MagicMock(return_value=True)
+    slave_conn_mock.write_register = write_register
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+    return write_register
+
+
+def writer_registers_mock(rel_control: RelControl) -> MagicMock:
+    slave_conn_mock = MagicMock()
+    write_registers = MagicMock(return_value=True)
+    slave_conn_mock.write_registers = write_registers
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+    return write_registers
+
+
 @pytest.fixture
 def rel_control(monkeypatch):
     config = load_modbus_config()
@@ -55,12 +81,28 @@ def test_get_data(rel_control: RelControl, test_value):
         assert register.value == test_value
 
 
+@pytest.mark.parametrize(
+    "test_address, modbus_value, count",
+    [
+        (100, [10], 1),
+        (110, [20], 1),
+        (14, [30], 1),
+    ],
+)
+def test_read_holding_register(rel_control: RelControl, test_address, modbus_value, count):
+    slave_conn_mock = MagicMock()
+    read_register = MagicMock(return_value=ModbusMockResponse(modbus_value))
+    slave_conn_mock.read_holding_registers = read_register
+    rel_control.master_io_link.slave_conn = slave_conn_mock
+    offset = rel_control.master_io_link.slave.offset
+    called_address = test_address - offset
+    rel_control.read_holding_register(test_address)
+    read_register.assert_called_with(address=called_address, count=count)
+
+
 def test_manifold_actions(rel_control: RelControl):
     manifold = ManifoldActions()
-    slave_conn_mock = MagicMock()
-    write_register = MagicMock(return_value=True)
-    slave_conn_mock.write_register = write_register
-    rel_control.master_io_link.slave_conn = slave_conn_mock
+    write_register = writer_register_mock(rel_control)
     hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.MANIFOLD.value)
     for _, value in manifold.model_dump().items():
         rel_control.apply_manifold_state(value)
@@ -72,10 +114,7 @@ def test_manifold_actions(rel_control: RelControl):
 
 def test_control_hyd_valve(rel_control: RelControl):
     digital_valve = DigitalHydValve()
-    slave_conn_mock = MagicMock()
-    write_register = MagicMock(return_value=True)
-    slave_conn_mock.write_register = write_register
-    rel_control.master_io_link.slave_conn = slave_conn_mock
+    write_register = writer_register_mock(rel_control)
     hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
     for _, value in digital_valve.model_dump().items():
         rel_control.apply_hyd_valve_state(value)
@@ -87,11 +126,7 @@ def test_control_hyd_valve(rel_control: RelControl):
 
 def test_control_instance(rel_control: RelControl):
     assert isinstance(rel_control.tower_devive, TowerStatusDevice)
-    slave_conn_mock = MagicMock()
-    write_registers = MagicMock(return_value=True)
-    slave_conn_mock.write_registers = write_registers
-    rel_control.master_io_link.slave_conn = slave_conn_mock
-
+    write_registers = writer_registers_mock(rel_control)
     # apply all tower states
     for _, state in enumerate(TowerState):
         state_addresses = getattr(rel_control.tower_devive.tower_status.states, state.value)
