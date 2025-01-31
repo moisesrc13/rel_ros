@@ -67,15 +67,22 @@ class RelControl:
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
 
-    def apply_hyd_valve_state(self, state_value: int):
-        hr: HRegister = get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
+    def apply_state(self, hr: HRegister, state_value: int):
         try:
             self.master_io_link.slave_conn.write_register(
                 hr.address,
                 state_value,
             )
         except Exception as err:
-            logger.error("error writing hyd valve state %s - %s", state_value, err)
+            logger.error("error writing state %s - %s", state_value, err)
+
+    def apply_manifold_state(self, state_value: int):
+        self.apply_state(get_register_by_name(self.hr, IOLinkHR.MANIFOLD.value), state_value)
+
+    def apply_hyd_valve_state(self, state_value: int):
+        self.apply_state(
+            get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value), state_value
+        )
 
     def apply_tower_state(self, state: TowerState):
         registers = []

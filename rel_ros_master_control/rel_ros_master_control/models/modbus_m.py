@@ -4,6 +4,14 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class ManifoldActions(Enum):
+    PISTONS_UP = 1
+    PISTONS_DOWN = 2
+    ACOUSTIC_SIGNAL = 4
+    RECYCLE = 8
+    ACTIVATE_ELECTRO_VALVE = 16
+
+
 class IOLinkHR(Enum):
     SENSOR_MATERIAL_PRESSURE = "sensor_material_pressure"
     SENSOR_MATERIAL_TEMPERATURE = "sensor_material_temperature"
