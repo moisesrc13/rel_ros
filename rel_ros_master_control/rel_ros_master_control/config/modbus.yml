@@ -19,22 +19,22 @@ holding_registers:
       words: 1
       data_type: "uint16"
       value: 0
-    - name: "sensor_pressure_regulator_real"
+    - name: "sensor_pressure_regulator_read_real"
       address: 3003
       words: 1
       data_type: "uint16"
       value: 0
-    - name: "sensor_pressure_regulator_valve_state"
+    - name: "sensor_pressure_regulator_valve_read_state"  # all sensors are read
       address: 3004
       words: 1
       data_type: "uint16"
       value: 0
-    - name: "sensor_pressure_regulator_write_set"
+    - name: "regulator_pressure_set"
       address: 3052
       words: 1
       data_type: "uint16"
       value: 0
-    - name: "sensor_pressure_regulator_activate_valve"
+    - name: "regulator_activate_valve"
       address: 3053
       words: 1
       data_type: "uint16"
