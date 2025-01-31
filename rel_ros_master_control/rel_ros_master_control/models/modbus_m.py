@@ -36,12 +36,19 @@ class CRegister(BaseModel):
     value: int = 0  # this will be only valid for 0 or 1
 
 
+class RegisterMode(Enum):
+    RW = "rw"
+    R = "r"
+    W = "w"
+
+
 class HRegister(BaseModel):
     address: int
     words: int = 1
     data_type: RegisterDataType = RegisterDataType.uint16
     name: str = ""
     value: int = 0
+    mode: RegisterMode = RegisterMode.R
 
     def __post_init__(self):
         if self.data_type in [RegisterDataType.uint32, RegisterDataType.float32]:

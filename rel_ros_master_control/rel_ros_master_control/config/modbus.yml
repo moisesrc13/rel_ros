@@ -4,51 +4,61 @@ holding_registers:
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "sensor_material_temperature"
       address: 1003
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "sensor_laser_distance"
       address: 2002
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "sensor_pressure_regulator_read_set"
       address: 3002
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "sensor_pressure_regulator_read_real"
       address: 3003
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "sensor_pressure_regulator_valve_read_state"  # all sensors are read
       address: 3004
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "r"
     - name: "regulator_pressure_set"
       address: 3052
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "w"
     - name: "regulator_activate_valve"
       address: 3053
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "w"
     - name: "manifold"
       address: 5052
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "w"
     - name: "digital_out_hyd_valve"
       address: 7051
       words: 1
       data_type: "uint16"
       value: 0
+      mode: "w"
 iolinks:
   -   name: "master io link 0"
       hmi_id: 0
