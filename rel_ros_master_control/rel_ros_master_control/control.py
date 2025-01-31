@@ -13,6 +13,7 @@ from rel_ros_master_control.models.modbus_m import (
     HRegister,
     IOLinkHR,
     RegisterDataType,
+    RegisterMode,
     SlaveTCP,
     get_register_by_name,
 )
@@ -169,7 +170,11 @@ class RelControl:
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for register in self.hr:
-                futures.append(executor.submit(worker, register))
+                if register.mode == RegisterMode.R:
+                    futures.append(executor.submit(worker, register))
+        if not futures:
+            logger.warning("getting no data for read mode registers...")
+            return futures
         concurrent.futures.wait(futures)
         logger.info(
             "getting data total %s from master %s", len(updated_registers), updated_registers
