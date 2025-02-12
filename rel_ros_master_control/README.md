@@ -98,10 +98,10 @@ port 8 => sensor, 8000 status 8001 => data => 8002 - 8017
 
 ```bash
 # READ
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 8001
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 8001 --id 0
 
 # WRITE
-python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5051 --value 1`
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5051 --value 1 --id 0
 
-python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5052 --value 1`
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5052 --value 1 --id 0
 ```

@@ -60,6 +60,8 @@ ros2 run rel_ros_hmi rel_ros_hmi_node
 ## Run test modbus master control slave
 ```bash
 export USE_TEST_MODBUS="true"
+export APP_MASTER_IOLINK_ID="0"
+
 python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
