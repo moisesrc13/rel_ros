@@ -2,7 +2,6 @@
 this is our modbus slave(s) implementation, mainly for testing
 """
 import os
-import random
 import time
 
 from pymodbus.constants import Endian
