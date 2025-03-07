@@ -13,7 +13,7 @@ class RelPWM:
     def __init__(self, config: PWMConfig):
         try:
             GPIO.setwarnings(False)  # disable warnings
-            GPIO.setmode(GPIO.BOARD)  # set pin numbering system
+            GPIO.setmode(GPIO.BCM)  # set pin numbering system
             GPIO.setup(config.pin, GPIO.OUT)
             self.pi_pwm = GPIO.PWM(
                 config.pin, config.frequency
