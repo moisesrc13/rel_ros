@@ -4,76 +4,73 @@
       host: 0.0.0.0  # localhost for ROS working as HMI slave
       port: 8845  # 502 is the standard
       offset: 0
-  coil_registers:
-    - name: "enter_screen_1_0"
-      address: 0
-      value: 0
+  coil_registers:  # default value to 0
     - name: "open_local_window_1_1"
+      address: 0
+    - name: "enter_screen_5_0"
       address: 1
-      value: 0
-    - name: "open_local_window_1_2"
-      address: 2
-      value: 0
-    - name: "open_local_window_1_3"
-      address: 3
-      value: 0
-    - name: "close_local_window_1_1"
-      address: 4
-      value: 0
-    - name: "close_local_window_1_2"
-      address: 5
-      value: 0
-    - name: "close_local_window_1_3"
-      address: 6
-      value: 0
-    - name: "enter_screen_2_0"
-      address: 7
-      value: 0
     - name: "turn_on_pumping_process"
-      address: 8
-      value: 0
-    - name: "save_button"
-      address: 9
-      value: 0
-    - name: "enter_screen_3_0"
-      address: 10
-      value: 0
-    - name: "enter_screen_4_0"
-      address: 11
-      value: 0
-    - name: "open_local_window_2_1"
-      address: 12
-      value: 0
-    - name: "open_local_window_2_2"
-      address: 13
-      value: 0
-    - name: "open_local_window_2_3"
-      address: 14
-      value: 0
-    - name: "close_local_window_2_1"
-      address: 15
-      value: 0
-    - name: "close_local_window_2_2"
-      address: 16
-      value: 0
-    - name: "close_local_window_2_3"
-      address: 17
-      value: 0
-    - name: "down_pistons"
-      address: 18
-      value: 0
-    - name: "up_pistons"
-      address: 19
-      value: 0
-    - name: "turn_on_pump"
-      address: 20
-      value: 0
+      address: 2
     - name: "recycle"
-      address: 21
-      value: 0
+      address: 3
+    - name: "enter_screen_3_0"
+      address: 4
+    - name: "close_local_window_0_1"
+      address: 5
+    - name: "enter_screen_2_0"
+      address: 6
+    - name: "enter_screen_4_0"
+      address: 7
+    - name: "enter_screen_1_0"
+      address: 8
+    - name: "button_lock_password"
+      address: 9
+    - name: "button_load_password"
+      address: 10
+    - name: "open_local_window_0_2"
+      address: 12  # jumped 11 - ok
+    - name: "close_local_window_0_2"
+      address: 13
+    - name: "pre-fill-line"
+      address: 14
+    - name: "pull_down_pistons_manual"
+      address: 15
+    - name: "pull_up_pistons_manual"
+      address: 16
     - name: "vacuum_air"
+      address: 17
+    - name: "depressurize"
+      address: 18
+    - name: "open_local_window_1_1"
+      address: 19
+    - name: "enter_screen_3_0"
+      address: 20
+    - name: "enter_screen_0_0"
+      address: 21
+    - name: "recycle_car"
       address: 22
-      value: 0
+    - name: "recycle_retractil"
+      address: 23
+    - name: "enter_screen_1_0"
+      address: 24
+    - name: "button_start_bucket_change_1"
+      address: 25
+    - name: "button_start_bucket_change_2"
+      address: 26
+    - name: "pull_down_pinstons_bucket"
+      address: 27
+    - name: "pull_up_pinstons_bucket"
+      address: 28
+    - name: "button_change_bucket_3"
+      address: 29
+    - name: "enter_screen_0_0"
+      address: 30
+    - name: "button_volume_1"
+      address: 31
+    - name: "button_volume_2"
+      address: 32
+    - name: "button_volume_3"
+      address: 33
   holding_registers:
     - name: "param_target_pressure_hyd"
       address: 40006
