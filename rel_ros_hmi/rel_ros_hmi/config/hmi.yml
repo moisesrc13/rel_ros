@@ -72,26 +72,76 @@
     - name: "button_volume_3"
       address: 33
   holding_registers:
-    - name: "param_target_pressure_hyd"
+    - name: "param_target_pressure_hyd_home"
       address: 40006
       data_type: "uint16"
-      value: 0
-    - name: "param_target_pressure_pistons"
+    - name: "param_target_pressure_pistons_home"
       address: 40007
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_low"
+    - name: "user_password"
       address: 40008
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_medium"
+    - name: "param_target_pressure_hyd_manual"
       address: 40009
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_high"
+    - name: "param_target_pressure_pistons_manual"
       address: 40010
       data_type: "uint16"
-      value: 0
+    - name: "param_recycle_time_manual"
+      address: 40011
+      data_type: "uint16"
+    - name: "param_recycle_time_cycle"
+      address: 40012
+      data_type: "uint16"
+    - name: "param_pulse_train_selection"
+      address: 40013
+      data_type: "uint16"
+    - name: "param_recycle_time_auto"
+      address: 40014
+      data_type: "uint16"
+    - name: "data_vacuum_limit_high"
+      address: 40015
+      data_type: "uint16"
+    - name: "data_pre_vacuum_limit_low"
+      address: 40016
+      data_type: "uint16"
+    - name: "param_pulse_train_low"
+      address: 40021
+      data_type: "uint16"
+    - name: "param_pulse_train_medium"
+      address: 40022
+      data_type: "uint16"
+    - name: "param_pulse_train_high"
+      address: 40023
+      data_type: "uint16"
+    - name: "param_vacuum_distance"
+      address: 40024
+      data_type: "uint16"
+    - name: "param_security_distance"
+      address: 40025
+      data_type: "uint16"
+    - name: "param_recycle_time"
+      address: 40026
+      data_type: "uint16"
+    - name: "param_recyle_time_interval"
+      address: 40027
+      data_type: "uint16"
+    - name: "param_distance_bucket_1"
+      address: 40028
+      data_type: "uint16"
+    - name: "param_distance_bucket_2"
+      address: 40029
+      data_type: "uint16"
+    - name: "param_distance_bucket_3"
+      address: 40030
+      data_type: "uint16"
+    - name: "param_max_time_pump_on"
+      address: 40031
+      data_type: "uint16"
+    - name: "param_client_password"
+      address: 40032
+      data_type: "uint16"
+# --------
     - name: "param_alarm_pre_vacuum_limit_high"
       address: 40011
       data_type: "uint16"
@@ -110,10 +160,6 @@
       value: 0
     - name: "param_recycle_time"
       address: 40015
-      data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_selection"
-      address: 40016
       data_type: "uint16"
       value: 0
     - name: "status_general" # status registers
@@ -170,14 +216,6 @@
       value: 0
     - name: "data_pulse_train_high"
       address: 40030
-      data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_limit_high"
-      address: 40031
-      data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_limit_low"
-      address: 40032
       data_type: "uint16"
       value: 0
     - name: "data_vacuum_distance"
