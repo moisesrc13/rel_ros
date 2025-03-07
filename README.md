@@ -148,4 +148,11 @@ No access to /dev/mem
 
 sudo apt install rpi.gpio-common
 sudo adduser relant dialout
+sudo groupadd gpio
+sudo usermod -a -G gpio relant
+sudo grep gpio /etc/group
+sudo chown root:gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
+
+
 sudo reboot

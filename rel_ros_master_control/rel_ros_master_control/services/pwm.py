@@ -41,6 +41,6 @@ class RelPWM:
 
 
 if __name__ == "__main__":
-    logger.info("running pwm ...")
+    logger.info("running pwm for 5 secs...")
     my_pwm = RelPWM(PWMConfig())
     my_pwm.run(5)
