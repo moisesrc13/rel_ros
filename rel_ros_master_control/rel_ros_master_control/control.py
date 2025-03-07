@@ -86,6 +86,7 @@ class RelControl:
 
     def apply_tower_state(self, state: TowerState):
         registers = []
+        start_address = self.tower_devive.tower_status.start_address
         match state:
             case TowerState.FULL:
                 registers = self.tower_devive.tower_status.states.full
@@ -99,14 +100,18 @@ class RelControl:
                 registers = self.tower_devive.tower_status.states.vacuum
             case TowerState.BUCKET_CHANGE:
                 registers = self.tower_devive.tower_status.states.bucket_change
-            case TowerState.ACOSTIC_ALARM:
-                registers = self.tower_devive.tower_status.states.acoustic_alarm
+            case TowerState.ACOSTIC_ALARM_ON:
+                start_address = self.tower_devive.tower_status.alarm_address
+                registers = self.tower_devive.tower_status.states.acoustic_alarm_on
+            case TowerState.ACOSTIC_ALARM_OFF:
+                start_address = self.tower_devive.tower_status.alarm_address
+                registers = self.tower_devive.tower_status.states.acoustic_alarm_off
             case _:
                 logger.warning("no match state found for tower device - %s", state.value)
         if registers:
             try:
                 self.master_io_link.slave_conn.write_registers(
-                    self.tower_devive.tower_status.start_address,
+                    start_address,
                     registers,
                 )
             except Exception as err:

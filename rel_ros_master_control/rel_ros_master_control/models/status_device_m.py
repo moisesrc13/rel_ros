@@ -15,7 +15,8 @@ class TowerState(Enum):
     PRE_VACUUM = "pre_vacuum"
     VACUUM = "vacuum"
     BUCKET_CHANGE = "bucket_change"
-    ACOSTIC_ALARM = "acoustic_alarm"
+    ACOSTIC_ALARM_ON = "acoustic_alarm_on"
+    ACOSTIC_ALARM_OFF = "acoustic_alarm_on"
 
 
 class BasicActions(Enum):
@@ -38,12 +39,14 @@ class TowerControlStates(BaseModel):
     pre_vacuum: list[int]
     vacuum: list[int]
     bucket_change: list[int]
-    acoustic_alarm: list[int]
+    acoustic_alarm_on: list[int]
+    acoustic_alarm_off: list[int]
 
 
 class TowerStatus(BaseModel):
     start_address: int
     total_registers: int
+    alarm_address: int
     states: TowerControlStates
 
 

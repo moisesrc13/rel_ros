@@ -1,5 +1,6 @@
 start_address: 6060
 total_registers: 8
+alarm_address: 6052
 states:
   full: [22, 3628, 256, 1, 0, 256, 1, 0]
   medium_high: [16, 3328, 5645, 1, 0, 256, 1, 0]
@@ -7,4 +8,5 @@ states:
   pre_vacuum: [0, 0, 0, 0, 3332, 1549, 1, 1024]
   vacuum: [0, 0, 0, 0, 0, 13, 15, 256]
   bucket_change: [23, 1024, 5892, 23, 1024, 5892, 4119, 1024]
-  acoustic_alarm: [6052]
+  acoustic_alarm_on: [256]
+  acoustic_alarm_off: [0]
