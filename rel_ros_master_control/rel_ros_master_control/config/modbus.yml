@@ -40,10 +40,15 @@ holding_registers:
       data_type: "uint16"
       mode: "w"
     - name: "manifold"
-      address: 5052
+      address: 5051
       words: 1
       data_type: "uint16"
       mode: "w"
+    - name: "digital_in_emergency_stop"
+      address: 4002
+      words: 1
+      data_type: "uint16"
+      mode: "r"
     - name: "digital_out_hyd_valve"
       address: 7051
       words: 1

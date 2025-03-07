@@ -5,11 +5,13 @@ from pydantic import BaseModel
 
 
 class ManifoldActions(BaseModel):
-    PISTONS_UP: int = 1
-    PISTONS_DOWN: int = 2
-    ACOUSTIC_SIGNAL: int = 4
-    RECYCLE: int = 8
-    ACTIVATE_ELECTRO_VALVE: int = 16
+    ACTIVATE: int = int("0000_0000_0000_0001", 2)
+    EXTRA: int = int("0000_0001_0000_0000", 2)
+    RECYCLE: int = int("0000_0100_0000_0000", 2)
+    VENTING_RETRACTIL_UP: int = int("0001_0000_0000_0000", 2)
+    VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
+    PISTONS_UP: int = int("0100_0000_0000_0000", 2)
+    PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
 
 
 class IOLinkHR(Enum):
