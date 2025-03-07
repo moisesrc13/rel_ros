@@ -71,6 +71,19 @@
       address: 32
     - name: "button_volume_3"
       address: 33
+    # ------------------- STATUS
+    - name: "status_alarm_pre_vacuum"
+      address: 34
+    - name: "status_alarm"
+      address: 35
+    - name: "status_no_air_pressure"
+      address: 36
+    - name: "status_error_change_bucket"
+      address: 37
+    - name: "status_pump_no_pressure"
+      address: 38
+    - name: "status_pump_no_depressurized"
+      address: 39
   holding_registers:
     - name: "param_target_pressure_hyd_home"
       address: 40006
