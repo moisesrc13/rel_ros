@@ -99,10 +99,10 @@
     - name: "param_recycle_time_auto"
       address: 40014
       data_type: "uint16"
-    - name: "data_vacuum_limit_high"
+    - name: "param_vacuum_limit_high"
       address: 40015
       data_type: "uint16"
-    - name: "data_pre_vacuum_limit_low"
+    - name: "param_pre_vacuum_limit_low"
       address: 40016
       data_type: "uint16"
     - name: "param_pulse_train_low"
@@ -141,116 +141,22 @@
     - name: "param_client_password"
       address: 40032
       data_type: "uint16"
-# --------
-    - name: "param_alarm_pre_vacuum_limit_high"
-      address: 40011
-      data_type: "uint16"
-      value: 0
-    - name: "param_alarm_pre_vacuum_limit_low"
-      address: 40012
-      data_type: "uint16"
-      value: 0
-    - name: "param_alarm_pre_vacuum_distance"
-      address: 40013
-      data_type: "uint16"
-      value: 0
-    - name: "param_security_distance"
-      address: 40014
-      data_type: "uint16"
-      value: 0
-    - name: "param_recycle_time"
-      address: 40015
-      data_type: "uint16"
-      value: 0
-    - name: "status_general" # status registers
-      address: 40017
-      data_type: "uint16"
-      value: 0
-    - name: "status_in_process_alarm"
-      address: 40018
-      data_type: "uint16"
-      value: 0
-    - name: "status_operational_alarm"
-      address: 40019
-      data_type: "uint16"
-      value: 0
-    - name: "status_operational_state"
-      address: 40020
-      data_type: "uint16"
-      value: 0
-    - name: "status_extend_piston"
-      address: 40021
-      data_type: "uint16"
-      value: 0
-    - name: "status_retract_piston"
-      address: 40022
-      data_type: "uint16"
-      value: 0
-    - name: "status_air_vacuum"
-      address: 40023
-      data_type: "uint16"
-      value: 0
-    - name: "status_acoustic_signal"
-      address: 40024
-      data_type: "uint16"
-      value: 0
-    - name: "status_recycling"
-      address: 40025
-      data_type: "uint16"
-      value: 0
-    - name: "data_target_pressure_pistons" # data registers
-      address: 40026
-      data_type: "uint16"
-      value: 0
-    - name: "data_target_pressure_hyd"  # same as material pressure??
-      address: 40027
-      data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_low"
-      address: 40028
-      data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_medium"
-      address: 40029
-      data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_high"
-      address: 40030
-      data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_distance"
-      address: 40033
-      data_type: "uint16"
-      value: 0
-    - name: "data_security_distance"
-      address: 40034
-      data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_selection"
-      address: 40035
-      data_type: "uint16"
-      value: 0
+    # --------------------------------------- SENSORS START
     - name: "sensor_material_pressure"
-      address: 40036
+      address: 40048
       data_type: "uint16"
-      value: 0
     - name: "sensor_material_temperature"
-      address: 40037
+      address: 40049
       data_type: "uint16"
-      value: 0
     - name: "sensor_laser_distance"
-      address: 40038
+      address: 40050
       data_type: "uint16"
-      value: 0
     - name: "sensor_pressure_regulator_read_set"
-      address: 40039
+      address: 40051
       data_type: "uint16"
-      value: 0
     - name: "sensor_pressure_regulator_read_real"
-      address: 40040
+      address: 40052
       data_type: "uint16"
-      value: 0
     - name: "sensor_pressure_regulator_valve_read_state"
-      address: 40041
+      address: 40053
       data_type: "uint16"
-      value: 0
