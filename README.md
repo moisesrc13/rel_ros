@@ -134,3 +134,9 @@ Replace `localhost` by host IP
 curl "http://localhost:9080/read/8001"
 
 curl -X POST "http://localhost:9080/write" -H "Content-Type:application/json" -d '{"register": 5051, "value": 1}'
+
+## PWM
+https://www.electronicwings.com/raspberry-pi/raspberry-pi-pwm-generation-using-python-and-c
+
+first, install `sudo apt-get install python3.11-dev`
+need this lib https://pypi.org/project/RPi.GPIO/
