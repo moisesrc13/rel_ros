@@ -140,3 +140,12 @@ https://www.electronicwings.com/raspberry-pi/raspberry-pi-pwm-generation-using-p
 
 first, install `sudo apt-get install python3.11-dev`
 need this lib https://pypi.org/project/RPi.GPIO/
+
+Error running PWM
+https://raspberrypi.stackexchange.com/questions/40105/access-gpio-pins-without-root-no-access-to-dev-mem-try-running-as-root
+
+No access to /dev/mem
+
+sudo apt install rpi.gpio-common
+sudo adduser relant dialout
+sudo reboot
