@@ -63,6 +63,10 @@ export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
 
 python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
+```
+
+## Run rest API app
+```bash
 python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
 
