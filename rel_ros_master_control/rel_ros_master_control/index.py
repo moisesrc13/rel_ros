@@ -17,6 +17,10 @@ class HMIData:
 
 
 def create_hmi_cluster(size: int) -> list[HMIData]:
+    """
+    used to get data from sensors and user input in the HMI.
+    This data will be used for the control logic
+    """
     cluster = []
     for n in range(size):
         cluster.append(HMIData(hmi_id=n))
