@@ -73,7 +73,8 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
 
         with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
             for register in self.hr:
-                setattr(hmi_msg, register.name, register.value)
+                if hasattr(hmi_msg, register.name):
+                    setattr(hmi_msg, register.name, register.value)
             logger.info("📨 publishing message from HMI set value %s", hmi_msg)
             self.publisher.publish(hmi_msg)
 
