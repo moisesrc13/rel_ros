@@ -170,13 +170,6 @@ class ModbusSlaveThread(Thread):
                 server.shutdown()
         except Exception as ex:
             logger.error("Error %s running slave thread %s", ex, self.slave.id)
-        self.queue.task_done()
-
-
-def run(slave: SlaveTCP, publisher=None):
-    server = run_sync_modbus_server(slave=slave, publisher=publisher)
-    if server:
-        server.shutdown()
 
 
 def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[HRegister], publishers: dict):
