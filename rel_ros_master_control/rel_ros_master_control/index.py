@@ -16,6 +16,12 @@ class HMIData:
     hmi: HMI = None
 
 
+@dataclass
+class ControlIOLinkData:
+    data: IOLinkData
+    hmi_id: int = 0
+
+
 def create_hmi_cluster(size: int) -> list[HMIData]:
     """
     used to get data from sensors and user input in the HMI.
@@ -45,6 +51,7 @@ class RelROSNode(Node):
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+        self.control_iolink_data = {}
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
@@ -86,6 +93,8 @@ class RelROSNode(Node):
         registers = master.get_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
+
+        self.control_iolink_data[hmi_id] = ControlIOLinkData(data=msg, hmi_id=hmi_id)
         self.rel_publisher.publish(msg)
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
 
