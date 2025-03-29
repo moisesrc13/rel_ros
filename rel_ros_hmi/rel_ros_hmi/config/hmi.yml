@@ -85,13 +85,14 @@
     - name: "status_pump_no_depressurized"
       address: 39
   holding_registers:
+  # --------------------------------------- PARAMETERS START
     - name: "param_target_pressure_hyd_home"
       address: 40006
       data_type: "uint16"
     - name: "param_target_pressure_pistons_home"
       address: 40007
       data_type: "uint16"
-    - name: "user_password"
+    - name: "param_user_password"
       address: 40008
       data_type: "uint16"
     - name: "param_target_pressure_hyd_manual"
@@ -136,7 +137,7 @@
     - name: "param_recycle_time"
       address: 40026
       data_type: "uint16"
-    - name: "param_recyle_time_interval"
+    - name: "param_recycle_time_interval"
       address: 40027
       data_type: "uint16"
     - name: "param_distance_bucket_1"

@@ -26,13 +26,13 @@ class RelPWM:
         try:
             logger.info("start running pwm with duty %s", duty)
             while time.time() < t_end:
-                for duty in range(0, duty, 1):
-                    self.pi_pwm.ChangeDutyCycle(duty)
+                for d in range(0, duty, 1):
+                    self.pi_pwm.ChangeDutyCycle(d)
                     sleep(0.01)
                 sleep(0.25)
 
-                for duty in range(duty, -1, -1):
-                    self.pi_pwm.ChangeDutyCycle(duty)
+                for d in range(duty, -1, -1):
+                    self.pi_pwm.ChangeDutyCycle(d)
                     sleep(0.01)
                 sleep(0.25)
             logger.info("end running pwm with duty %s", duty)
