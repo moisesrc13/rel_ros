@@ -1,7 +1,14 @@
+import time
 from enum import Enum
 
 from hamilton.function_modifiers import config
 from pydantic import BaseModel
+
+from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.logger import new_logger
+from rel_ros_master_control.models.status_device_m import TowerState
+
+logger = new_logger(__name__)
 
 
 class SensorDistanceParams(BaseModel):
@@ -68,7 +75,12 @@ def sensor_distance_state(
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
-def sensor_laser_on__a(sensor_distance_state: SensorDistanceState):
+def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
+    logger.debug("sensor_distance_state -> ", sensor_distance_state)
+    control.apply_tower_state(TowerState.VACUUM)
+    control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+    time.sleep(1)  # TBD
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
     pass
 
 
