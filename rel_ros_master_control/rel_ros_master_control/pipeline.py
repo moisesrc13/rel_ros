@@ -35,7 +35,7 @@ class SensorDistanceState(Enum):
     GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINIT = "gt_bucket_size_distance_and_le_infinit"
 
 
-class SensorDistanceStateNames(Enum):
+class SensorDistanceStateName(Enum):
     A = SensorDistanceState.LT_VACUUM_DISTANCE
     B = SensorDistanceState.GT_VACUUM_DISTANCE_AND_LE_HIGH_VACUUM_LIMIT
     C = SensorDistanceState.GT_HIGH_VACUUM_LIMIT_AND_LE_HIGH_PRE_VACUUM_LIMIT
@@ -47,46 +47,46 @@ def sensor_distance_state(
     sensor_distance: int, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
     if sensor_distance < sensor_distance_params.vacuum_distance:
-        return SensorDistanceStateNames.A
+        return SensorDistanceStateName.A
     if (
         sensor_distance > sensor_distance_params.vacuum_distance
         and sensor_distance <= sensor_distance_params.high_vacuum_limit
     ):
-        return SensorDistanceStateNames.B
+        return SensorDistanceStateName.B
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance <= sensor_distance_params.high_pre_vacuum_limit
     ):
-        return SensorDistanceStateNames.C
+        return SensorDistanceStateName.C
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance < sensor_distance_params.bucket_distance
     ):
-        return SensorDistanceStateNames.D
+        return SensorDistanceStateName.D
     # return default for now
-    return SensorDistanceStateNames.E
+    return SensorDistanceStateName.E
 
 
-@config.when(sensor_distance_state=SensorDistanceStateNames.A)
+@config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(sensor_distance_state: SensorDistanceState):
     pass
 
 
-@config.when(sensor_distance_state=SensorDistanceStateNames.B)
+@config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(sensor_distance_state: SensorDistanceState):
     pass
 
 
-@config.when(sensor_distance_state=SensorDistanceStateNames.C)
+@config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(sensor_distance_state: SensorDistanceState):
     pass
 
 
-@config.when(sensor_distance_state=SensorDistanceStateNames.D)
+@config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(sensor_distance_state: SensorDistanceState):
     pass
 
 
-@config.when(sensor_distance_state=SensorDistanceStateNames.E)
+@config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(sensor_distance_state: SensorDistanceState):
     pass
