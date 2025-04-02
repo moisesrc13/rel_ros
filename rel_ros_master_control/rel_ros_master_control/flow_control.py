@@ -2,12 +2,18 @@ import importlib
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
+from pydantic import BaseModel
 
 from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
 
 telemetry.disable_telemetry()
+
+
+class FlowControlConfig(BaseModel):
+    inputs: dict
+    tasks: list[str]
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -48,13 +54,13 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(inputs: dict, tasks: list[str]):
+def run(config: FlowControlConfig):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     dr = (
         driver.Builder()
         .with_modules(router_module)
-        .with_config(inputs)
+        .with_config(config.inputs)
         .with_adapters(
             default_adapter,
             LoggingPreNodeExecute(),
@@ -63,6 +69,6 @@ def run(inputs: dict, tasks: list[str]):
         .build()
     )
     try:
-        dr.execute(tasks)
+        dr.execute(config.tasks)
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
