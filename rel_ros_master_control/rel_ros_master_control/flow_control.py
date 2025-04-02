@@ -48,7 +48,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run_control_flow(inputs: dict, tasks: list[str]):
+def run(inputs: dict, tasks: list[str]):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     dr = (
