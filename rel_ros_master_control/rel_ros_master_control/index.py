@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import rclpy
+from pydantic import BaseModel
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
@@ -10,16 +11,20 @@ from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 
 
-@dataclass
-class HMIData:
+class HMIData(BaseModel):
     hmi_id: int = 0
-    hmi: HMI = None
+    hmi: Optional[HMI] = None
 
 
-@dataclass
-class ControlIOLinkData:
-    data: IOLinkData
+class ControlIOLinkData(BaseModel):
     hmi_id: int = 0
+    data: Optional[IOLinkData] = None
+
+
+class FlowControlInputs(BaseModel):
+    hmi_data: HMIData
+    control_iolink_data: ControlIOLinkData
+    rel_control: RelControl
 
 
 def create_hmi_cluster(size: int) -> list[HMIData]:
