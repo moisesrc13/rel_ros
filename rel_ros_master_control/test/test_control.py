@@ -7,7 +7,7 @@ from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
     RelModbusMaster,
-    SlaveTCP,
+    SlaveIOLink,
     get_builder,
     get_decoder_from_rr,
     get_value,
@@ -18,6 +18,7 @@ from rel_ros_master_control.models.modbus_m import (
     IOLinkHR,
     ManifoldActions,
     RegisterDataType,
+    SlaveTCP,
     get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
@@ -57,8 +58,9 @@ def rel_control(monkeypatch):
         host="0.0.0.0",
         port=9090,
     )
+    iolink_slave = SlaveIOLink(slave_tcp=slave_tcp)
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
-    return RelControl(iolink_slave=slave_tcp, hr=config.holding_registers)
+    return RelControl(iolink_slave=iolink_slave, hr=config.holding_registers)
 
 
 @pytest.mark.parametrize(
@@ -94,7 +96,7 @@ def test_read_holding_register(rel_control: RelControl, test_address, modbus_val
     read_register = MagicMock(return_value=ModbusMockResponse(modbus_value))
     slave_conn_mock.read_holding_registers = read_register
     rel_control.master_io_link.slave_conn = slave_conn_mock
-    offset = rel_control.master_io_link.slave.offset
+    offset = rel_control.master_io_link.slave.slave_tcp.offset
     called_address = test_address - offset
     rel_control.read_holding_register(test_address)
     read_register.assert_called_with(address=called_address, count=count)

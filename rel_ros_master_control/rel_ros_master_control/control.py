@@ -14,7 +14,7 @@ from rel_ros_master_control.models.modbus_m import (
     IOLinkHR,
     RegisterDataType,
     RegisterMode,
-    SlaveTCP,
+    SlaveIOLink,
     get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
@@ -58,7 +58,7 @@ class ModbusStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, iolink_slave: SlaveTCP, hr: list[HRegister]) -> None:
+    def __init__(self, iolink_slave: SlaveIOLink, hr: list[HRegister]) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
@@ -118,7 +118,7 @@ class RelControl:
                 logger.error("error writing tower state status %s - %s", state.value, err)
 
     def get_register_with_offset(self, register: int) -> int:
-        register = register + self.master_io_link.slave.offset
+        register = register + self.master_io_link.slave.slave_tcp.offset
         logger.debug("register with offset %s", register)
         return register
 
@@ -194,7 +194,9 @@ class RelControl:
         return updated_registers
 
 
-def run_masters_to_iolinks(iolink_slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelControl]:
+def run_masters_to_iolinks(
+    iolink_slaves: list[SlaveIOLink], hr: list[HRegister]
+) -> list[RelControl]:
     masters = []
     for slave in iolink_slaves:
         masters.append(RelControl(iolink_slave=slave, hr=hr))

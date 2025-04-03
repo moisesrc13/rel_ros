@@ -58,14 +58,18 @@ iolinks:
   - name: "master io link 0"
     hmi_id: 0
     hmi_name: "HMI 0"
-    host: 192.168.0.21
-    port: 502
-    framer: "socket"
-    timeout_seconds: 10
-    offset: -1
+    slave_tcp:
+      host: 192.168.0.21
+      port: 502
+      framer: "socket"
+      timeout_seconds: 1
+      offset: -1
 hmis:  # the HMIs should match the slaves under rel_ros_hmi
   - name: "HMI 0"
     id: 0
-    host: 0.0.0.0  # localhost for ROS working as HMI slave
-    port: 8845  # 502 is the standard
-    offset: 0
+    slave_tcp:
+       host: 0.0.0.0  # localhost for ROS working as HMI slave
+       port: 8845  # 502 is the standard
+       framer: "socket"
+       timeout_seconds: 1
+       offset: 0

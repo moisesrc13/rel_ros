@@ -70,12 +70,22 @@ class HRegister(BaseModel):
 class SlaveTCP(BaseModel):
     host: str
     port: int
-    name: str = ""
-    hmi_id: int = 0
-    hmi_name: str = "HMI"
     framer: str = "socket"
     timeout_seconds: int = 5
     offset: int = 0
+
+
+class SlaveIOLink(BaseModel):
+    name: str = ""
+    hmi_id: int = 0
+    hmi_name: str = "HMI"
+    slave_tcp: SlaveTCP
+
+
+class SlaveHMI(BaseModel):
+    name: str = ""
+    id: int = 0
+    slave_tcp: SlaveTCP
 
 
 class SlaveSerial(BaseModel):
@@ -91,19 +101,10 @@ class SlaveSerial(BaseModel):
     port: str = "/dev/ptyp0"
 
 
-class HMISlaves(BaseModel):
-    name: str
-    host: str
-    port: int
-    id: int
-    framer: str = "socket"
-    timeout_seconds: int = 1
-
-
 class ModbusConfig(BaseModel):
-    iolinks: list[SlaveTCP | SlaveSerial]
+    iolinks: list[SlaveIOLink]
     holding_registers: list[HRegister]
-    hmis: list[HMISlaves]
+    hmis: list[SlaveHMI]
 
 
 def get_register_by_address(
