@@ -62,8 +62,12 @@ class RelModbusMaster:
         logger.info("✨ Starting iolink modbus master ...")
         self.slave_conn = setup_sync_client(slave.slave_tcp)
         self.slave = slave
-        self.hmi_id = slave.hmi_id
-        self.hmi_name = slave.hmi_name
+        if isinstance(slave, SlaveIOLink):
+            self.hmi_id = slave.hmi_id
+            self.hmi_name = slave.hmi_name
+        else:
+            self.hmi_id = slave.id
+            self.hmi_name = slave.name
         self.connection_state = None
 
     def _connection_state(self):
