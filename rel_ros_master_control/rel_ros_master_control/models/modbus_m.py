@@ -91,9 +91,19 @@ class SlaveSerial(BaseModel):
     port: str = "/dev/ptyp0"
 
 
+class HMISlaves(BaseModel):
+    name: str
+    host: str
+    port: int
+    id: int
+    framer: str = "socket"
+    timeout_seconds: int = 1
+
+
 class ModbusConfig(BaseModel):
     iolinks: list[SlaveTCP | SlaveSerial]
     holding_registers: list[HRegister]
+    hmis: list[HMISlaves]
 
 
 def get_register_by_address(

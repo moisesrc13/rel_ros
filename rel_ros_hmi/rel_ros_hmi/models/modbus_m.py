@@ -42,7 +42,7 @@ class SlaveTCP(BaseModel):
     port: int
     id: int
     framer: str = "socket"
-    timeout_seconds: int = 5
+    timeout_seconds: int = 1
 
 
 class ModbusConfig(BaseModel):

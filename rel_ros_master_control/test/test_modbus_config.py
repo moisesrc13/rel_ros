@@ -6,3 +6,4 @@ def test_config():
     config = load_modbus_config()
     assert isinstance(config, ModbusConfig)
     assert isinstance(config.iolinks, list)
+    assert isinstance(config.hmis, list)
