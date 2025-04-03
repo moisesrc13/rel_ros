@@ -57,7 +57,7 @@ def setup_sync_client(
         raise err
 
 
-class RelIOLinkModbusMaster:
+class RelModbusMaster:
     def __init__(self, slave: SlaveTCP | SlaveSerial) -> None:
         logger.info("✨ Starting iolink modbus master ...")
         self.slave_conn = setup_sync_client(slave)

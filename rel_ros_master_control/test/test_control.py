@@ -6,7 +6,7 @@ from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
-    RelIOLinkModbusMaster,
+    RelModbusMaster,
     SlaveTCP,
     get_builder,
     get_decoder_from_rr,
@@ -57,7 +57,7 @@ def rel_control(monkeypatch):
         host="0.0.0.0",
         port=9090,
     )
-    monkeypatch.setattr(RelIOLinkModbusMaster, "do_connect", MagicMock(return_value=None))
+    monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
     return RelControl(iolink_slave=slave_tcp, hr=config.holding_registers)
 
 

@@ -1,4 +1,4 @@
-from rel_ros_master_control.modbus_master import RelIOLinkModbusMaster
+from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import ModbusConfig, SlaveTCP
 
 

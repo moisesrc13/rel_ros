@@ -7,7 +7,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.modbus_master import RelIOLinkModbusMaster
+from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import (
     DigitalHydValve,
     HRegister,
@@ -61,7 +61,7 @@ class RelControl:
     def __init__(self, iolink_slave: SlaveTCP, hr: list[HRegister]) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
-        self.master_io_link = RelIOLinkModbusMaster(iolink_slave)
+        self.master_io_link = RelModbusMaster(iolink_slave)
         self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
