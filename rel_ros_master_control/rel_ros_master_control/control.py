@@ -7,7 +7,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.modbus_master import RelModbusMaster
+from rel_ros_master_control.modbus_master import RelIOLinkModbusMaster
 from rel_ros_master_control.models.modbus_m import (
     DigitalHydValve,
     HRegister,
@@ -58,10 +58,10 @@ class ModbusStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
+    def __init__(self, iolink_slave: SlaveTCP, hr: list[HRegister]) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
-        self.master_io_link = RelModbusMaster(slave)
+        self.master_io_link = RelIOLinkModbusMaster(iolink_slave)
         self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
@@ -194,10 +194,10 @@ class RelControl:
         return updated_registers
 
 
-def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelControl]:
+def run_masters_to_iolinks(iolink_slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelControl]:
     masters = []
-    for slave in slaves:
-        masters.append(RelControl(slave=slave, hr=hr))
+    for slave in iolink_slaves:
+        masters.append(RelControl(iolink_slave=slave, hr=hr))
     logger.info("finish to run masters ...")
     return masters
 
@@ -238,7 +238,7 @@ def run():
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
     config = load_modbus_config()
-    control = RelControl(slave=config.iolinks[args.id], hr=config.holding_registers)
+    control = RelControl(iolink_slave=config.iolinks[args.id], hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

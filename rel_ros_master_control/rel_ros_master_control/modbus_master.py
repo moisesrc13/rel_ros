@@ -57,18 +57,19 @@ def setup_sync_client(
         raise err
 
 
-class RelModbusMaster:
+class RelIOLinkModbusMaster:
     def __init__(self, slave: SlaveTCP | SlaveSerial) -> None:
-        logger.info("✨ Starting modbus master ...")
+        logger.info("✨ Starting iolink modbus master ...")
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
         self.hmi_id = slave.hmi_id
         self.hmi_name = slave.hmi_name
+        self.connection_state = None
 
-    def connection_state(self):
+    def _connection_state(self):
         if self.slave_conn.connected:
             return "connected 🍰"
-        return "❌ error not connected"
+        return self.connection_state or "❌ error not connected"
 
     @retry(
         stop=stop_after_attempt(5),
@@ -77,24 +78,24 @@ class RelModbusMaster:
     )
     def do_connect(self):
         try:
-            logger.info("connecting to modbus slave")
+            logger.info("connecting to iolink modbus slave")
             assert self.slave_conn.connect()
             logger.info(
                 "modbus slave connected 🤘 is socked opened %s, transport %s",
                 self.slave_conn.is_socket_open(),
                 self.slave_conn.transport,
             )
-            logger.info("modbus socket %s", self.slave_conn.socket)
+            logger.info("iolink modbus socket %s", self.slave_conn.socket)
         except Exception as err:
-            logger.error("❌ Error connecting to modbus slave - %s", err)
+            logger.error("❌ Error connecting to iolink modbus slave - %s", err)
             raise err
 
     def do_close(self):
         try:
-            logger.info("closing connection to modbus slave")
+            logger.info("closing connection to iolink modbus slave")
             self.slave_conn.close()
-            logger.info("slave connection closed")
+            logger.info("iolink slave connection closed")
             self.connection_state = "closed"
         except Exception as err:
-            logger.error("❌ Error closing connection to modbus server - %s", err)
+            logger.error("❌ Error closing connection to iolink modbus server - %s", err)
             self.connection_state = "❌ error closing"
