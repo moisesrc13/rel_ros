@@ -11,6 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import (
+    CRegister,
     HRegister,
     RegisterDataType,
     RegisterModbusType,
@@ -80,13 +81,14 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
+    def __init__(self, slave: SlaveTCP, hr: list[HRegister], coils: list[CRegister]) -> None:
         logger.info("✨ Starting modbus HMI master ...")
         self.hmi_name = slave.name
         self.hmi_id = slave.id
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
         self.hr = hr
+        self.coils = coils
 
     def connection_state(self):
         if self.slave_conn.connected:
@@ -161,8 +163,10 @@ class RelModbusMaster:
         return updated_registers
 
 
-def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelModbusMaster]:
-    return [RelModbusMaster(s, hr) for s in slaves]
+def create_masters_for_hmis(
+    slaves: list[SlaveTCP], hr: list[HRegister], coils: list[CRegister]
+) -> list[RelModbusMaster]:
+    return [RelModbusMaster(s, hr, coils) for s in slaves]
 
 
 def run():
@@ -201,7 +205,9 @@ def run():
     )
     args = parser.parse_args()
     config = load_modbus_config()
-    modbus_master = RelModbusMaster(config.slaves[0], config.holding_registers)
+    modbus_master = RelModbusMaster(
+        config.slaves[0], config.holding_registers, config.coil_registers
+    )
     modbus_master.do_connect()
     if args.action == "write":
         modbus_master.do_write(args.register, args.value, RegisterModbusType(args.type))

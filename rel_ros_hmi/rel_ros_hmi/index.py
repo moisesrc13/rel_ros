@@ -3,7 +3,7 @@ import time
 import rclpy
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMI, IOLinkData
+from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
@@ -13,8 +13,11 @@ class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_hmi_node")
         self.get_logger().info("creating subscriber for rel/iolink topic 📨")
-        self.subscription = self.create_subscription(
+        self.subscription_iolink = self.create_subscription(
             IOLinkData, "rel/iolink", self.listener_iolink_data_callback, 10
+        )
+        self.subscription_hmi_status = self.create_subscription(
+            HMIStatus, "rel/hmistatus", self.listener_hmi_status_callback, 10
         )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
@@ -23,7 +26,9 @@ class RelROSNode(Node):
         )
         time.sleep(1)
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
-        self.masters = create_masters_for_hmis(config.slaves, config.holding_registers)
+        self.masters = create_masters_for_hmis(
+            config.slaves, config.holding_registers, config.coil_registers
+        )
 
     def create_hmi_publishers(self, count: int = 1) -> dict:
         publishers = {}
@@ -40,6 +45,23 @@ class RelROSNode(Node):
     def listener_iolink_data_callback(self, msg: IOLinkData):
         self.get_logger().info(f"📨 I got an IOLinkData message {msg}")
         self.save_hmi_iolink_data(msg.hmi_id, msg)
+
+    def listener_hmi_status_callback(self, msg: HMIStatus):
+        self.get_logger().info(f"📨 I got an HMIStatus message {msg}")
+        self.save_hmi_status(msg.hmi_id, msg)
+
+    def save_hmi_status(self, master_id: int, msg: HMIStatus):
+        try:
+            master = self.masters[master_id]
+            for register in master.coils:
+                if value := getattr(msg, register.name, None):
+                    self.get_logger().info(
+                        f"📺 write HMI {master_id} coil {register.address} value: {value}"
+                    )
+                    master.do_write(register.address, value)
+            self.get_logger().info(f"complete write status into hmi master id {master_id}")
+        except Exception as err:
+            self.get_logger().error(f"error saving hmi status {err}")
 
     def save_hmi_iolink_data(self, master_id: int, msg: IOLinkData):
         try:
