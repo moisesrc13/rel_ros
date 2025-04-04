@@ -29,3 +29,17 @@ int32 param_distance_bucket_2
 int32 param_distance_bucket_3
 int32 param_max_time_pump_on
 int32 param_client_password
+int32 param_turn_on_pumping_process
+int32 param_recycle
+int32 param_pre_fill_line
+int32 param_pull_down_pistons_manual
+int32 param_pull_up_pistons_manual
+int32 param_vacuum_air
+int32 param_depressurize
+int32 param_recycle_car
+int32 param_recycle_retractil
+int32 param_button_start_bucket_change_1
+int32 param_button_start_bucket_change_2
+int32 param_pull_down_pistons_bucket
+int32 param_pull_up_pistons_bucket
+int32 param_button_change_bucket_3
