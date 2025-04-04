@@ -1,9 +1,11 @@
 import time
 from enum import Enum
+from typing import Any
 
 from hamilton.function_modifiers import config
 from pydantic import BaseModel
 
+from rel_interfaces.msg import HMIStatus
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
@@ -111,7 +113,7 @@ def sensor_distance_state_(
     return SensorDistanceStateName.E
 
 
-def bucket_level(bucket_distance: int) -> TowerState:
+def bucket_state(bucket_distance: int) -> TowerState:
     if bucket_distance >= 80 and TowerState <= 100:
         return TowerState.FULL
     if bucket_distance >= 50 and TowerState <= 79:
@@ -130,8 +132,19 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
-def sensor_laser_on__b(sensor_distance_state: SensorDistanceState):
-    pass
+def sensor_laser_on__b(
+    hmi_status_publisher: Any,
+    control: RelControl,
+    sensor_distance_state: SensorDistanceState,
+    bucket_state: TowerState,
+):
+    control.apply_tower_state(bucket_state)
+    msg = HMIStatus()
+    if bucket_state == TowerState.PRE_VACUUM:
+        msg.status_alarm_pre_vacuum = 1
+    elif bucket_state == TowerState.VACUUM:
+        msg.status_alarm = 1
+    hmi_status_publisher.publish(msg)
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)

@@ -23,7 +23,7 @@ class FlowControlConfig(BaseModel):
     inputs: FlowControlInputs
     tasks: list[str] = [
         "bucket_distance",
-        "bucket_level",
+        "bucket_state",
         "sensor_distance_state",
         "sensor_laser_on",
     ]
