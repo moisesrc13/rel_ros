@@ -64,35 +64,20 @@ def bucket_distance(param_bucket_size_selection: int, control_hmi_data: dict) ->
     return distance
 
 
-def sensor_distance_state(
-    control_iolink_data: dict, control_hmi_data: dict, bucket_distance: int
-) -> SensorDistanceState:
-    sensor_distance = control_iolink_data.get("sensor_laser_distance")
-    params = SensorDistanceParams(
+def sensor_distance_params(bucket_distance: int, control_hmi_data: dict) -> SensorDistanceParams:
+    return SensorDistanceParams(
         bucket_distance=bucket_distance,
         high_pre_vacuum_limit=control_hmi_data.get("param_pre_vacuum_limit_high"),
         high_vacuum_limit=control_hmi_data.get("param_vacuum_limit_high"),
         vacuum_distance=control_hmi_data.get("param_vacuum_distance"),
     )
-    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
-        return SensorDistanceStateName.A
-    elif sensor_distance > params.vacuum_distance and sensor_distance <= params.high_vacuum_limit:
-        return SensorDistanceStateName.B
-    if (
-        sensor_distance > params.high_vacuum_limit
-        and sensor_distance <= params.high_pre_vacuum_limit
-    ):
-        return SensorDistanceStateName.C
-    if sensor_distance > params.high_vacuum_limit and sensor_distance < params.bucket_distance:
-        return SensorDistanceStateName.D
-    # return default for now
-    return SensorDistanceStateName.E
 
 
-def sensor_distance_state_(
-    sensor_distance: int, sensor_distance_params: SensorDistanceParams
+def sensor_distance_state(
+    control_iolink_data: dict, control_hmi_data: dict, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
-    if sensor_distance < sensor_distance_params.vacuum_distance:
+    sensor_distance = control_iolink_data.get("sensor_laser_distance")
+    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
         return SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
