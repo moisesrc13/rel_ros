@@ -62,10 +62,27 @@ class RelROSNode(Node):
         self.get_logger().info("creating publisher for rel/hmistatus topic 📨 ...")
         self.hmi_status_publisher = self.create_publisher(HMIStatus, "rel/hmistatus", 10)
 
-        self.get_logger().info("======= creating MAIN CONTROL timer 🤖 =======")
-        self.create_timer(0.5, self.timer_callback_main_control)
+        self.get_logger().info("======= creating MAIN CONTROL timers 🤖 =======")
+        self.create_timers_for_main_control()
 
-    def timer_callback_main_control(self):
+    def create_timers_for_main_control(self):
+        if not self.masters:
+            self.get_logger().error("no iolink masters available")
+            return
+        self.get_logger().info("creating main control timers ⏱ ...")
+        for master in self.masters:
+            if isinstance(master, RelControl):
+                self.get_logger().info(
+                    f"creating timer for main control with hmi id {master.master_io_link.hmi_id}"
+                )
+                self.create_timer(
+                    0.5,
+                    functools.partial(
+                        self.timer_callback_main_control, hmi_id=master.master_io_link.hmi_id
+                    ),
+                )
+
+    def timer_callback_main_control(self, hmi_id: int = 0):
         pass
 
     def create_hmi_subscribers(self, count: int = 1):
@@ -81,7 +98,7 @@ class RelROSNode(Node):
         if not self.masters:
             self.get_logger().error("no iolink masters available")
             return
-        self.get_logger().info("creating timers ⏱ ...")
+        self.get_logger().info("creating iolink data timers ⏱ ...")
         for master in self.masters:
             if isinstance(master, RelControl):
                 self.get_logger().info(
