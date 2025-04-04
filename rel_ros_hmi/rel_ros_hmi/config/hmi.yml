@@ -155,6 +155,9 @@
     - name: "param_client_password"
       address: 40032
       data_type: "uint16"
+    - name: "param_bucket_size_selection"
+      address: 40032
+      data_type: "uint16"
     # --------------------------------------- SENSORS START
     - name: "sensor_material_pressure"
       address: 40048

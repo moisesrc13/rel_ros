@@ -14,7 +14,7 @@ logger = new_logger(__name__)
 class SensorDistanceParams(BaseModel):
     vacuum_distance: int  # Z
     bucket_distance: int  # W
-    high_pre_vacuum_limit: int  # X
+    high_pre_vacuum_limit: int  # X  # need to check discrepancy with this value
     high_vacuum_limit: int  # Y
 
 
@@ -51,24 +51,35 @@ class SensorDistanceStateName(Enum):
 
 
 def sensor_distance_state(control_iolink_data: dict, control_hmi_data: dict) -> SensorDistanceState:
+    def get_bucket_distance(selection: int):
+        distance = control_hmi_data.get("param_distance_bucket_1")  # default
+        match selection:
+            case 1:
+                return distance
+            case 2:
+                distance = control_hmi_data.get("param_distance_bucket_2")
+            case 3:
+                distance = control_hmi_data.get("param_distance_bucket_3")
+        return distance
+
     sensor_distance = control_iolink_data.get("sensor_laser_distance")
-    params = SensorDistanceParams(bucket_distance=control_hmi_data.get("param_vacuum_distance"))
+    bucket_distance = get_bucket_distance(control_hmi_data.get("param_bucket_size_selection"))
+    params = SensorDistanceParams(
+        bucket_distance=bucket_distance,
+        high_pre_vacuum_limit=control_hmi_data.get("param_pre_vacuum_limit_low"),  # need to clarify
+        high_vacuum_limit=control_hmi_data.get("param_vacuum_limit_high"),
+        vacuum_distance=control_hmi_data.get("param_vacuum_distance"),
+    )
     if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
         return SensorDistanceStateName.A
-    elif (
-        sensor_distance > sensor_distance_params.vacuum_distance
-        and sensor_distance <= sensor_distance_params.high_vacuum_limit
-    ):
+    elif sensor_distance > params.vacuum_distance and sensor_distance <= params.high_vacuum_limit:
         return SensorDistanceStateName.B
     if (
-        sensor_distance > sensor_distance_params.high_vacuum_limit
-        and sensor_distance <= sensor_distance_params.high_pre_vacuum_limit
+        sensor_distance > params.high_vacuum_limit
+        and sensor_distance <= params.high_pre_vacuum_limit
     ):
         return SensorDistanceStateName.C
-    if (
-        sensor_distance > sensor_distance_params.high_vacuum_limit
-        and sensor_distance < sensor_distance_params.bucket_distance
-    ):
+    if sensor_distance > params.high_vacuum_limit and sensor_distance < params.bucket_distance:
         return SensorDistanceStateName.D
     # return default for now
     return SensorDistanceStateName.E
