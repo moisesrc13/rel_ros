@@ -7,7 +7,6 @@ from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
     RelModbusMaster,
-    SlaveHMI,
     SlaveIOLink,
     get_builder,
     get_decoder_from_rr,
@@ -60,9 +59,8 @@ def rel_control(monkeypatch):
         port=9090,
     )
     iolink_slave = SlaveIOLink(slave_tcp=slave_tcp)
-    hmi_slave = SlaveHMI(slave_tcp=slave_tcp)
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
-    return RelControl(iolink_slave=iolink_slave, hmi_slave=hmi_slave, hr=config.holding_registers)
+    return RelControl(iolink_slave=iolink_slave, hr=config.holding_registers)
 
 
 @pytest.mark.parametrize(

@@ -14,7 +14,6 @@ from rel_ros_master_control.models.modbus_m import (
     IOLinkHR,
     RegisterDataType,
     RegisterMode,
-    SlaveHMI,
     SlaveIOLink,
     get_register_by_name,
 )
@@ -59,11 +58,10 @@ class ModbusStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, iolink_slave: SlaveIOLink, hmi_slave: SlaveHMI, hr: list[HRegister]) -> None:
+    def __init__(self, iolink_slave: SlaveIOLink, hr: list[HRegister]) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
-        self.master_hmi = RelModbusMaster(hmi_slave)
         self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
@@ -197,12 +195,11 @@ class RelControl:
 
 
 def run_masters_to_iolinks(
-    iolink_slaves: list[SlaveIOLink], hmi_slaves: list[SlaveHMI], hr: list[HRegister]
+    iolink_slaves: list[SlaveIOLink], hr: list[HRegister]
 ) -> list[RelControl]:
     masters = []
     for iolink_slave in iolink_slaves:
-        hmi_slave = next((s for s in hmi_slaves if s.id == iolink_slave.hmi_id), None)
-        masters.append(RelControl(iolink_slave=iolink_slave, hmi_slave=hmi_slave, hr=hr))
+        masters.append(RelControl(iolink_slave=iolink_slave, hr=hr))
     logger.info("finish to run masters ...")
     return masters
 

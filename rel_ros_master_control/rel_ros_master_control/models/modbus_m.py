@@ -82,12 +82,6 @@ class SlaveIOLink(BaseModel):
     slave_tcp: SlaveTCP
 
 
-class SlaveHMI(BaseModel):
-    name: str = ""
-    id: int = 0
-    slave_tcp: SlaveTCP
-
-
 class SlaveSerial(BaseModel):
     name: str = ""
     hmi_id: int = 0
@@ -104,7 +98,6 @@ class SlaveSerial(BaseModel):
 class ModbusConfig(BaseModel):
     iolinks: list[SlaveIOLink]
     holding_registers: list[HRegister]
-    hmis: list[SlaveHMI]
 
 
 def get_register_by_address(
