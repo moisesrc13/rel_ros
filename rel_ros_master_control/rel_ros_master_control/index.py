@@ -22,21 +22,27 @@ class ControlIOLinkData(BaseModel):
     data: Optional[IOLinkData] = None
 
 
-def create_hmi_cluster(size: int) -> list[ControlHMIData]:
+class ControlNode(BaseModel):
+    hmi_data: ControlHMIData
+    iolink_data: ControlIOLinkData
+
+
+def create_control_cluster(size: int) -> list[ControlNode]:
     """
     used to get data from sensors and user input in the HMI.
     This data will be used for the control logic
     """
     cluster = []
     for n in range(size):
-        cluster.append(ControlHMIData(hmi_id=n))
+        control_node = ControlNode(
+            hmi_data=ControlHMIData(hmi_id=n), iolink_data=ControlIOLinkData(hmi_id=n)
+        )
+        cluster.append(control_node)
     return cluster
 
 
-def get_hmi_from_cluster_with_id(
-    cluster: list[ControlHMIData], hmi_id: int
-) -> Optional[ControlHMIData]:
-    return next((hmid for hmid in cluster if hmid.hmi_id == hmi_id), None)
+def get_control_node_with_id(cluster: list[ControlNode], hmi_id: int) -> Optional[ControlNode]:
+    return next((node for node in cluster if node.hmi_data.hmi_id == hmi_id), None)
 
 
 class RelROSNode(Node):
@@ -48,14 +54,13 @@ class RelROSNode(Node):
             iolink_slaves=self.config.iolinks, hr=self.config.holding_registers
         )
         self.create_timers_for_iolink_masters()
-        self.hmi_cluster = create_hmi_cluster(size=len(self.masters))
+        self.control_cluster = create_control_cluster(size=len(self.masters))
         self.get_logger().info("creating subscriber for rel/hmi topics 📨 ...")
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
         self.get_logger().info("creating publisher for rel/hmistatus topic 📨 ...")
         self.hmi_status_publisher = self.create_publisher(HMIStatus, "rel/hmistatus", 10)
-        self.control_iolink_data = {}
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
@@ -85,9 +90,9 @@ class RelROSNode(Node):
 
     def listener_hmi_callback(self, msg: HMI, hmi_id: int = 0):
         self.get_logger().info(f"📨 I got an HMI {hmi_id} data message 📺 {msg}")
-        hmiData: ControlHMIData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
-        hmiData.data = msg
-        self.hmi_cluster[msg.hmi_id] = hmiData
+        node: ControlNode = get_control_node_with_id(self.control_cluster, msg.hmi_id)
+        node.hmi_data.data = msg
+        # self.control_cluster[msg.hmi_id] = node  # may not be required
 
     def get_io_link_data(self, hmi_id: int = 0):
         master: RelControl = self.masters[hmi_id]
@@ -98,9 +103,11 @@ class RelROSNode(Node):
         for reg in registers:
             setattr(msg, reg.name, reg.value)
 
-        self.control_iolink_data[hmi_id] = ControlIOLinkData(data=msg, hmi_id=hmi_id)
-        self.iolink_publisher.publish(msg)
+        node: ControlNode = get_control_node_with_id(self.control_cluster, msg.hmi_id)
+        node.iolink_data = msg
+        # self.control_cluster[msg.hmi_id] = node  # may not be required
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
+        self.iolink_publisher.publish(msg)
 
     def timer_callback_iolink_test(self, hmi_id: int = 0):
         self.get_logger().info(f"test hmi_id {hmi_id}")
