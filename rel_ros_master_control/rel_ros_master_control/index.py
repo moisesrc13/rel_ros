@@ -84,9 +84,9 @@ class RelROSNode(Node):
                 )
 
     def listener_hmi_callback(self, msg: HMI, hmi_id: int = 0):
-        self.get_logger().info(f"📨 I got an HMI {hmi_id} message 📺 {msg}")
-        hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
-        hmiData.hmi = msg
+        self.get_logger().info(f"📨 I got an HMI {hmi_id} data message 📺 {msg}")
+        hmiData: ControlHMIData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
+        hmiData.data = msg
         self.hmi_cluster[msg.hmi_id] = hmiData
 
     def get_io_link_data(self, hmi_id: int = 0):

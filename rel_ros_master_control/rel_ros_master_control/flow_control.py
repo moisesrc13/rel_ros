@@ -15,8 +15,8 @@ telemetry.disable_telemetry()
 class FlowControlInputs(BaseModel):
     hmi_status_publisher: Any
     rel_control: RelControl
-    control_iolink_data: Any  # ControlIOLinkData from index.py ROS
-    control_hmi_data: Any  # ControlHMIData from index.py ROS
+    control_iolink_data: dict
+    control_hmi_data: dict
 
 
 class FlowControlConfig(BaseModel):
