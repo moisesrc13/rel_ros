@@ -9,11 +9,12 @@ from rclpy.node import Node
 from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
+from rel_ros_master_control.flow_control import FlowControlInputs
 
 
-class HMIData(BaseModel):
+class ControlHMIData(BaseModel):
     hmi_id: int = 0
-    hmi: Optional[HMI] = None
+    data: Optional[HMI] = None
 
 
 class ControlIOLinkData(BaseModel):
@@ -21,24 +22,20 @@ class ControlIOLinkData(BaseModel):
     data: Optional[IOLinkData] = None
 
 
-class FlowControlInputs(BaseModel):
-    hmi_data: HMIData
-    control_iolink_data: ControlIOLinkData
-    rel_control: RelControl
-
-
-def create_hmi_cluster(size: int) -> list[HMIData]:
+def create_hmi_cluster(size: int) -> list[ControlHMIData]:
     """
     used to get data from sensors and user input in the HMI.
     This data will be used for the control logic
     """
     cluster = []
     for n in range(size):
-        cluster.append(HMIData(hmi_id=n))
+        cluster.append(ControlHMIData(hmi_id=n))
     return cluster
 
 
-def get_hmi_from_cluster_with_id(cluster: list[HMIData], hmi_id: int) -> Optional[HMIData]:
+def get_hmi_from_cluster_with_id(
+    cluster: list[ControlHMIData], hmi_id: int
+) -> Optional[ControlHMIData]:
     return next((hmid for hmid in cluster if hmid.hmi_id == hmi_id), None)
 
 

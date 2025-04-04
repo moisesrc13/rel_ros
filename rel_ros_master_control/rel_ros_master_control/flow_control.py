@@ -4,6 +4,7 @@ from typing import Any, Optional
 from hamilton import base, driver, lifecycle, node, telemetry
 from pydantic import BaseModel
 
+from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
@@ -11,8 +12,15 @@ logger = new_logger(__name__)
 telemetry.disable_telemetry()
 
 
+class FlowControlInputs(BaseModel):
+    hmi_status_publisher: Any
+    rel_control: RelControl
+    control_iolink_data: Any  # ControlIOLinkData from index.py ROS
+    control_hmi_data: Any  # ControlHMIData from index.py ROS
+
+
 class FlowControlConfig(BaseModel):
-    inputs: dict
+    inputs: FlowControlInputs
     tasks: list[str]
 
 
@@ -60,7 +68,7 @@ def run(config: FlowControlConfig):
     dr = (
         driver.Builder()
         .with_modules(router_module)
-        .with_config(config.inputs)
+        .with_config(config.inputs.model_dump())
         .with_adapters(
             default_adapter,
             LoggingPreNodeExecute(),

@@ -19,7 +19,7 @@ class SensorDistanceParams(BaseModel):
 
 
 class Constants:
-    laser_infinit: int = 1000
+    laser_infinity: int = 1000
 
 
 class SensorDistanceState(Enum):
@@ -76,7 +76,7 @@ def sensor_distance_state(
 
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
-    logger.debug("sensor_distance_state -> ", sensor_distance_state)
+    logger.debug("sensor_distance_state -> %s", sensor_distance_state)
     control.apply_tower_state(TowerState.VACUUM)
     control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
     time.sleep(1)  # TBD
