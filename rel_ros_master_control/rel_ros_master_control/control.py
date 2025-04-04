@@ -156,6 +156,14 @@ class RelControl:
         status.value = value
         return status
 
+    def eletrovalve_on(self):
+        register = get_register_by_name("digital_out_hyd_valve")
+        self.write_holding_register(register.address, 3)
+
+    def eletrovalve_off(self):
+        register = get_register_by_name("digital_out_hyd_valve")
+        self.write_holding_register(register.address, 5)
+
     def read_holding_register(self, register: int) -> ModbusStatus:
         status = ModbusStatus()
         logger.info("reading register %s", register)

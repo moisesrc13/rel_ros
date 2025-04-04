@@ -108,9 +108,18 @@ def bucket_state(bucket_distance: int) -> TowerState:
     return TowerState.BUCKET_CHANGE
 
 
+def check_distance_sensor_for_electrovales(
+    control: RelControl, control_iolink_data: dict, control_hmi_data: dict
+):
+    sensor_distance = control_iolink_data.get("sensor_laser_distance")
+    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
+        control.eletrovalve_off()
+        control.apply_tower_state(TowerState.VACUUM)
+        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+
+
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
-    logger.debug("sensor_distance_state -> %s", sensor_distance_state)
     control.apply_tower_state(TowerState.VACUUM)
     control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
@@ -130,6 +139,7 @@ def sensor_laser_on__b(
     elif bucket_state == TowerState.VACUUM:
         msg.status_alarm = 1
     hmi_status_publisher.publish(msg)
+    control.eletrovalve_on()
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
