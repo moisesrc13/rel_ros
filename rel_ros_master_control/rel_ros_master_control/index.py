@@ -6,7 +6,7 @@ import rclpy
 from pydantic import BaseModel
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMI, IOLinkData
+from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 
@@ -55,7 +55,9 @@ class RelROSNode(Node):
         self.get_logger().info("creating subscriber for rel/hmi topics 📨 ...")
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
-        self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+        self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+        self.get_logger().info("creating publisher for rel/hmistatus topic 📨 ...")
+        self.hmi_status_publisher = self.create_publisher(HMIStatus, "rel/hmistatus", 10)
         self.control_iolink_data = {}
 
     def create_hmi_subscribers(self, count: int = 1):
@@ -100,7 +102,7 @@ class RelROSNode(Node):
             setattr(msg, reg.name, reg.value)
 
         self.control_iolink_data[hmi_id] = ControlIOLinkData(data=msg, hmi_id=hmi_id)
-        self.rel_publisher.publish(msg)
+        self.iolink_publisher.publish(msg)
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
 
     def timer_callback_iolink_test(self, hmi_id: int = 0):
