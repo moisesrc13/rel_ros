@@ -62,6 +62,12 @@ class RelROSNode(Node):
         self.get_logger().info("creating publisher for rel/hmistatus topic 📨 ...")
         self.hmi_status_publisher = self.create_publisher(HMIStatus, "rel/hmistatus", 10)
 
+        self.get_logger().info("======= creating MAIN CONTROL timer 🤖 =======")
+        self.create_timer(0.5, self.timer_callback_main_control)
+
+    def timer_callback_main_control(self):
+        pass
+
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
             topic = f"rel/hmi_{s}"
