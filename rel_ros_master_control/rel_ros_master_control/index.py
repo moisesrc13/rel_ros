@@ -1,15 +1,17 @@
 import functools
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 import rclpy
 from pydantic import BaseModel
 from rclpy.node import Node
+from rclpy_message_converter.message_converter import convert_ros_message_to_dictionary
 
 from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
-from rel_ros_master_control.flow_control import FlowControlInputs
+from rel_ros_master_control.flow_control import FlowControlConfig, FlowControlInputs
+from rel_ros_master_control.flow_control import run as run_control
 
 
 class ControlHMIData(BaseModel):
@@ -83,7 +85,21 @@ class RelROSNode(Node):
                 )
 
     def timer_callback_main_control(self, hmi_id: int = 0):
-        pass
+        node: ControlNode = get_control_node_with_id(self.control_cluster, hmi_id)
+        control_iolink_data = convert_ros_message_to_dictionary(node.iolink_data.data)
+        control_hmi_data = convert_ros_message_to_dictionary(node.iolink_data.data)
+        master_control: RelControl = self.masters[hmi_id]
+        inputs = FlowControlInputs(
+            master_control=master_control,
+            control_hmi_data=control_hmi_data,
+            control_iolink_data=control_iolink_data,
+            hmi_status_publisher=self.hmi_status_publisher,
+        )
+        run_control(
+            FlowControlConfig(
+                inputs=inputs,
+            )
+        )
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
@@ -97,7 +113,8 @@ class RelROSNode(Node):
     def create_timers_for_iolink_masters(self):
         if not self.masters:
             self.get_logger().error("no iolink masters available")
-            return
+            raise RuntimeError("no iolink masters available")
+
         self.get_logger().info("creating iolink data timers ⏱ ...")
         for master in self.masters:
             if isinstance(master, RelControl):
