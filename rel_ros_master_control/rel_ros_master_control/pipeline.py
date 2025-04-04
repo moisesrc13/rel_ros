@@ -25,10 +25,10 @@ class Constants:
 class SensorDistanceState(Enum):
     """_summary_
 
-    W=distancia de tamaño de cubeta
-    X=Límite superior de prevacío
-    Y=Límite superior de vacio
-    Z=Distancia para vacío
+    W = distancia de tamaño de cubeta
+    X = Límite superior de prevacío
+    Y = Límite superior de vacio
+    Z = Distancia para vacío
     """
 
     LT_VACUUM_DISTANCE = "lt_vacuum_distance"  # less than vaccum distance
@@ -39,7 +39,7 @@ class SensorDistanceState(Enum):
     GT_HIGH_VACUUM_LIMIT_AND_LT_BUCKET_SIZE_DISTANCE = (
         "gt_high_vacuum_limit_and_lt_bucket_size_distance"
     )
-    GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINIT = "gt_bucket_size_distance_and_le_infinit"
+    GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINITY = "gt_bucket_size_distance_and_le_infinity"
 
 
 class SensorDistanceStateName(Enum):
@@ -47,15 +47,39 @@ class SensorDistanceStateName(Enum):
     B = SensorDistanceState.GT_VACUUM_DISTANCE_AND_LE_HIGH_VACUUM_LIMIT
     C = SensorDistanceState.GT_HIGH_VACUUM_LIMIT_AND_LE_HIGH_PRE_VACUUM_LIMIT
     D = SensorDistanceState.GT_HIGH_VACUUM_LIMIT_AND_LT_BUCKET_SIZE_DISTANCE
-    E = SensorDistanceState.GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINIT
+    E = SensorDistanceState.GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINITY
 
 
-def sensor_distance_state(
+def sensor_distance_state(control_iolink_data: dict, control_hmi_data: dict) -> SensorDistanceState:
+    sensor_distance = control_iolink_data.get("sensor_laser_distance")
+    params = SensorDistanceParams(bucket_distance=control_hmi_data.get("param_vacuum_distance"))
+    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
+        return SensorDistanceStateName.A
+    elif (
+        sensor_distance > sensor_distance_params.vacuum_distance
+        and sensor_distance <= sensor_distance_params.high_vacuum_limit
+    ):
+        return SensorDistanceStateName.B
+    if (
+        sensor_distance > sensor_distance_params.high_vacuum_limit
+        and sensor_distance <= sensor_distance_params.high_pre_vacuum_limit
+    ):
+        return SensorDistanceStateName.C
+    if (
+        sensor_distance > sensor_distance_params.high_vacuum_limit
+        and sensor_distance < sensor_distance_params.bucket_distance
+    ):
+        return SensorDistanceStateName.D
+    # return default for now
+    return SensorDistanceStateName.E
+
+
+def sensor_distance_state_(
     sensor_distance: int, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
     if sensor_distance < sensor_distance_params.vacuum_distance:
         return SensorDistanceStateName.A
-    if (
+    elif (
         sensor_distance > sensor_distance_params.vacuum_distance
         and sensor_distance <= sensor_distance_params.high_vacuum_limit
     ):
@@ -79,7 +103,6 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
     logger.debug("sensor_distance_state -> %s", sensor_distance_state)
     control.apply_tower_state(TowerState.VACUUM)
     control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-    time.sleep(1)  # TBD
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
     pass
 

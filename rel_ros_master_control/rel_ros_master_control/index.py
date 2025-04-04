@@ -5,7 +5,7 @@ from typing import Optional
 import rclpy
 from pydantic import BaseModel
 from rclpy.node import Node
-from rclpy_message_converter.message_converter import convert_ros_message_to_dictionary
+from rospy_message_converter.message_converter import convert_ros_message_to_dictionary
 
 from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
@@ -84,9 +84,10 @@ class RelROSNode(Node):
                     ),
                 )
 
-    """ Main control function """
-
     def timer_callback_main_control(self, hmi_id: int = 0):
+        """
+        Main control function
+        """
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")

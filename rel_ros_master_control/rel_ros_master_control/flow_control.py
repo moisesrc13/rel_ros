@@ -21,7 +21,10 @@ class FlowControlInputs(BaseModel):
 
 class FlowControlConfig(BaseModel):
     inputs: FlowControlInputs
-    tasks: list[str]
+    tasks: list[str] = [
+        "sensor_distance_state",
+        "sensor_laser_on",
+    ]
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
