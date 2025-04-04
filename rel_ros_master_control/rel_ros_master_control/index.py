@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import rclpy
+from pydantic import BaseModel
 from rclpy.node import Node
 
 from rel_interfaces.msg import HMI, IOLinkData
@@ -10,13 +11,27 @@ from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 
 
-@dataclass
-class HMIData:
+class HMIData(BaseModel):
     hmi_id: int = 0
-    hmi: HMI = None
+    hmi: Optional[HMI] = None
+
+
+class ControlIOLinkData(BaseModel):
+    hmi_id: int = 0
+    data: Optional[IOLinkData] = None
+
+
+class FlowControlInputs(BaseModel):
+    hmi_data: HMIData
+    control_iolink_data: ControlIOLinkData
+    rel_control: RelControl
 
 
 def create_hmi_cluster(size: int) -> list[HMIData]:
+    """
+    used to get data from sensors and user input in the HMI.
+    This data will be used for the control logic
+    """
     cluster = []
     for n in range(size):
         cluster.append(HMIData(hmi_id=n))
@@ -33,7 +48,7 @@ class RelROSNode(Node):
         self.config = load_modbus_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
-            slaves=self.config.iolinks, hr=self.config.holding_registers
+            iolink_slaves=self.config.iolinks, hr=self.config.holding_registers
         )
         self.create_timers_for_iolink_masters()
         self.hmi_cluster = create_hmi_cluster(size=len(self.masters))
@@ -41,6 +56,7 @@ class RelROSNode(Node):
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.rel_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
+        self.control_iolink_data = {}
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
@@ -82,6 +98,8 @@ class RelROSNode(Node):
         registers = master.get_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
+
+        self.control_iolink_data[hmi_id] = ControlIOLinkData(data=msg, hmi_id=hmi_id)
         self.rel_publisher.publish(msg)
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
 

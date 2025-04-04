@@ -4,194 +4,173 @@
       host: 0.0.0.0  # localhost for ROS working as HMI slave
       port: 8845  # 502 is the standard
       offset: 0
-  coil_registers:
-    - name: "enter_screen_1_0"
-      address: 0
-      value: 0
+  coil_registers:  # default value to 0
     - name: "open_local_window_1_1"
+      address: 0
+    - name: "enter_screen_5_0"
       address: 1
-      value: 0
-    - name: "open_local_window_1_2"
+    - name: "param_turn_on_pumping_process"
       address: 2
-      value: 0
-    - name: "open_local_window_1_3"
+    - name: "param_recycle"
       address: 3
-      value: 0
-    - name: "close_local_window_1_1"
-      address: 4
-      value: 0
-    - name: "close_local_window_1_2"
-      address: 5
-      value: 0
-    - name: "close_local_window_1_3"
-      address: 6
-      value: 0
-    - name: "enter_screen_2_0"
-      address: 7
-      value: 0
-    - name: "turn_on_pumping_process"
-      address: 8
-      value: 0
-    - name: "save_button"
-      address: 9
-      value: 0
     - name: "enter_screen_3_0"
-      address: 10
-      value: 0
+      address: 4
+    - name: "close_local_window_0_1"
+      address: 5
+    - name: "enter_screen_2_0"
+      address: 6
     - name: "enter_screen_4_0"
-      address: 11
-      value: 0
-    - name: "open_local_window_2_1"
-      address: 12
-      value: 0
-    - name: "open_local_window_2_2"
+      address: 7
+    - name: "enter_screen_1_0"
+      address: 8
+    - name: "button_lock_password"
+      address: 9
+    - name: "button_load_password"
+      address: 10
+    - name: "open_local_window_0_2"
+      address: 12  # jumped 11 - ok
+    - name: "close_local_window_0_2"
       address: 13
-      value: 0
-    - name: "open_local_window_2_3"
+    - name: "param_pre_fill_line"
       address: 14
-      value: 0
-    - name: "close_local_window_2_1"
+    - name: "param_pull_down_pistons_manual"
       address: 15
-      value: 0
-    - name: "close_local_window_2_2"
+    - name: "param_pull_up_pistons_manual"
       address: 16
-      value: 0
-    - name: "close_local_window_2_3"
+    - name: "param_vacuum_air"
       address: 17
-      value: 0
-    - name: "down_pistons"
+    - name: "param_depressurize"
       address: 18
-      value: 0
-    - name: "up_pistons"
+    - name: "open_local_window_1_1"
       address: 19
-      value: 0
-    - name: "turn_on_pump"
+    - name: "enter_screen_3_0"
       address: 20
-      value: 0
-    - name: "recycle"
+    - name: "enter_screen_0_0"
       address: 21
-      value: 0
-    - name: "vacuum_air"
+    - name: "param_recycle_car"
       address: 22
-      value: 0
+    - name: "param_recycle_retractil"
+      address: 23
+    - name: "enter_screen_1_0"
+      address: 24
+    - name: "param_button_start_bucket_change_1"
+      address: 25
+    - name: "param_button_start_bucket_change_2"
+      address: 26
+    - name: "param_pull_down_pistons_bucket"
+      address: 27
+    - name: "param_pull_up_pistons_bucket"
+      address: 28
+    - name: "param_button_change_bucket_3"
+      address: 29
+    - name: "enter_screen_0_0"
+      address: 30
+    - name: "button_volume_1"
+      address: 31
+    - name: "button_volume_2"
+      address: 32
+    - name: "button_volume_3"
+      address: 33
+    # ------------------- STATUS
+    - name: "status_alarm_pre_vacuum"
+      address: 34
+    - name: "status_alarm"
+      address: 35
+    - name: "status_no_air_pressure"
+      address: 36
+    - name: "status_error_change_bucket"
+      address: 37
+    - name: "status_pump_no_pressure"
+      address: 38
+    - name: "status_pump_no_depressurized"
+      address: 39
   holding_registers:
-    - name: "param_target_pressure_hyd"
+  # --------------------------------------- PARAMETERS START
+    - name: "param_target_pressure_hyd_home"
       address: 40006
       data_type: "uint16"
-      value: 0
-    - name: "param_target_pressure_pistons"
+    - name: "param_target_pressure_pistons_home"
       address: 40007
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_low"
+    - name: "param_user_password"
       address: 40008
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_medium"
+    - name: "param_target_pressure_hyd_manual"
       address: 40009
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_high"
+    - name: "param_target_pressure_pistons_manual"
       address: 40010
       data_type: "uint16"
-      value: 0
-    - name: "param_alarm_pre_vacuum_limit_high"
+    - name: "param_recycle_time_manual"
       address: 40011
       data_type: "uint16"
-      value: 0
-    - name: "param_alarm_pre_vacuum_limit_low"
+    - name: "param_recycle_time_cycle"
       address: 40012
       data_type: "uint16"
-      value: 0
-    - name: "param_alarm_pre_vacuum_distance"
+    - name: "param_pulse_train_selection"
       address: 40013
       data_type: "uint16"
-      value: 0
-    - name: "param_security_distance"
+    - name: "param_recycle_time_auto"
       address: 40014
       data_type: "uint16"
-      value: 0
-    - name: "param_recycle_time"
+    - name: "param_vacuum_limit_high"
       address: 40015
       data_type: "uint16"
-      value: 0
-    - name: "param_pulse_train_selection"
+    - name: "param_pre_vacuum_limit_low"
       address: 40016
       data_type: "uint16"
-      value: 0
-    - name: "status_general" # status registers
-      address: 40017
-      data_type: "uint16"
-      value: 0
-    - name: "status_in_process_alarm"
-      address: 40018
-      data_type: "uint16"
-      value: 0
-    - name: "status_operational_alarm"
-      address: 40019
-      data_type: "uint16"
-      value: 0
-    - name: "status_operational_state"
-      address: 40020
-      data_type: "uint16"
-      value: 0
-    - name: "status_extend_piston"
+    - name: "param_pulse_train_low"
       address: 40021
       data_type: "uint16"
-      value: 0
-    - name: "status_retract_piston"
+    - name: "param_pulse_train_medium"
       address: 40022
       data_type: "uint16"
-      value: 0
-    - name: "status_air_vacuum"
+    - name: "param_pulse_train_high"
       address: 40023
       data_type: "uint16"
-      value: 0
-    - name: "status_acoustic_signal"
+    - name: "param_vacuum_distance"
       address: 40024
       data_type: "uint16"
-      value: 0
-    - name: "status_recycling"
+    - name: "param_security_distance"
       address: 40025
       data_type: "uint16"
-      value: 0
-    - name: "data_target_pressure_pistons" # data registers
+    - name: "param_recycle_time"
       address: 40026
       data_type: "uint16"
-      value: 0
-    - name: "data_target_pressure_hyd"  # same as material pressure??
+    - name: "param_recycle_time_interval"
       address: 40027
       data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_low"
+    - name: "param_distance_bucket_1"
       address: 40028
       data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_medium"
+    - name: "param_distance_bucket_2"
       address: 40029
       data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_high"
+    - name: "param_distance_bucket_3"
       address: 40030
       data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_limit_high"
+    - name: "param_max_time_pump_on"
       address: 40031
       data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_limit_low"
+    - name: "param_client_password"
       address: 40032
       data_type: "uint16"
-      value: 0
-    - name: "data_vacuum_distance"
-      address: 40033
+    # --------------------------------------- SENSORS START
+    - name: "sensor_material_pressure"
+      address: 40048
       data_type: "uint16"
-      value: 0
-    - name: "data_security_distance"
-      address: 40034
+    - name: "sensor_material_temperature"
+      address: 40049
       data_type: "uint16"
-      value: 0
-    - name: "data_pulse_train_selection"
-      address: 40035
+    - name: "sensor_laser_distance"
+      address: 40050
       data_type: "uint16"
-      value: 0
+    - name: "sensor_pressure_regulator_read_set"
+      address: 40051
+      data_type: "uint16"
+    - name: "sensor_pressure_regulator_read_real"
+      address: 40052
+      data_type: "uint16"
+    - name: "sensor_pressure_regulator_valve_read_state"
+      address: 40053
+      data_type: "uint16"

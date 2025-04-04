@@ -47,10 +47,7 @@ class RelROSNode(Node):
             for register in master.hr:
                 if value := getattr(msg, register.name, None):
                     self.get_logger().info(
-                        f"writing iolink data into hmi with address: {register.address}, value: {value}"
-                    )
-                    self.get_logger().info(
-                        f"📺 write HMI {master_id} register {register.address} value {value}"
+                        f"📺 write HMI {master_id} register {register.address} value: {value}"
                     )
                     master.do_write(register.address, value)
             self.get_logger().info(f"complete write into hmi master id {master_id}")

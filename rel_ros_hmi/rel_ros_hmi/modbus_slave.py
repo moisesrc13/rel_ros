@@ -67,13 +67,17 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("write register %s with value %s", register, value)
         register.value = value
         self.hr[idx] = register
-        # publish the data
+        # publish the data only if a param register
+        if not register.name.startswith("param_"):
+            logger.debug("not a param register, do not publish")
+            return
         if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
             return
 
         with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
             for register in self.hr:
-                setattr(hmi_msg, register.name, register.value)
+                if register.name.startswith("param_") and hasattr(hmi_msg, register.name):
+                    setattr(hmi_msg, register.name, register.value)
             logger.info("📨 publishing message from HMI set value %s", hmi_msg)
             self.publisher.publish(hmi_msg)
 
@@ -170,13 +174,6 @@ class ModbusSlaveThread(Thread):
                 server.shutdown()
         except Exception as ex:
             logger.error("Error %s running slave thread %s", ex, self.slave.id)
-        self.queue.task_done()
-
-
-def run(slave: SlaveTCP, publisher=None):
-    server = run_sync_modbus_server(slave=slave, publisher=publisher)
-    if server:
-        server.shutdown()
 
 
 def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[HRegister], publishers: dict):

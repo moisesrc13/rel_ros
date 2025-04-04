@@ -7,7 +7,7 @@ USER root
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # install ros package
 RUN apt-get update && apt-get install -y \
-      ros-humble-demo-nodes-cpp curl wget \
+      ros-humble-demo-nodes-cpp curl wget python3.11-dev \
       virtualenv nano qt5-* \
       ros-humble-demo-nodes-py && \
     rm -rf /var/lib/apt/lists/*
@@ -34,7 +34,7 @@ USER root
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant
 # install VS Code (code-server)
-RUN curl -fsSL https://code-server.dev/install.sh | sh
+# RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # create ROS packages
 USER relant
@@ -45,6 +45,10 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/relant/ros2_ws/venv/bin/activate" >> ~/.bashrc
 RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
 RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
+
+ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
+ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
+ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 
 
 # launch ros package

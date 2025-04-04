@@ -35,7 +35,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_master_control
 export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 ```
 
-> for ROS image
+> for ROS Docekr image
 This is important to execute before running (only once)
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
@@ -60,7 +60,13 @@ ros2 run rel_ros_hmi rel_ros_hmi_node
 ## Run test modbus master control slave
 ```bash
 export USE_TEST_MODBUS="true"
+export APP_MASTER_IOLINK_ID="0"
+
 python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
+```
+
+## Run rest API app
+```bash
 python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
 
@@ -90,7 +96,7 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
 cd ~/ros2_ws/src
-python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40010 --value 1200
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
 
 # read all
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0
@@ -105,6 +111,15 @@ Make sure you install `numpy` in the virtual env
 ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi && \
 ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control && \
 ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
+```
+
+### Run ROS on RPi4
+```
+cd /home/relant/ros2_ws
+cp /home/relant/git/rel_ros/*.sh .
+cp -r /home/relant/git/rel_ros/rel_ros_master_control/rel_ros_master_control/config /home/relant/ros2_ws/install/rel_ros_master_control/lib/python3.12/site-packages/rel_ros_master_control/
+cp -r /home/relant/git/rel_ros/rel_ros_hmi/rel_ros_hmi/config /home/relant/ros2_ws/install/rel_ros_hmi/lib/python3.12/site-packages/rel_ros_hmi/
+
 ```
 
 ## Config REST Service
@@ -123,3 +138,25 @@ Replace `localhost` by host IP
 curl "http://localhost:9080/read/8001"
 
 curl -X POST "http://localhost:9080/write" -H "Content-Type:application/json" -d '{"register": 5051, "value": 1}'
+
+## PWM
+https://www.electronicwings.com/raspberry-pi/raspberry-pi-pwm-generation-using-python-and-c
+
+first, install `sudo apt-get install python3.11-dev`
+need this lib https://pypi.org/project/RPi.GPIO/
+
+Error running PWM
+https://raspberrypi.stackexchange.com/questions/40105/access-gpio-pins-without-root-no-access-to-dev-mem-try-running-as-root
+
+No access to /dev/mem
+
+sudo apt install rpi.gpio-common
+sudo adduser relant dialout
+sudo groupadd gpio
+sudo usermod -a -G gpio relant
+sudo grep gpio /etc/group
+sudo chown root:gpio /dev/gpiomem
+sudo chmod g+rw /dev/gpiomem
+
+
+sudo reboot

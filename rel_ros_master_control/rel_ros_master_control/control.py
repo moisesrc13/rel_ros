@@ -5,10 +5,20 @@ from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_modbus_config, load_status_device_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
-from rel_ros_master_control.models.modbus_m import DevicePort, HRegister, RegisterDataType, SlaveTCP
+from rel_ros_master_control.models.modbus_m import (
+    DigitalHydValve,
+    HRegister,
+    IOLinkHR,
+    RegisterDataType,
+    RegisterMode,
+    SlaveHMI,
+    SlaveIOLink,
+    get_register_by_name,
+)
+from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
 logger = new_logger(__name__)
 
@@ -42,36 +52,77 @@ def get_value(
             return -1
 
 
-class ControlStatus(BaseModel):
+class ModbusStatus(BaseModel):
     error: str = None
     status: str = ""
     value: int = 0
 
 
 class RelControl:
-    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
-        self.master_io_link = RelModbusMaster(slave)
+    def __init__(self, iolink_slave: SlaveIOLink, hmi_slave: SlaveHMI, hr: list[HRegister]) -> None:
+        self.tower_devive = TowerStatusDevice(load_status_device_config())
+        self.hyd_valve_io = DigitalHydValve()
+        self.master_io_link = RelModbusMaster(iolink_slave)
+        self.master_hmi = RelModbusMaster(hmi_slave)
         self.hr = hr
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
 
+    def apply_state(self, hr: HRegister, state_value: int):
+        try:
+            self.master_io_link.slave_conn.write_register(
+                hr.address,
+                state_value,
+            )
+        except Exception as err:
+            logger.error("error writing state %s - %s", state_value, err)
+
+    def apply_manifold_state(self, state_value: int):
+        self.apply_state(get_register_by_name(self.hr, IOLinkHR.MANIFOLD.value), state_value)
+
+    def apply_hyd_valve_state(self, state_value: int):
+        self.apply_state(
+            get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value), state_value
+        )
+
+    def apply_tower_state(self, state: TowerState):
+        registers = []
+        start_address = self.tower_devive.tower_status.start_address
+        match state:
+            case TowerState.FULL:
+                registers = self.tower_devive.tower_status.states.full
+            case TowerState.MEDIUM_HIGH:
+                registers = self.tower_devive.tower_status.states.medium_high
+            case TowerState.MEDIUM:
+                registers = self.tower_devive.tower_status.states.medium
+            case TowerState.PRE_VACUUM:
+                registers = self.tower_devive.tower_status.states.pre_vacuum
+            case TowerState.VACUUM:
+                registers = self.tower_devive.tower_status.states.vacuum
+            case TowerState.BUCKET_CHANGE:
+                registers = self.tower_devive.tower_status.states.bucket_change
+            case TowerState.ACOSTIC_ALARM_ON:
+                start_address = self.tower_devive.tower_status.alarm_address
+                registers = self.tower_devive.tower_status.states.acoustic_alarm_on
+            case TowerState.ACOSTIC_ALARM_OFF:
+                start_address = self.tower_devive.tower_status.alarm_address
+                registers = self.tower_devive.tower_status.states.acoustic_alarm_off
+            case _:
+                logger.warning("no match state found for tower device - %s", state.value)
+        if registers:
+            try:
+                self.master_io_link.slave_conn.write_registers(
+                    start_address,
+                    registers,
+                )
+            except Exception as err:
+                logger.error("error writing tower state status %s - %s", state.value, err)
+
     def get_register_with_offset(self, register: int) -> int:
-        register = register + self.master_io_link.slave.offset
+        register = register + self.master_io_link.slave.slave_tcp.offset
         logger.debug("register with offset %s", register)
         return register
-
-    def read_device_port_input_status(self, port: str) -> int:
-        port: DevicePort = getattr(self.master_io_link.slave.device_ports, port)
-        logger.debug(
-            "port_num %s status_register %s", port, port.holding_registers.data_input_status
-        )
-        rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=self.get_register_with_offset(port.holding_registers.data_input_status.address),
-            count=port.holding_registers.data_input_status.words,
-        )
-        decoder = get_decoder(rr)
-        return get_value(decoder, port.holding_registers.data_input_status.data_type)
 
     def read_device_port_register(self, register: HRegister) -> int:
         logger.debug("read device register %s", register)
@@ -92,8 +143,8 @@ class RelControl:
             return
         logger.info("writing ok ✨")
 
-    def write_holding_register(self, register: int, value: int) -> ControlStatus:
-        status = ControlStatus()
+    def write_holding_register(self, register: int, value: int) -> ModbusStatus:
+        status = ModbusStatus()
         logger.info("writing to register %s value %s", register, value)
         response = self.master_io_link.slave_conn.write_register(
             address=self.get_register_with_offset(register), value=value
@@ -107,8 +158,8 @@ class RelControl:
         status.value = value
         return status
 
-    def read_holding_register(self, register: int) -> ControlStatus:
-        status = ControlStatus()
+    def read_holding_register(self, register: int) -> ModbusStatus:
+        status = ModbusStatus()
         logger.info("reading register %s", register)
         response = self.master_io_link.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register), count=1
@@ -133,7 +184,11 @@ class RelControl:
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for register in self.hr:
-                futures.append(executor.submit(worker, register))
+                if register.mode == RegisterMode.R:
+                    futures.append(executor.submit(worker, register))
+        if not futures:
+            logger.warning("getting no data for read mode registers...")
+            return futures
         concurrent.futures.wait(futures)
         logger.info(
             "getting data total %s from master %s", len(updated_registers), updated_registers
@@ -141,10 +196,13 @@ class RelControl:
         return updated_registers
 
 
-def run_masters_to_iolinks(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelControl]:
+def run_masters_to_iolinks(
+    iolink_slaves: list[SlaveIOLink], hmi_slaves: list[SlaveHMI], hr: list[HRegister]
+) -> list[RelControl]:
     masters = []
-    for slave in slaves:
-        masters.append(RelControl(slave=slave, hr=hr))
+    for iolink_slave in iolink_slaves:
+        hmi_slave = next((s for s in hmi_slaves if s.id == iolink_slave.hmi_id), None)
+        masters.append(RelControl(iolink_slave=iolink_slave, hmi_slave=hmi_slave, hr=hr))
     logger.info("finish to run masters ...")
     return masters
 
@@ -185,7 +243,7 @@ def run():
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
     config = load_modbus_config()
-    control = RelControl(slave=config.iolinks[args.id], hr=config.holding_registers)
+    control = RelControl(iolink_slave=config.iolinks[args.id], hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

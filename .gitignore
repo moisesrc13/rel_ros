@@ -1,5 +1,7 @@
 *.drawio.bkp
 *.~lock.*
+.vscode*
+documentation/*.Identifier*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

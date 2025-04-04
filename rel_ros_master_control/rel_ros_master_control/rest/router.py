@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import BaseModel
 
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
+from rel_ros_master_control.services.pwm import PWMConfig, RelPWM
 
 logger = new_logger(__name__)
 
@@ -12,6 +13,12 @@ api_router = APIRouter()
 class WriteRequest(BaseModel):
     register: int
     value: int
+
+
+class PWMRequest(BaseModel):
+    frequency: int = 1000
+    time_seconds: int = 10
+    duty: int = 100
 
 
 @api_router.get("/")
@@ -25,7 +32,7 @@ def health():
     return "OK"
 
 
-@api_router.get("/read/{register}")
+@api_router.get("/modbus/read/{register}")
 async def read_register(
     request: Request,
     register: int,
@@ -41,7 +48,7 @@ async def read_register(
     return control_status.model_dump()
 
 
-@api_router.post("/write")
+@api_router.post("/modbus/write")
 async def write_register(
     request: Request,
     write_request: WriteRequest,
@@ -55,3 +62,15 @@ async def write_register(
             detail=f"Error getting register data: {control_status.error}",
         )
     return control_status.model_dump()
+
+
+@api_router.post("/pwdm/run")
+async def run_pwm(
+    pwm_request: PWMRequest,
+    background_tasks: BackgroundTasks,
+):
+    r_pwm = RelPWM(PWMConfig(frequency=pwm_request.frequency))
+    background_tasks.add_task(
+        r_pwm.run, time_seconds=pwm_request.time_seconds, duty=pwm_request.duty
+    )
+    return {"message": "pwm running..."}
