@@ -1,6 +1,6 @@
 import functools
-from dataclasses import dataclass
-from typing import Any, Optional
+import os
+from typing import Optional
 
 import rclpy
 from pydantic import BaseModel
@@ -84,7 +84,12 @@ class RelROSNode(Node):
                     ),
                 )
 
+    """ Main control function """
+
     def timer_callback_main_control(self, hmi_id: int = 0):
+        if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
+            return
+        self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
         node: ControlNode = get_control_node_with_id(self.control_cluster, hmi_id)
         control_iolink_data = convert_ros_message_to_dictionary(node.iolink_data.data)
         control_hmi_data = convert_ros_message_to_dictionary(node.iolink_data.data)
