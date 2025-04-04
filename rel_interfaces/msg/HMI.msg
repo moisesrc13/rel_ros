@@ -16,7 +16,7 @@ int32 param_recycle_time_cycle
 int32 param_pulse_train_selection
 int32 param_recycle_time_auto
 int32 param_vacuum_limit_high
-int32 param_pre_vacuum_limit_low
+int32 param_pre_vacuum_limit_high
 int32 param_pulse_train_low
 int32 param_pulse_train_medium
 int32 param_pulse_train_high
