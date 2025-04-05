@@ -71,7 +71,7 @@ class RelControl:
     def apply_state(self, hr: HRegister, state_value: int):
         try:
             self.master_io_link.slave_conn.write_register(
-                hr.address,
+                self.get_register_with_offset(hr.address),
                 state_value,
             )
         except Exception as err:
