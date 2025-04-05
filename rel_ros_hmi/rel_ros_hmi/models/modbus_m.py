@@ -60,7 +60,9 @@ def get_register_by_address(
     return (None, None)
 
 
-def get_register_by_name(registers: list[HRegister], name: str) -> Optional[HRegister]:
+def get_register_by_name(
+    registers: list[HRegister] | list[CRegister], name: str
+) -> Optional[HRegister | CRegister]:
     return next((r for r in registers if r.name == name), None)
 
 

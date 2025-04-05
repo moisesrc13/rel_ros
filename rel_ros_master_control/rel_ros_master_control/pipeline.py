@@ -6,6 +6,7 @@ from hamilton.function_modifiers import config
 from pydantic import BaseModel
 
 from rel_interfaces.msg import HMIStatus
+from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
@@ -18,10 +19,6 @@ class SensorDistanceParams(BaseModel):
     bucket_distance: int  # W
     high_pre_vacuum_limit: int  # X
     high_vacuum_limit: int  # Y
-
-
-class Constants:
-    laser_infinity: int = 1000
 
 
 class SensorDistanceState(Enum):

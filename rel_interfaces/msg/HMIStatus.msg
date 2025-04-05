@@ -1,8 +1,0 @@
-string hmi_name
-int32 hmi_id
-int32 status_alarm_pre_vacuum
-int32 status_alarm
-int32 status_no_air_pressure
-int32 status_error_change_bucket
-int32 status_pump_no_pressure
-int32 status_pump_no_depressurized

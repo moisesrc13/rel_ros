@@ -3,10 +3,11 @@ import time
 import rclpy
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
+from rel_interfaces.msg import HMI, HMIAction, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
+from rel_ros_hmi.models.modbus_m import get_register_by_name
 
 
 class RelROSNode(Node):
@@ -17,10 +18,7 @@ class RelROSNode(Node):
             IOLinkData, "rel/iolink", self.listener_iolink_data_callback, 10
         )
         self.subscription_hmi_status = self.create_subscription(
-            HMIStatus, "rel/hmistatus", self.listener_hmi_status_callback, 10
-        )
-        self.subscription_hmi_status = self.create_subscription(
-            HMIStatus, "rel/hmiaction", self.listener_hmi_action_callback, 10
+            HMIAction, "rel/hmiaction", self.listener_hmi_action_callback, 10
         )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
@@ -49,24 +47,21 @@ class RelROSNode(Node):
         self.get_logger().info(f"📨 I got an IOLinkData message {msg}")
         self.save_hmi_iolink_data(msg.hmi_id, msg)
 
-    def listener_hmi_status_callback(self, msg: HMIStatus):
-        self.get_logger().info(f"📨 I got an HMIStatus message {msg}")
-        self.save_hmi_status(msg.hmi_id, msg)
-
-    def listener_hmi_action_callback(self, msg: HMIStatus):
+    def listener_hmi_action_callback(self, msg: HMIAction):
         self.get_logger().info(f"📨 I got an HMIAction message {msg}")
-        self.save_hmi_status(msg.hmi_id, msg)
+        self.write_hmi_action(msg.hmi_id, msg)
 
-    def save_hmi_status(self, master_id: int, msg: HMIStatus):
+    def write_hmi_action(self, master_id: int, msg: HMIAction):
         try:
             master = self.masters[master_id]
-            for register in master.coils:
-                if value := getattr(msg, register.name, None):
-                    self.get_logger().info(
-                        f"📺 write HMI {master_id} coil {register.address} value: {value}"
-                    )
-                    master.do_write(register.address, value)
-            self.get_logger().info(f"complete write status into hmi master id {master_id}")
+            if register := get_register_by_name(
+                master.coils, msg.action_name
+            ):  # holding action on coils only for now
+                self.get_logger().info(
+                    f"📺 write HMI {master_id} coil {register.address} value: {msg.action_value}"
+                )
+                master.do_write(register.address, msg.action_value)
+                self.get_logger().info(f"complete write status into hmi master id {master_id}")
         except Exception as err:
             self.get_logger().error(f"error saving hmi status {err}")
 

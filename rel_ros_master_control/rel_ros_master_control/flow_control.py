@@ -5,23 +5,13 @@ from typing import Any, Optional
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
 
 telemetry.disable_telemetry()
-
-
-class Constants:
-    tasks: list[str] = [
-        "bucket_distance",
-        "sensor_distance_params",
-        "bucket_state",
-        "check_distance_sensor_for_electrovales",
-        "sensor_distance_state",
-        "sensor_laser_on",
-    ]
 
 
 @dataclass
@@ -95,7 +85,7 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
         return
     try:
         logger.info("running control flow")
-        dr.execute(Constants.tasks)
+        dr.execute(Constants.flow_tasks)
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
 
