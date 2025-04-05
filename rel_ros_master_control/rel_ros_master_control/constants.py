@@ -62,7 +62,12 @@ class HMIWriteAction(Enum):
 
 
 class Sensors(Enum):
+    SENSOR_MATERIAL_PRESSURE = "sensor_material_pressure"
+    SENSOR_MATERIAL_TEMPERATURE = "sensor_material_temperature"
     SENSOR_LASER_DISTANCE = "sensor_laser_distance"
+    SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
+    SENSOR_PRESSURE_REGULATOR_READ_REAL = "sensor_pressure_regulator_read_real"
+    SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
 
 
 class Params(Enum):
