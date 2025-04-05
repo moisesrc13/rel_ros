@@ -181,6 +181,10 @@ class RelControl:
         status.status = "read ok"
         return status
 
+    def get_data_by_hr_name(self, register_name: str) -> int:
+        register = get_register_by_name(self.hr, register_name)
+        return self.read_holding_register(register.address).value
+
     def get_data(self) -> list[HRegister]:
         updated_registers = []
 

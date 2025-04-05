@@ -50,6 +50,7 @@ def get_control_node_with_id(cluster: list[ControlNode], hmi_id: int) -> Optiona
 class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
+        self.is_control_running = False
         self.config = load_modbus_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
@@ -88,6 +89,8 @@ class RelROSNode(Node):
         """
         Main control function
         """
+        if self.is_control_running:
+            return
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
@@ -101,7 +104,9 @@ class RelROSNode(Node):
             control_iolink_data=control_iolink_data,
             hmi_action_publisher=self.hmi_action_publisher,
         )
+        self.is_control_running = True
         run_control(flow_inputs=flow_inputs)
+        self.is_control_running = False
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
