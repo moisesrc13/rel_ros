@@ -31,4 +31,3 @@ int32 param_bucket_size_selection
 int32 param_max_time_pump_on
 int32 param_client_password
 int32 param_turn_on_pumping_process
-int32 param_recycle

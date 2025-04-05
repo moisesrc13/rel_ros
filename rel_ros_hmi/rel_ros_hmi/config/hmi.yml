@@ -11,7 +11,7 @@
       address: 1
     - name: "param_turn_on_pumping_process"
       address: 2
-    - name: "param_recycle"
+    - name: "action_recycle"
       address: 3
     - name: "enter_screen_3_0"
       address: 4

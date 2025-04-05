@@ -12,3 +12,4 @@ int32 action_button_start_bucket_change_2
 int32 action_pull_down_pistons_bucket
 int32 action_pull_up_pistons_bucket
 int32 action_button_change_bucket_3
+int32 action_recycle
