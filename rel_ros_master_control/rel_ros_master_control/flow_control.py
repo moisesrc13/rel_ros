@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
+from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -69,7 +70,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(flow_inputs: FlowControlInputs):
+def run(flow_inputs: FlowControlInputs, visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -89,6 +90,9 @@ def run(flow_inputs: FlowControlInputs):
         )
         .build()
     )
+    if visualize:
+        dr.display_all_functions()
+        return
     try:
         logger.info("running control flow")
         dr.execute(Constants.tasks)
@@ -97,4 +101,25 @@ def run(flow_inputs: FlowControlInputs):
 
 
 if __name__ == "__main__":
-    logger.info("running ...")
+    """this method is for manual testing"""
+
+    class TestPubliser:
+        def publish(self, msg: str):
+            print(f"publish {msg}")
+
+    config = load_modbus_config()
+    control = RelControl(iolink_slave=config.iolinks[0], hr=config.holding_registers)
+    logger.info("visualize ...")
+    flow_inputs = FlowControlInputs(
+        control_hmi_data={
+            "param_vacuum_limit_high": 100,
+            "param_pre_vacuum_limit_high": 80,
+            "param_vacuum_distance": 10,
+        },
+        control_iolink_data={
+            "sensor_laser_distance": 100,
+        },
+        hmi_status_publisher=TestPubliser(),
+        master_control=control,
+    )
+    run(flow_inputs=flow_inputs, visualize=True)
