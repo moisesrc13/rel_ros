@@ -6,7 +6,7 @@ from hamilton.function_modifiers import config
 from pydantic import BaseModel
 
 from rel_interfaces.msg import HMIStatus
-from rel_ros_master_control.constants import Constants
+from rel_ros_master_control.constants import HMIWriteAction
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
@@ -124,27 +124,33 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
-    hmi_status_publisher: Any,
+    hmi_action_publisher: Any,
     control: RelControl,
     sensor_distance_state: SensorDistanceState,
     bucket_state: TowerState,
 ):
     control.apply_tower_state(bucket_state)
     msg = HMIStatus()
+    msg.hmi_id = control.hmi_id
+    msg.action_value = 1
     if bucket_state == TowerState.PRE_VACUUM:
-        msg.status_alarm_pre_vacuum = 1
+        msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
     elif bucket_state == TowerState.VACUUM:
-        msg.status_alarm = 1
-    hmi_status_publisher.publish(msg)
-    control.eletrovalve_on()
+        msg.action_name = HMIWriteAction.STATUS_ALARM.value
+    hmi_action_publisher.publish(msg)
+    msg = HMIStatus()
+    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value
+    hmi_action_publisher.publish(msg)
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
-def sensor_laser_on__c(hmi_status_publisher: Any, control: RelControl, bucket_state: TowerState):
+def sensor_laser_on__c(hmi_action_publisher: Any, control: RelControl, bucket_state: TowerState):
     control.apply_tower_state(bucket_state)
     msg = HMIStatus()
-    msg.status_alarm_pre_vacuum = 1
-    hmi_status_publisher.publish(msg)
+    msg.hmi_id = control.hmi_id
+    msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
+    msg.action_value = 1
+    hmi_action_publisher.publish(msg)
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)

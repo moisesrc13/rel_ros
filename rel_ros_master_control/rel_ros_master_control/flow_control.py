@@ -16,7 +16,7 @@ telemetry.disable_telemetry()
 
 @dataclass
 class FlowControlInputs:
-    hmi_status_publisher: Any
+    hmi_action_publisher: Any
     master_control: RelControl
     control_iolink_data: dict
     control_hmi_data: dict
@@ -64,7 +64,7 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
-        "hmi_status_publisher": flow_inputs.hmi_status_publisher,
+        "hmi_action_publisher": flow_inputs.hmi_action_publisher,
         "control_hmi_data": flow_inputs.control_hmi_data,
         "control_iolink_data": flow_inputs.control_iolink_data,
         "control": flow_inputs.master_control,
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         control_iolink_data={
             "sensor_laser_distance": 100,
         },
-        hmi_status_publisher=TestPubliser(),
+        hmi_action_publisher=TestPubliser(),
         master_control=control,
     )
     run(flow_inputs=flow_inputs, visualize=True)

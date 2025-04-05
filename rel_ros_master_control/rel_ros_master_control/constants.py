@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class HMIAction(Enum):
+class HMIWriteAction(Enum):
     ACTION_TURN_ON_PUMPING_PROCESS = "action_turn_on_pumping_process"
     ACTION_PRE_FILL_LINE = "action_pre_fill_line"
     ACTION_PULL_DOWN_PISTONS_MANUAL = "action_pull_down_pistons_manual"
@@ -16,9 +16,6 @@ class HMIAction(Enum):
     ACTION_PULL_UP_PISTONS_BUCKET = "action_pull_up_pistons_bucket"
     ACTION_BUTTON_CHANGE_BUCKET_3 = "action_button_change_bucket_3"
     ACTION_RECYCLE = "action_recycle"
-
-
-class HMIStatus(Enum):
     STATUS_ALARM_PRE_VACUUM = "status_alarm_pre_vacuum"
     STATUS_ALARM = "status_alarm"
     STATUS_NO_AIR_PRESSURE = "status_no_air_pressure"

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from rclpy.node import Node
 from rospy_message_converter.message_converter import convert_ros_message_to_dictionary
 
-from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
+from rel_interfaces.msg import HMI, HMIAction, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import FlowControlInputs
@@ -61,8 +61,8 @@ class RelROSNode(Node):
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
-        self.get_logger().info("creating publisher for rel/hmistatus topic 📨 ...")
-        self.hmi_status_publisher = self.create_publisher(HMIStatus, "rel/hmistatus", 10)
+        self.get_logger().info("creating publisher for rel/hmiaction topic 📨 ...")
+        self.hmi_action_publisher = self.create_publisher(HMIAction, "rel/hmiaction", 10)
 
         self.get_logger().info("======= creating MAIN CONTROL timers 🤖 =======")
         self.create_timers_for_main_control()
@@ -99,7 +99,7 @@ class RelROSNode(Node):
             master_control=master_control,
             control_hmi_data=control_hmi_data,
             control_iolink_data=control_iolink_data,
-            hmi_status_publisher=self.hmi_status_publisher,
+            hmi_action_publisher=self.hmi_action_publisher,
         )
         run_control(flow_inputs=flow_inputs)
 

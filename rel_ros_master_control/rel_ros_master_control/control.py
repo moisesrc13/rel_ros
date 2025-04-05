@@ -63,6 +63,7 @@ class RelControl:
         self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
         self.hr = hr
+        self.hmi_id = iolink_slave.hmi_id
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
