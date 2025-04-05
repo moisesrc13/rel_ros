@@ -19,6 +19,9 @@ class RelROSNode(Node):
         self.subscription_hmi_status = self.create_subscription(
             HMIStatus, "rel/hmistatus", self.listener_hmi_status_callback, 10
         )
+        self.subscription_hmi_status = self.create_subscription(
+            HMIStatus, "rel/hmiaction", self.listener_hmi_action_callback, 10
+        )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
         run_modbus_slaves(
@@ -48,6 +51,10 @@ class RelROSNode(Node):
 
     def listener_hmi_status_callback(self, msg: HMIStatus):
         self.get_logger().info(f"📨 I got an HMIStatus message {msg}")
+        self.save_hmi_status(msg.hmi_id, msg)
+
+    def listener_hmi_action_callback(self, msg: HMIStatus):
+        self.get_logger().info(f"📨 I got an HMIAction message {msg}")
         self.save_hmi_status(msg.hmi_id, msg)
 
     def save_hmi_status(self, master_id: int, msg: HMIStatus):

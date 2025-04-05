@@ -1,5 +1,6 @@
 string hmi_name
 int32 hmi_id
+int32 action_turn_on_pumping_process
 int32 action_pre_fill_line
 int32 action_pull_down_pistons_manual
 int32 action_pull_up_pistons_manual
