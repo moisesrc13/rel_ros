@@ -77,7 +77,7 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
         "hmi_status_publisher": flow_inputs.hmi_status_publisher,
         "control_hmi_data": flow_inputs.control_hmi_data,
         "control_iolink_data": flow_inputs.control_iolink_data,
-        "master_control": flow_inputs.master_control,
+        "control": flow_inputs.master_control,
     }
     dr = (
         driver.Builder()

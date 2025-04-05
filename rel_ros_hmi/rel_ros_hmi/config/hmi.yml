@@ -31,15 +31,15 @@
       address: 12  # jumped 11 - ok
     - name: "close_local_window_0_2"
       address: 13
-    - name: "param_pre_fill_line"
+    - name: "action_pre_fill_line"
       address: 14
-    - name: "param_pull_down_pistons_manual"
+    - name: "action_pull_down_pistons_manual"
       address: 15
-    - name: "param_pull_up_pistons_manual"
+    - name: "action_pull_up_pistons_manual"
       address: 16
-    - name: "param_vacuum_air"
+    - name: "action_vacuum_air"
       address: 17
-    - name: "param_depressurize"
+    - name: "action_depressurize"
       address: 18
     - name: "open_local_window_1_1"
       address: 19
@@ -47,21 +47,21 @@
       address: 20
     - name: "enter_screen_0_0"
       address: 21
-    - name: "param_recycle_car"
+    - name: "action_recycle_car"
       address: 22
-    - name: "param_recycle_retractil"
+    - name: "action_recycle_retractil"
       address: 23
     - name: "enter_screen_1_0"
       address: 24
-    - name: "param_button_start_bucket_change_1"
+    - name: "action_button_start_bucket_change_1"
       address: 25
-    - name: "param_button_start_bucket_change_2"
+    - name: "action_button_start_bucket_change_2"
       address: 26
-    - name: "param_pull_down_pistons_bucket"
+    - name: "action_pull_down_pistons_bucket"
       address: 27
-    - name: "param_pull_up_pistons_bucket"
+    - name: "action_pull_up_pistons_bucket"
       address: 28
-    - name: "param_button_change_bucket_3"
+    - name: "action_button_change_bucket_3"
       address: 29
     - name: "enter_screen_0_0"
       address: 30

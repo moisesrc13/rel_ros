@@ -143,8 +143,11 @@ def sensor_laser_on__b(
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
-def sensor_laser_on__c(sensor_distance_state: SensorDistanceState):
-    pass
+def sensor_laser_on__c(hmi_status_publisher: Any, control: RelControl, bucket_state: TowerState):
+    control.apply_tower_state(bucket_state)
+    msg = HMIStatus()
+    msg.status_alarm_pre_vacuum = 1
+    hmi_status_publisher.publish(msg)
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
