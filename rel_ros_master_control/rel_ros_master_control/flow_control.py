@@ -1,8 +1,8 @@
 import importlib
+from dataclasses import dataclass
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
-from pydantic import BaseModel
 
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
@@ -12,15 +12,7 @@ logger = new_logger(__name__)
 telemetry.disable_telemetry()
 
 
-class FlowControlInputs:
-    hmi_status_publisher: Any
-    master_control: RelControl
-    control_iolink_data: dict
-    control_hmi_data: dict
-
-
-class FlowControlConfig:
-    inputs: FlowControlInputs
+class Constants:
     tasks: list[str] = [
         "bucket_distance",
         "sensor_distance_params",
@@ -29,6 +21,14 @@ class FlowControlConfig:
         "sensor_distance_state",
         "sensor_laser_on",
     ]
+
+
+@dataclass
+class FlowControlInputs:
+    hmi_status_publisher: Any
+    master_control: RelControl
+    control_iolink_data: dict
+    control_hmi_data: dict
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -69,13 +69,19 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(config: FlowControlConfig):
+def run(flow_inputs: FlowControlInputs):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
+    inputs = {
+        "hmi_status_publisher": flow_inputs.hmi_status_publisher,
+        "control_hmi_data": flow_inputs.control_hmi_data,
+        "control_iolink_data": flow_inputs.control_iolink_data,
+        "master_control": flow_inputs.master_control,
+    }
     dr = (
         driver.Builder()
         .with_modules(router_module)
-        .with_config(config.inputs.model_dump())
+        .with_config(inputs)
         .with_adapters(
             default_adapter,
             LoggingPreNodeExecute(),
@@ -85,7 +91,7 @@ def run(config: FlowControlConfig):
     )
     try:
         logger.info("running control flow")
-        dr.execute(config.tasks)
+        dr.execute(Constants.tasks)
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
 

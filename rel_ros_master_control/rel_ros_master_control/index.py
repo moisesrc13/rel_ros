@@ -10,7 +10,7 @@ from rospy_message_converter.message_converter import convert_ros_message_to_dic
 from rel_interfaces.msg import HMI, HMIStatus, IOLinkData
 from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
-from rel_ros_master_control.flow_control import FlowControlConfig, FlowControlInputs
+from rel_ros_master_control.flow_control import FlowControlInputs
 from rel_ros_master_control.flow_control import run as run_control
 
 
@@ -95,17 +95,13 @@ class RelROSNode(Node):
         control_iolink_data = convert_ros_message_to_dictionary(node.iolink_data.data)
         control_hmi_data = convert_ros_message_to_dictionary(node.iolink_data.data)
         master_control: RelControl = self.masters[hmi_id]
-        inputs = FlowControlInputs(
+        flow_inputs = FlowControlInputs(
             master_control=master_control,
             control_hmi_data=control_hmi_data,
             control_iolink_data=control_iolink_data,
             hmi_status_publisher=self.hmi_status_publisher,
         )
-        run_control(
-            FlowControlConfig(
-                inputs=inputs,
-            )
-        )
+        run_control(flow_inputs=flow_inputs)
 
     def create_hmi_subscribers(self, count: int = 1):
         for s in range(count):
