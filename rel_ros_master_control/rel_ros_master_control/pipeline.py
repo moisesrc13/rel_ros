@@ -120,8 +120,9 @@ def sensor_laser_on__b(
     hmi_action_publisher.publish(msg)
     wait_for_sensor_laser()
     data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data < control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
-        pass
+    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
+        hmi_action_publisher.publish(msg)
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
