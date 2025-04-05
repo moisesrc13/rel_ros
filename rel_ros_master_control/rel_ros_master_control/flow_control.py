@@ -12,19 +12,20 @@ logger = new_logger(__name__)
 telemetry.disable_telemetry()
 
 
-class FlowControlInputs(BaseModel):
+class FlowControlInputs:
     hmi_status_publisher: Any
     master_control: RelControl
     control_iolink_data: dict
     control_hmi_data: dict
 
 
-class FlowControlConfig(BaseModel):
+class FlowControlConfig:
     inputs: FlowControlInputs
     tasks: list[str] = [
         "bucket_distance",
         "sensor_distance_params",
         "bucket_state",
+        "check_distance_sensor_for_electrovales",
         "sensor_distance_state",
         "sensor_laser_on",
     ]
@@ -83,6 +84,11 @@ def run(config: FlowControlConfig):
         .build()
     )
     try:
+        logger.info("running control flow")
         dr.execute(config.tasks)
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
+
+
+if __name__ == "__main__":
+    logger.info("running ...")
