@@ -4,28 +4,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class ManifoldActions(BaseModel):
-    ACTIVATE: int = int("0000_0000_0000_0001", 2)
-    EXTRA: int = int("0000_0001_0000_0000", 2)
-    RECYCLE: int = int("0000_0100_0000_0000", 2)
-    VENTING_RETRACTIL_UP: int = int("0001_0000_0000_0000", 2)
-    VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
-    PISTONS_UP: int = int("0100_0000_0000_0000", 2)
-    PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
-
-
-class IOLinkHR(Enum):
-    MANIFOLD = "manifold"
-    DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
-
-
-class DigitalHydValve(BaseModel):
-    out1_off_out2_off: int = 1
-    out1_on_out2_off: int = 3
-    out1_off_out2_on: int = 5
-    out1_on_out2_on: int = 7
-
-
 class RegisterDataType(Enum):
     float16 = "float16"
     uint16 = "uint16"

@@ -6,12 +6,11 @@ from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
+from rel_ros_master_control.constants import DigitalHydValve, IOLinkHR
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import (
-    DigitalHydValve,
     HRegister,
-    IOLinkHR,
     RegisterDataType,
     RegisterMode,
     SlaveIOLink,

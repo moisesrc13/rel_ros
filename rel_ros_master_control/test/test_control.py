@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.constants import DigitalHydValve, IOLinkHR, ManifoldActions
 from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
@@ -13,10 +14,7 @@ from rel_ros_master_control.control import (
     get_value,
 )
 from rel_ros_master_control.models.modbus_m import (
-    DigitalHydValve,
     HRegister,
-    IOLinkHR,
-    ManifoldActions,
     RegisterDataType,
     SlaveTCP,
     get_register_by_name,
