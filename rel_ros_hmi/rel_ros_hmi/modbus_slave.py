@@ -138,7 +138,7 @@ def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister], publisher):
         if isinstance(slave.slave_tcp, SlaveTCP):
             # Start Modbus TCP Server
             logger.info(
-                "running TCP modbus slave 🤖 on %s port %s",
+                "running TCP modbus HMI slave 🤖 on %s port %s",
                 slave.slave_tcp.host,
                 slave.slave_tcp.port,
             )
@@ -179,7 +179,7 @@ class ModbusSlaveThread(Thread):
 
 def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister], publishers: dict):
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
+        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.hmi_id))
         slave_thread.daemon = True
         slave_thread.start()
     try:
