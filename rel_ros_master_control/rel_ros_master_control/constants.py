@@ -3,9 +3,12 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class IOLinkHR(Enum):
-    MANIFOLD = "manifold"
+class DigitalOutput(Enum):
     DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
+
+
+class DigitalInput(Enum):
+    DIGITAL_IN_EMERGENCY_STOP = "digital_in_emergency_stop"
 
 
 class DigitalHydValve(BaseModel):
@@ -75,6 +78,7 @@ class HMIWriteAction(Enum):
     ACTION_PULL_UP_PISTONS_BUCKET = "action_pull_up_pistons_bucket"
     ACTION_BUTTON_CHANGE_BUCKET_3 = "action_button_change_bucket_3"
     ACTION_RECYCLE = "action_recycle"
+    ACTION_MANIFOLD = "action_manifold"
     STATUS_ALARM_PRE_VACUUM = "status_alarm_pre_vacuum"
     STATUS_ALARM = "status_alarm"
     STATUS_NO_AIR_PRESSURE = "status_no_air_pressure"

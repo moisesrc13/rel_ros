@@ -6,7 +6,7 @@ from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from rel_ros_master_control.config import load_modbus_config, load_status_device_config
-from rel_ros_master_control.constants import DigitalHydValve, IOLinkHR
+from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.modbus_m import (
@@ -77,11 +77,13 @@ class RelControl:
             logger.error("error writing state %s - %s", state_value, err)
 
     def apply_manifold_state(self, state_value: int):
-        self.apply_state(get_register_by_name(self.hr, IOLinkHR.MANIFOLD.value), state_value)
+        self.apply_state(
+            get_register_by_name(self.hr, HMIWriteAction.ACTION_MANIFOLD.value), state_value
+        )
 
     def apply_hyd_valve_state(self, state_value: int):
         self.apply_state(
-            get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value), state_value
+            get_register_by_name(self.hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value), state_value
         )
 
     def apply_tower_state(self, state: TowerState):

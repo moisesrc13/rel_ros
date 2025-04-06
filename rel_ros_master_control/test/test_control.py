@@ -3,7 +3,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from rel_ros_master_control.config import load_modbus_config
-from rel_ros_master_control.constants import DigitalHydValve, IOLinkHR, ManifoldActions
+from rel_ros_master_control.constants import (
+    DigitalHydValve,
+    DigitalOutput,
+    HMIWriteAction,
+    ManifoldActions,
+)
 from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
@@ -103,7 +108,7 @@ def test_read_holding_register(rel_control: RelControl, test_address, modbus_val
 def test_manifold_actions(rel_control: RelControl):
     manifold = ManifoldActions()
     write_register = writer_register_mock(rel_control)
-    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.MANIFOLD.value)
+    hr: HRegister = get_register_by_name(rel_control.hr, HMIWriteAction.ACTION_MANIFOLD.value)
     for _, value in manifold.model_dump().items():
         rel_control.apply_manifold_state(value)
         write_register.assert_called_with(
@@ -115,7 +120,7 @@ def test_manifold_actions(rel_control: RelControl):
 def test_control_hyd_valve(rel_control: RelControl):
     digital_valve = DigitalHydValve()
     write_register = writer_register_mock(rel_control)
-    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
+    hr: HRegister = get_register_by_name(rel_control.hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value)
     for _, value in digital_valve.model_dump().items():
         rel_control.apply_hyd_valve_state(value)
         write_register.assert_called_with(
