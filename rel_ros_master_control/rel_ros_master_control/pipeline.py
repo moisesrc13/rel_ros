@@ -9,6 +9,7 @@ from rel_interfaces.msg import HMIStatus
 from rel_ros_master_control.constants import (
     Constants,
     HMIWriteAction,
+    ManifoldActions,
     Params,
     SensorDistanceParams,
     SensorDistanceState,
@@ -118,11 +119,15 @@ def sensor_laser_on__b(
     hmi_action_publisher.publish(msg)
     msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value
     hmi_action_publisher.publish(msg)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
     data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
     if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+        control.apply_tower_state(TowerState.BUCKET_CHANGE)
         msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
         hmi_action_publisher.publish(msg)
+    else:
+        pass
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
