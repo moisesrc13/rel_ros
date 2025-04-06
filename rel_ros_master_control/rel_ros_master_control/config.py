@@ -36,8 +36,10 @@ def load_config(file_path: str, config_type: ConfigType):
 
 
 def load_modbus_config() -> ModbusConfig:
-    return load_config("./config/modbus.yml", ConfigType.MODBUS)
+    config_path = os.getenv("CONFIG_PATH", "./config")
+    return load_config(f"{config_path}/control/modbus.yml", ConfigType.MODBUS)
 
 
 def load_status_device_config() -> TowerStatus:
-    return load_config("./config/status_device.yml", ConfigType.STATUS_DEVICE)
+    config_path = os.getenv("CONFIG_PATH", "./config")
+    return load_config(f"{config_path}/control/status_device.yml", ConfigType.STATUS_DEVICE)
