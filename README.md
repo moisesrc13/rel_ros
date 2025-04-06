@@ -1,16 +1,17 @@
 # rel_ros
-Relant on ROS2
 
+Relant on ROS2
 
 ## Docker
 
->build
-`docker build . -t rel-ros:0.1.0`
+> build
+> `docker build . -t rel-ros:0.1.0`
 
->run
-`docker run --rm --name rel-ros -it rel-ros:0.1.0 /bin/bash`
+> run
+> `docker run --rm --name rel-ros -it rel-ros:0.1.0 /bin/bash`
 
->run with mounted volumes for all nodes
+> run with mounted volumes for all nodes
+
 ```bash
 cd ~/vs-workspace/rel_ros
 
@@ -24,19 +25,24 @@ docker run --rm --name rel-ros -it \
 ## Run on local
 
 > my local all
+
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"
 export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_hmi"
+export CONFIG_PATH="/home/moisesrc/vs-workspace/rel_ros/config"
 ```
 
 > RPi4
+
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_master_control"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
+export CONFIG_PATH="/home/relant/git/rel_ros/config"
 ```
 
 > for ROS Docekr image
-This is important to execute before running (only once)
+> This is important to execute before running (only once)
+
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
@@ -56,8 +62,8 @@ ros2 run rel_ros_master_control rel_ros_master_control_node
 ros2 run rel_ros_hmi rel_ros_hmi_node
 ```
 
-
 ## Run test modbus master control slave
+
 ```bash
 export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
@@ -66,10 +72,10 @@ python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 ```
 
 ## Run rest API app
+
 ```bash
 python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
-
 
 ## Run test HMI modbus master & slave
 
@@ -103,6 +109,7 @@ python rel_ros_master_control/rel_ros_master_control/control.py --action read --
 ```
 
 ## Build interfaces package
+
 Make sure you install `numpy` in the virtual env
 
 ## Sym links in RPi
@@ -114,6 +121,7 @@ ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_inter
 ```
 
 ### Run ROS on RPi4
+
 ```
 cd /home/relant/ros2_ws
 cp /home/relant/git/rel_ros/*.sh .
@@ -123,6 +131,7 @@ cp -r /home/relant/git/rel_ros/rel_ros_hmi/rel_ros_hmi/config /home/relant/ros2_
 ```
 
 ## Config REST Service
+
 ```bash
 sudo cp rel_ros_master_control/rel_ros_master_control/rest/rel-iolink-rest.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -132,14 +141,15 @@ sudo systemctl rel-iolink-rest.service
 ```
 
 ### calling service
-Replace `localhost` by host IP
 
+Replace `localhost` by host IP
 
 curl "http://localhost:9080/read/8001"
 
 curl -X POST "http://localhost:9080/write" -H "Content-Type:application/json" -d '{"register": 5051, "value": 1}'
 
 ## PWM
+
 https://www.electronicwings.com/raspberry-pi/raspberry-pi-pwm-generation-using-python-and-c
 
 first, install `sudo apt-get install python3.11-dev`
@@ -157,6 +167,5 @@ sudo usermod -a -G gpio relant
 sudo grep gpio /etc/group
 sudo chown root:gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
-
 
 sudo reboot
