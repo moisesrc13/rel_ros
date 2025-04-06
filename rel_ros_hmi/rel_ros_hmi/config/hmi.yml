@@ -9,7 +9,7 @@
       address: 0
     - name: "enter_screen_5_0"
       address: 1
-    - name: "param_turn_on_pumping_process"
+    - name: "action_turn_on_pumping_process"
       address: 2
     - name: "action_recycle"
       address: 3

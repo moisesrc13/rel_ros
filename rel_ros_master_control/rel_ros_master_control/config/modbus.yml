@@ -64,3 +64,59 @@ iolinks:
       framer: "socket"
       timeout_seconds: 1
       offset: -1
+hmis:
+  - name: "HMI 0"
+    hmi_id: 0
+    hmi_name: "HMI 0"
+    slave_tcp:
+      host: 0.0.0.0
+      port: 8845
+      framer: "socket"
+      timeout_seconds: 1
+      offset: 0
+hmi_coil_registers:  # for actions only
+  - name: "action_recycle"
+    address: 3
+  - name: "action_pre_fill_line"
+    address: 14
+  - name: "action_pull_down_pistons_manual"
+    address: 15
+  - name: "action_pull_up_pistons_manual"
+    address: 16
+  - name: "action_vacuum_air"
+    address: 17
+  - name: "action_depressurize"
+    address: 18
+  - name: "open_local_window_1_1"
+    address: 19
+  - name: "enter_screen_3_0"
+    address: 20
+  - name: "enter_screen_0_0"
+    address: 21
+  - name: "action_recycle_car"
+    address: 22
+  - name: "action_recycle_retractil"
+    address: 23
+  - name: "action_button_start_bucket_change_1"
+    address: 25
+  - name: "action_button_start_bucket_change_2"
+    address: 26
+  - name: "action_pull_down_pistons_bucket"
+    address: 27
+  - name: "action_pull_up_pistons_bucket"
+    address: 28
+  - name: "action_button_change_bucket_3"
+    address: 29
+  # ------------------- STATUS
+  - name: "status_alarm_pre_vacuum"
+    address: 34
+  - name: "status_alarm"
+    address: 35
+  - name: "status_no_air_pressure"
+    address: 36
+  - name: "status_error_change_bucket"
+    address: 37
+  - name: "status_pump_no_pressure"
+    address: 38
+  - name: "status_pump_no_depressurized"
+    address: 39
