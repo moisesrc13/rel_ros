@@ -1,11 +1,9 @@
 import time
-from enum import Enum
 from typing import Any
 
 from hamilton.function_modifiers import config
-from pydantic import BaseModel
 
-from rel_interfaces.msg import HMIStatus
+from rel_interfaces.msg import HMIAction
 from rel_ros_master_control.constants import (
     Constants,
     HMIWriteAction,
@@ -73,14 +71,22 @@ def sensor_distance_state(
     return SensorDistanceStateName.E
 
 
-def bucket_state(bucket_distance: int) -> TowerState:
+def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
+    state = TowerState.BUCKET_CHANGE
     if bucket_distance >= 80 and TowerState <= 100:
-        return TowerState.FULL
-    if bucket_distance >= 50 and TowerState <= 79:
-        return TowerState.MEDIUM_HIGH
-    if bucket_distance >= 10 and TowerState <= 20:
-        return TowerState.PRE_VACUUM
-    return TowerState.BUCKET_CHANGE
+        state = TowerState.FULL
+    elif bucket_distance >= 50 and TowerState <= 79:
+        state = TowerState.MEDIUM_HIGH
+    elif bucket_distance >= 30 and TowerState <= 49:
+        state = TowerState.MEDIUM_HIGH
+    elif bucket_distance >= 10 and TowerState <= 20:
+        state = TowerState.PRE_VACUUM
+        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+    elif bucket_distance >= 2 and TowerState <= 5:
+        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        state = TowerState.VACUUM
+    control.apply_tower_state(state)
+    return state
 
 
 def check_distance_sensor_for_electrovales(
@@ -108,14 +114,10 @@ def sensor_laser_on__b(
     bucket_state: TowerState,
     control_iolink_data: dict,
 ):
-    control.apply_tower_state(bucket_state)
-    msg = HMIStatus()
+    msg = HMIAction()
     msg.hmi_id = control.hmi_id
     msg.action_value = 1
-    if bucket_state == TowerState.PRE_VACUUM:
-        msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
-    elif bucket_state == TowerState.VACUUM:
-        msg.action_name = HMIWriteAction.STATUS_ALARM.value
+    msg.action_name = HMIWriteAction.STATUS_ALARM.value  # vacuum alarm
     hmi_action_publisher.publish(msg)
     msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value
     hmi_action_publisher.publish(msg)
@@ -126,18 +128,31 @@ def sensor_laser_on__b(
         control.apply_tower_state(TowerState.BUCKET_CHANGE)
         msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
         hmi_action_publisher.publish(msg)
-    else:
-        pass
+        # else will pass to A state next iteration
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
-def sensor_laser_on__c(hmi_action_publisher: Any, control: RelControl, bucket_state: TowerState):
+def sensor_laser_on__c(
+    hmi_action_publisher: Any,
+    control: RelControl,
+    bucket_state: TowerState,
+    control_iolink_data: dict,
+):
     control.apply_tower_state(bucket_state)
-    msg = HMIStatus()
+    msg = HMIAction()
     msg.hmi_id = control.hmi_id
     msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
     msg.action_value = 1
     hmi_action_publisher.publish(msg)
+    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET
+    hmi_action_publisher.publish(msg)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    wait_for_sensor_laser()
+    data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
+        hmi_action_publisher.publish(msg)
+        # continue....
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
