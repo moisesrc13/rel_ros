@@ -37,16 +37,21 @@ class HRegister(BaseModel):
 
 
 class SlaveTCP(BaseModel):
-    name: str
     host: str
     port: int
-    id: int
     framer: str = "socket"
-    timeout_seconds: int = 1
+    timeout_seconds: int = 5
+    offset: int = 0
+
+
+class SlaveHMI(BaseModel):
+    name: str = ""
+    hmi_id: int = 0
+    slave_tcp: SlaveTCP
 
 
 class ModbusConfig(BaseModel):
-    slaves: list[SlaveTCP]
+    slaves: list[SlaveHMI]
     holding_registers: list[HRegister]
     coil_registers: list[CRegister]
 

@@ -13,7 +13,7 @@ from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import HRegister, SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import HRegister, SlaveHMI, SlaveTCP, get_register_by_address
 
 logger = new_logger(__name__)
 
@@ -37,12 +37,12 @@ class PublishHMIData:
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveTCP, hr: list[HRegister], publisher):
+    def __init__(self, addr, values, slave: SlaveHMI, hr: list[HRegister], publisher):
         """Initialize."""
         self.hr = hr
         self.slave = slave
         self.publisher = publisher
-        logger.info("initializing modbus 👾 slave on port %s", slave.port)
+        logger.info("initializing modbus 👾 slave on port %s", self.slave.slave_tcp.port)
         super().__init__(addr, values)
 
     def setValues(self, address, value):
@@ -74,7 +74,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
             return
 
-        with PublishHMIData(self.slave.name, self.slave.id) as hmi_msg:
+        with PublishHMIData(self.slave.name, self.slave.hmi_id) as hmi_msg:
             for register in self.hr:
                 if register.name.startswith("param_") and hasattr(hmi_msg, register.name):
                     setattr(hmi_msg, register.name, register.value)
@@ -119,7 +119,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveTCP, hr: list[HRegister], publisher):
+def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister], publisher):
     try:
         nreg = 50_000  # number of registers
         block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, publisher)
@@ -130,24 +130,24 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[HRegister], publisher):
         context = ModbusServerContext(slaves=store, single=True)
         # initialize the server information
         identity = ModbusDeviceIdentification()
-        identity.VendorName = f"Relant HMI - {slave.id}"
+        identity.VendorName = f"Relant HMI - {slave.hmi_id}"
         identity.ProductName = "Relant-On-ROS"
         identity.ModelName = "relros"
         identity.MajorMinorRevision = "0.1.0"
         modbus_slave = None
-        if isinstance(slave, SlaveTCP):
+        if isinstance(slave.slave_tcp, SlaveTCP):
             # Start Modbus TCP Server
             logger.info(
                 "running TCP modbus slave 🤖 on %s port %s",
-                slave.host,
-                slave.port,
+                slave.slave_tcp.host,
+                slave.slave_tcp.port,
             )
             modbus_slave = StartTcpServer(
                 context=context,
-                host=slave.host,
+                host=slave.slave_tcp.host,
                 identity=identity,
                 framer=FramerType.SOCKET,
-                address=(slave.host, slave.port, publisher),
+                address=(slave.slave_tcp.host, slave.slave_tcp.port, publisher),
             )
         else:
             raise RuntimeError("slave type not supported")
@@ -160,23 +160,24 @@ def run_sync_modbus_server(slave: SlaveTCP, hr: list[HRegister], publisher):
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveTCP, hr: list[HRegister], publisher) -> None:
+    def __init__(self, slave: SlaveHMI, hr: list[HRegister], publisher) -> None:
         Thread.__init__(self)
         self.slave = slave
         self.hr = hr
+        self.hmi_id = slave.hmi_id
         self.publisher = publisher
 
     def run(self):
-        logger.info("running slave thread %s", self.slave.id)
+        logger.info("running slave thread %s", self.hmi_id)
         try:
             server = run_sync_modbus_server(slave=self.slave, hr=self.hr, publisher=self.publisher)
             if server:
                 server.shutdown()
         except Exception as ex:
-            logger.error("Error %s running slave thread %s", ex, self.slave.id)
+            logger.error("Error %s running slave thread %s", ex, self.hmi_id)
 
 
-def run_modbus_slaves(slaves: list[SlaveTCP], hr: list[HRegister], publishers: dict):
+def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister], publishers: dict):
     for slave in slaves:
         slave_thread = ModbusSlaveThread(slave=slave, hr=hr, publisher=publishers.get(slave.id))
         slave_thread.daemon = True

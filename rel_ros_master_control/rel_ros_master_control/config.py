@@ -43,3 +43,8 @@ def load_modbus_config() -> ModbusConfig:
 def load_status_device_config() -> TowerStatus:
     config_path = os.getenv("CONFIG_PATH", "./config")
     return load_config(f"{config_path}/control/status_device.yml", ConfigType.STATUS_DEVICE)
+
+
+def load_hmi_config() -> ModbusConfig:
+    config_path = os.getenv("CONFIG_PATH", "./config")
+    return load_config(f"{config_path}/hmi/hmi.yml")
