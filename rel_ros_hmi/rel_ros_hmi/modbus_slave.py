@@ -101,12 +101,15 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
 
             addresses = list(range(address, address + count))
             logger.info("addresses to get %s", addresses)
+            total = 0
             for addr in addresses:
                 register, _ = get_register_by_address(self.hr, addr)
                 if not register:
                     continue
                 builder.add_16bit_uint(register.value)
+                total += 1
             values = builder.to_registers()
+            logger.info("returning total values %s", total)
             logger.info("return values %s", values)
             return values
         except Exception as ex:

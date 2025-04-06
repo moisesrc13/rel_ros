@@ -28,8 +28,10 @@
       address: 9
     - name: "button_load_password"
       address: 10
+    - name: "not_used"
+      address: 11
     - name: "open_local_window_0_2"
-      address: 12  # jumped 11 - ok
+      address: 12
     - name: "close_local_window_0_2"
       address: 13
     - name: "action_pre_fill_line"
@@ -120,6 +122,18 @@
     - name: "param_pre_vacuum_limit_low"
       address: 40016
       data_type: "uint16"
+    - name: "not_used"
+      address: 40017
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40018
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40019
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40020
+      data_type: "uint16"
     - name: "param_pulse_train_low"
       address: 40021
       data_type: "uint16"
@@ -161,20 +175,20 @@
       data_type: "uint16"
     # --------------------------------------- SENSORS START
     - name: "sensor_material_pressure"
-      address: 40048
+      address: 40034
       data_type: "uint16"
     - name: "sensor_material_temperature"
-      address: 40049
+      address: 40035
       data_type: "uint16"
     - name: "sensor_laser_distance"
-      address: 40050
+      address: 40036
       data_type: "uint16"
     - name: "sensor_pressure_regulator_read_set"
-      address: 40051
+      address: 40037
       data_type: "uint16"
     - name: "sensor_pressure_regulator_read_real"
-      address: 40052
+      address: 40038
       data_type: "uint16"
     - name: "sensor_pressure_regulator_valve_read_state"
-      address: 40053
+      address: 40039
       data_type: "uint16"

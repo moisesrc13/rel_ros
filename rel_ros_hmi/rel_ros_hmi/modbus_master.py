@@ -151,8 +151,8 @@ class RelModbusMaster:
 
     def get_holding_registers_data(self) -> list[HRegister]:
         addresses = get_hr_addresses(self.hr)
-        addresses = [40006, 40007, 40008]
         logger.info("reading holding register data, addresses %s", addresses)
+        logger.info("reading total records %s", len(addresses))
         rr = self.slave_conn.read_holding_registers(
             address=addresses[0], count=len(addresses)
         )  # start with first address
