@@ -12,6 +12,7 @@ class RegisterDataType(Enum):
 
 
 class CRegister(BaseModel):
+    name: str
     address: int
     value: int = 0  # this will be only valid for 0 or 1
 
@@ -71,8 +72,8 @@ class ModbusConfig(BaseModel):
 
 
 def get_register_by_address(
-    registers: list[HRegister], address: int
-) -> Optional[tuple[HRegister, int]]:
+    registers: list[HRegister] | list[CRegister], address: int
+) -> Optional[tuple[HRegister, int] | tuple[CRegister, int]]:
     for index, r in enumerate(registers):
         if r.address == address:
             return (r, index)

@@ -25,6 +25,10 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
+def hmi_hr_data(control: RelControl) -> dict:
+    return control.get_hmi_hr_data()
+
+
 def bucket_distance(param_bucket_size_selection: int, control_hmi_data: dict) -> int:
     distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
     match param_bucket_size_selection:

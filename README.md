@@ -110,8 +110,11 @@ python rel_ros_master_control/rel_ros_master_control/control.py --action write -
 # iolink
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
 
-# hmi
+# hmi read all hr
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
+
+# hmi read all cr
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
 
 # hmi coil
 python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1

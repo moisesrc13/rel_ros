@@ -107,6 +107,7 @@ class Params(Enum):
 
 class Constants:
     flow_tasks: list[str] = [
+        "hmi_hr_data",
         "bucket_distance",
         "sensor_distance_params",
         "bucket_state",

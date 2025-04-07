@@ -296,7 +296,31 @@ class RelControl:
                 registers_data[register.name] = get_value(decoder, register.data_type)
             return registers_data
         except Exception as err:
-            logger.error("Error getting hmi data - %s", err)
+            logger.error("Error getting hmi holding registers data - %s", err)
+            return {}
+
+    def get_hmi_cr_data(self) -> dict:
+        master = self.get_master_connection(SlaveType.HMI)
+        addresses = [r.address for r in self.hmi_cr]
+        addresses.sort()
+        logger.info(
+            "reading HMI %s coils register data, addresses %s", master.slave_conn, addresses
+        )
+        logger.info("reading total coil records %s", len(addresses))
+        registers_data = {}
+        try:
+            response = master.slave_conn.read_coils(
+                address=addresses[0], count=len(addresses)
+            )  # start with first address and request the total
+            logger.info("results %s", response)
+            for addr, dx in enumerate(addresses):
+                register, _ = get_register_by_address(self.hmi_cr, addr)
+                if not register:
+                    continue
+                registers_data[register.name] = int(response.bits[dx])
+            return registers_data
+        except Exception as err:
+            logger.error("Error getting hmi coils data - %s", err)
             return {}
 
 
@@ -395,7 +419,7 @@ def run():
                 logger.info("value size %s", len(value))
             else:
                 value = control.read_iolink_hregister(args.register)
-            logger.info("read value %s", value)
+            logger.info("read results %s", value)
     else:
         register_type = RegisterType(args.addresstype)
         if args.action == "write":
@@ -407,12 +431,15 @@ def run():
             )
         elif args.action == "read":
             value = -1
-            if args.register == 0:
+            if args.register == 0 and register_type == RegisterType.HOLDING:
                 value = control.get_hmi_hr_data()
+                logger.info("value size %s", len(value))
+            elif args.register == 0 and register_type == RegisterType.COIL:
+                value = control.get_hmi_cr_data()
                 logger.info("value size %s", len(value))
             else:
                 value = control.read_hmi_register(args.register, rtype=register_type)
-            logger.info("read value %s", value)
+            logger.info("read results %s", value)
 
 
 # for testing outside ROS
