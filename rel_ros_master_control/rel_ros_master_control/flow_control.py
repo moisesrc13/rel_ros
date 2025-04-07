@@ -18,8 +18,6 @@ telemetry.disable_telemetry()
 class FlowControlInputs:
     hmi_action_publisher: Any
     master_control: RelControl
-    control_iolink_data: dict
-    control_hmi_data: dict
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -65,8 +63,6 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
         "hmi_action_publisher": flow_inputs.hmi_action_publisher,
-        "control_hmi_data": flow_inputs.control_hmi_data,
-        "control_iolink_data": flow_inputs.control_iolink_data,
         "control": flow_inputs.master_control,
     }
     dr = (
