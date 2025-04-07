@@ -6,6 +6,7 @@ from pymodbus.framer import FramerType
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from rel_ros_master_control.logger import new_logger
+from rel_ros_master_control.models.hmi_m import SlaveHMI
 from rel_ros_master_control.models.modbus_m import SlaveIOLink, SlaveSerial, SlaveTCP
 
 logger = new_logger(__name__)
@@ -58,7 +59,7 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveIOLink) -> None:
+    def __init__(self, slave: SlaveIOLink | SlaveHMI) -> None:
         logger.info("✨ Starting iolink modbus master ...")
         self.slave_conn = setup_sync_client(slave.slave_tcp)
         self.slave = slave

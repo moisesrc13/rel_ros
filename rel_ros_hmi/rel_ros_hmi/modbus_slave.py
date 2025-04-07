@@ -74,7 +74,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
             return
 
-        with PublishHMIData(self.slave.name, self.slave.hmi_id) as hmi_msg:
+        with PublishHMIData(self.slave.hmi_name, self.slave.hmi_id) as hmi_msg:
             for register in self.hr:
                 if register.name.startswith("param_") and hasattr(hmi_msg, register.name):
                     setattr(hmi_msg, register.name, register.value)

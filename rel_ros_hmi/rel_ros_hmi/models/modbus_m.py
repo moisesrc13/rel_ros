@@ -45,7 +45,7 @@ class SlaveTCP(BaseModel):
 
 
 class SlaveHMI(BaseModel):
-    name: str = ""
+    hmi_name: str = ""
     hmi_id: int = 0
     slave_tcp: SlaveTCP
 

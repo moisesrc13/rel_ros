@@ -9,7 +9,9 @@ from rel_ros_master_control.config import load_modbus_config, load_status_device
 from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
+from rel_ros_master_control.models.hmi_m import SlaveHMI
 from rel_ros_master_control.models.modbus_m import (
+    CRegister,
     HRegister,
     RegisterDataType,
     RegisterMode,
@@ -57,11 +59,21 @@ class ModbusStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, iolink_slave: SlaveIOLink, hr: list[HRegister]) -> None:
+    """Main class for control"""
+
+    def __init__(
+        self,
+        iolink_slave: SlaveIOLink,
+        iolink_hr: list[HRegister],
+        hmi_slave: SlaveHMI,
+        hmi_hr: list[HRegister],
+        hmi_cr: list[CRegister],
+    ) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
-        self.hr = hr
+        self.master_hmi = RelModbusMaster(hmi_slave)
+        self.iolink_hr = iolink_hr
         self.hmi_id = iolink_slave.hmi_id
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
@@ -78,12 +90,13 @@ class RelControl:
 
     def apply_manifold_state(self, state_value: int):
         self.apply_state(
-            get_register_by_name(self.hr, HMIWriteAction.ACTION_MANIFOLD.value), state_value
+            get_register_by_name(self.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value), state_value
         )
 
     def apply_hyd_valve_state(self, state_value: int):
         self.apply_state(
-            get_register_by_name(self.hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value), state_value
+            get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value),
+            state_value,
         )
 
     def apply_tower_state(self, state: TowerState):
@@ -159,11 +172,11 @@ class RelControl:
         return status
 
     def eletrovalve_on(self):
-        register = get_register_by_name(self.hr, "digital_out_hyd_valve")
+        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
         self.write_holding_register(register.address, 3)
 
     def eletrovalve_off(self):
-        register = get_register_by_name(self.hr, "digital_out_hyd_valve")
+        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
         self.write_holding_register(register.address, 5)
 
     def read_holding_register(self, register: int) -> ModbusStatus:
@@ -183,7 +196,7 @@ class RelControl:
         return status
 
     def get_data_by_hr_name(self, register_name: str) -> int:
-        register = get_register_by_name(self.hr, register_name)
+        register = get_register_by_name(self.iolink_hr, register_name)
         return self.read_holding_register(register.address).value
 
     def get_data(self) -> list[HRegister]:
@@ -195,7 +208,7 @@ class RelControl:
 
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            for register in self.hr:
+            for register in self.iolink_hr:
                 if register.mode == RegisterMode.R:
                     futures.append(executor.submit(worker, register))
         if not futures:
@@ -213,7 +226,7 @@ def run_masters_to_iolinks(
 ) -> list[RelControl]:
     masters = []
     for iolink_slave in iolink_slaves:
-        masters.append(RelControl(iolink_slave=iolink_slave, hr=hr))
+        masters.append(RelControl(iolink_slave=iolink_slave, iolink_hr=hr))
     logger.info("finish to run masters ...")
     return masters
 
@@ -254,7 +267,7 @@ def run():
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
     config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[args.id], hr=config.holding_registers)
+    control = RelControl(iolink_slave=config.iolinks[args.id], iolink_hr=config.holding_registers)
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

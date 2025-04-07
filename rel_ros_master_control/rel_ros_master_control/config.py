@@ -49,6 +49,6 @@ def load_status_device_config() -> TowerStatus:
     return load_config(f"{config_path}/control/status_device.yml", ConfigType.STATUS_DEVICE)
 
 
-def load_hmi_config() -> ModbusConfig:
+def load_hmi_config() -> ModbusHMIConfig:
     config_path = os.getenv("CONFIG_PATH", "./config")
     return load_config(f"{config_path}/hmi/hmi.yml", ConfigType.HMI)

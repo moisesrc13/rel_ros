@@ -98,7 +98,7 @@ if __name__ == "__main__":
             print(f"publish {msg}")
 
     config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[0], hr=config.holding_registers)
+    control = RelControl(iolink_slave=config.iolinks[0], iolink_hr=config.holding_registers)
     logger.info("visualize ...")
     flow_inputs = FlowControlInputs(
         control_hmi_data={

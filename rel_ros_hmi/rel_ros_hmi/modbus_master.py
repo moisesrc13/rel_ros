@@ -84,7 +84,7 @@ def setup_sync_client(
 class RelModbusMaster:
     def __init__(self, slave: SlaveHMI, hr: list[HRegister], coils: list[CRegister]) -> None:
         logger.info("✨ Starting modbus HMI master ...")
-        self.hmi_name = slave.name
+        self.hmi_name = slave.hmi_name
         self.hmi_id = slave.hmi_id
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave

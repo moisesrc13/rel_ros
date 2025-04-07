@@ -1,4 +1,4 @@
-from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_ros_master_control.config import load_modbus_config
 from rel_ros_master_control.models.modbus_m import ModbusConfig
 
 
