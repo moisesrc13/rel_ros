@@ -143,25 +143,6 @@ class RelControl:
         logger.debug("register with offset %s", register)
         return register
 
-    def read_device_port_register(self, register: HRegister) -> int:
-        logger.debug("read device register %s", register)
-        rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=self.get_register_with_offset(register.address),
-            count=register.words,
-        )
-        decoder = get_decoder(rr)
-        return get_value(decoder, register.data_type)
-
-    def write_device_port_register(self, register: HRegister, value: int) -> int:
-        logger.debug("write device register %s", register)
-        response = self.master_io_link.slave_conn.write_register(
-            address=self.get_register_with_offset(register.address), value=value
-        )
-        if response.isError():
-            logger.error("error writing register")
-            return
-        logger.info("writing ok ✨")
-
     def write_holding_register(self, register: int, value: int) -> ModbusStatus:
         status = ModbusStatus()
         logger.info("writing to register %s value %s", register, value)

@@ -8,7 +8,7 @@ from rclpy.node import Node
 from rospy_message_converter.message_converter import convert_ros_message_to_dictionary
 
 from rel_interfaces.msg import HMI, HMIAction, IOLinkData
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import FlowControlInputs
 from rel_ros_master_control.flow_control import run as run_control
