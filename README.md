@@ -113,7 +113,9 @@ python rel_ros_master_control/rel_ros_master_control/control.py --action read --
 # hmi
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
 
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
+# hmi coil
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 ```
 
 ## Build interfaces package

@@ -153,8 +153,12 @@ class RelControl:
             except Exception as err:
                 logger.error("error writing tower state status %s - %s", state.value, err)
 
-    def get_register_with_offset(self, register: int) -> int:
-        register = register + self.master_io_link.slave.slave_tcp.offset
+    def get_register_with_offset(self, register: int, stype: SlaveType = SlaveType.IOLINK) -> int:
+        if stype == SlaveType.IOLINK:
+            offset_value = self.master_io_link.slave.slave_tcp.offset
+        else:
+            offset_value = self.master_hmi.slave.slave_tcp.offset
+        register = register + offset_value
         logger.debug("register with offset %s", register)
         return register
 
@@ -179,7 +183,7 @@ class RelControl:
         logger.info("reading register %s", register)
         master = self.get_master_connection(stype)
         response = master.slave_conn.read_holding_registers(
-            address=self.get_register_with_offset(register), count=1
+            address=self.get_register_with_offset(register, stype), count=1
         )
         if response.isError():
             logger.error("error reading register on %s", stype)
@@ -196,7 +200,7 @@ class RelControl:
         logger.info("reading register %s", register)
         master = self.get_master_connection(SlaveType.HMI)
         response = master.slave_conn.read_coils(
-            address=self.get_register_with_offset(register), count=1
+            address=self.get_register_with_offset(register, SlaveType.HMI), count=1
         )
         if response.isError():
             logger.error("error reading hmi col register on")
@@ -220,12 +224,12 @@ class RelControl:
         logger.info("writing to register %s value %s", register, value)
         if rtype == RegisterType.HOLDING:
             response = master.slave_conn.write_register(
-                address=self.get_register_with_offset(register), value=value
+                address=self.get_register_with_offset(register, stype), value=value
             )
         else:
             coil_value = value > 0
             response = master.slave_conn.write_coil(
-                address=self.get_register_with_offset(register), value=coil_value
+                address=self.get_register_with_offset(register, stype), value=coil_value
             )
         if response.isError():
             logger.error("error writing register on %s", stype)

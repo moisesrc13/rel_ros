@@ -33,7 +33,6 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         logger.debug("calling SET values ...")
 
         super().setValues(address - 1, value)
-        address = address - 1
         value = value[0]
         if isinstance(value, bool):  # this is required for coils
             value = int(value)
@@ -54,8 +53,6 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         Automation inputs (from dispenser to modbus)
         """
         logger.debug("calling GET values from modbus slave ...")
-
-        address = address - 1
         builder = BinaryPayloadBuilder(wordorder=Endian.LITTLE, byteorder=Endian.BIG)
         try:
             address_value = super().getValues(address, count=count)
