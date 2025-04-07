@@ -29,32 +29,40 @@ def hmi_hr_data(control: RelControl) -> dict:
     return control.get_hmi_hr_data()
 
 
-def bucket_distance(param_bucket_size_selection: int, control_hmi_data: dict) -> int:
-    distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
+def hmi_cr_data(control: RelControl) -> dict:
+    return control.get_hmi_cr_data()
+
+
+def iolink_hr_data(control: RelControl) -> dict:
+    return control.get_iolink_hr_data()
+
+
+def bucket_distance(param_bucket_size_selection: int, hmi_hr_data: dict) -> int:
+    distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
     match param_bucket_size_selection:
         case 1:
             return distance
         case 2:
-            distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_2.value)
+            distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_2.value)
         case 3:
-            distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_3.value)
+            distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_3.value)
     return distance
 
 
-def sensor_distance_params(bucket_distance: int, control_hmi_data: dict) -> SensorDistanceParams:
+def sensor_distance_params(bucket_distance: int, hmi_hr_data: dict) -> SensorDistanceParams:
     return SensorDistanceParams(
         bucket_distance=bucket_distance,
-        high_pre_vacuum_limit=control_hmi_data.get(Params.PARAM_PRE_VACUUM_LIMIT_HIGH.value),
-        high_vacuum_limit=control_hmi_data.get(Params.PARAM_VACUUM_LIMIT_HIGH.value),
-        vacuum_distance=control_hmi_data.get(Params.PARAM_VACUUM_DISTANCE.value),
+        high_pre_vacuum_limit=hmi_hr_data.get(Params.PARAM_PRE_VACUUM_LIMIT_HIGH.value),
+        high_vacuum_limit=hmi_hr_data.get(Params.PARAM_VACUUM_LIMIT_HIGH.value),
+        vacuum_distance=hmi_hr_data.get(Params.PARAM_VACUUM_DISTANCE.value),
     )
 
 
 def sensor_distance_state(
-    control_iolink_data: dict, control_hmi_data: dict, sensor_distance_params: SensorDistanceParams
+    control_iolink_data: dict, hmi_hr_data: dict, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
     sensor_distance = control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < control_hmi_data.get(sensor_distance_params.vacuum_distance):
+    if sensor_distance < hmi_hr_data.get(sensor_distance_params.vacuum_distance):
         return SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
@@ -94,10 +102,10 @@ def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
 
 
 def check_distance_sensor_for_electrovales(
-    control: RelControl, control_iolink_data: dict, control_hmi_data: dict
+    control: RelControl, iolink_hr_data: dict, hmi_hr_data: dict
 ):
-    sensor_distance = control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
+    sensor_distance = iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
+    if sensor_distance < hmi_hr_data.get("param_vacuum_distance"):
         control.eletrovalve_off()
         control.apply_tower_state(TowerState.VACUUM)
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
