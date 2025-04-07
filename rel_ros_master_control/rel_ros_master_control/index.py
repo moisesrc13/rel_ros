@@ -59,11 +59,8 @@ class RelROSNode(Node):
             return
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
         control: RelControl = self.masters[hmi_id]
-        flow_inputs = FlowControlInputs(
-            control=control,
-        )
         self.is_control_running = True
-        run_control(flow_inputs=flow_inputs)
+        run_control(control)
         self.is_control_running = False
 
     def create_timers_for_iolink_masters(self):
