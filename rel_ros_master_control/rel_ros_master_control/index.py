@@ -61,9 +61,9 @@ class RelROSNode(Node):
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
-        master_control: RelControl = self.masters[hmi_id]
+        control: RelControl = self.masters[hmi_id]
         flow_inputs = FlowControlInputs(
-            master_control=master_control,
+            control=control,
             hmi_action_publisher=self.hmi_action_publisher,
         )
         self.is_control_running = True
@@ -93,7 +93,7 @@ class RelROSNode(Node):
         msg = IOLinkData()
         msg.hmi_name = master.master_io_link.slave.hmi_name
         msg.hmi_id = master.master_io_link.slave.hmi_id
-        registers = master.get_iolink_data()
+        registers = master.get_iolink_hr_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")

@@ -17,7 +17,7 @@ telemetry.disable_telemetry()
 @dataclass
 class FlowControlInputs:
     hmi_action_publisher: Any
-    master_control: RelControl
+    control: RelControl
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -63,7 +63,7 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
         "hmi_action_publisher": flow_inputs.hmi_action_publisher,
-        "control": flow_inputs.master_control,
+        "control": flow_inputs.control,
     }
     dr = (
         driver.Builder()
@@ -106,6 +106,6 @@ if __name__ == "__main__":
             "sensor_laser_distance": 100,
         },
         hmi_action_publisher=TestPubliser(),
-        master_control=control,
+        control=control,
     )
     run(flow_inputs=flow_inputs, visualize=True)

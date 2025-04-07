@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # this main method is basically for local test
     try:
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers, {})
+        run_modbus_slaves(config.hmis, config.holding_registers)
         logger.info("slaves launched ...")
         while True:
             pass

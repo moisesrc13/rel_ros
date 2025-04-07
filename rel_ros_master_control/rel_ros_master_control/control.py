@@ -21,6 +21,7 @@ from rel_ros_master_control.models.modbus_m import (
     RegisterDataType,
     RegisterMode,
     SlaveIOLink,
+    get_register_by_address,
     get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
@@ -225,7 +226,7 @@ class RelControl:
         register = get_register_by_name(self.iolink_hr, register_name)
         return self.read_iolink_hregister(register.address).value
 
-    def get_iolink_data(self) -> list[HRegister]:
+    def get_iolink_hr_data(self) -> list[HRegister]:
         updated_registers = []
 
         def worker(register: HRegister):
@@ -245,6 +246,29 @@ class RelControl:
             "getting data total %s from master %s", len(updated_registers), updated_registers
         )
         return updated_registers
+
+    def get_hmi_hr_data(self) -> dict:
+        master = self.get_master_connection(SlaveType.HMI)
+        addresses = [r.address for r in self.hmi_hr]
+        addresses.sort()
+        logger.info("reading holding register data, addresses %s", addresses)
+        logger.info("reading total records %s", len(addresses))
+        registers_data = {}
+        try:
+            rr = master.slave_conn.read_holding_registers(
+                address=addresses[0], count=len(addresses)
+            )  # start with first address and request the total
+            logger.info("results %s", rr)
+            decoder = get_decoder(rr)
+            for addr in addresses:
+                register, _ = get_register_by_address(self.hmi_hr, addr)
+                if not register:
+                    continue
+                registers_data[register.name] = get_value(decoder, register.data_type)
+            return registers_data
+        except Exception as err:
+            logger.error("Error getting hmi data - %s", err)
+            return {}
 
 
 def run_masters_to_iolinks(
@@ -303,6 +327,23 @@ def run():
         dest="value",
         type=int,
     )
+    parser.add_argument(
+        "-m",
+        "--mode",
+        help="connection mode",
+        dest="mode",
+        default=SlaveType.IOLINK.value,
+        type=str,
+    )
+    parser.add_argument(
+        "-a",
+        "--addresstype",
+        help="address type",
+        dest="addresstype",
+        default=RegisterType.HOLDING,
+        type=str,
+    )
+
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
     iolink_config = load_modbus_config()
@@ -314,16 +355,33 @@ def run():
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
-    if args.action == "write":
-        control.write_iolink_hregister(args.register, args.value)
-    elif args.action == "read":
-        value = -1
-        if args.register == 0:
-            value = control.get_iolink_data()
-            logger.info("value size %s", len(value))
-        else:
-            value = control.read_iolink_hregister(args.register)
-        logger.info("read value %s", value)
+    if args.mode == SlaveType.IOLINK.value:
+        if args.action == "write":
+            control.write_iolink_hregister(args.register, args.value)
+        elif args.action == "read":
+            value = -1
+            if args.register == 0:
+                value = control.get_iolink_hr_data()
+                logger.info("value size %s", len(value))
+            else:
+                value = control.read_iolink_hregister(args.register)
+            logger.info("read value %s", value)
+    else:
+        if args.action == "write":
+            control.write_register(
+                register=args.register,
+                value=args.value,
+                stype=SlaveType.HMI,
+                rtype=RegisterType.HOLDING,
+            )
+        elif args.action == "read":
+            value = -1
+            if args.register == 0:
+                value = control.get_iolink_hr_data()
+                logger.info("value size %s", len(value))
+            else:
+                value = control.read_iolink_hregister(args.register)
+            logger.info("read value %s", value)
 
 
 # for testing outside ROS
