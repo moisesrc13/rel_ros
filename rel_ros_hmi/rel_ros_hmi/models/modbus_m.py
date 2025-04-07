@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 
 class RegisterModbusType(Enum):
-    HR = "hr"
-    CO = "co"
+    HR = "holding"
+    CR = "coil"
 
 
 class RegisterDataType(Enum):

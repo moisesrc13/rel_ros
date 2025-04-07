@@ -12,15 +12,23 @@ from pymodbus.server import StartTcpServer
 
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
-from rel_ros_hmi.models.modbus_m import HRegister, SlaveHMI, SlaveTCP, get_register_by_address
+from rel_ros_hmi.models.modbus_m import (
+    CRegister,
+    HRegister,
+    RegisterModbusType,
+    SlaveHMI,
+    SlaveTCP,
+    get_register_by_address,
+)
 
 logger = new_logger(__name__)
 
 
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveHMI, hr: list[HRegister]):
+    def __init__(self, addr, values, slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]):
         """Initialize."""
         self.hr = hr
+        self.cr = cr
         self.slave = slave
         logger.info("initializing modbus 👾 slave on port %s", self.slave.slave_tcp.port)
         super().__init__(addr, values)
@@ -31,21 +39,28 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         Automation Outputs (to dispenser from modbus)
         """
         logger.debug("calling SET values ...")
-
-        super().setValues(address - 1, value)
+        address = address - 1
+        super().setValues(address, value)
         value = value[0]
         if isinstance(value, bool):  # this is required for coils
             value = int(value)
         logger.debug("setValues with address %s, value %s", address, value)
         logger.debug("getting register by address ...")
         register, idx = get_register_by_address(self.hr, address)
+        rtype = RegisterModbusType.HR
         if not register:
-            logger.debug("Not getting a valid register for address %s", address)
-            return
+            register, idx = get_register_by_address(self.cr, address)
+            if not register:
+                logger.debug("Not getting a valid register for address %s", address)
+                return
+            rtype = RegisterModbusType.CR
 
         logger.debug("write register %s with value %s", register, value)
         register.value = value
-        self.hr[idx] = register
+        if rtype == RegisterModbusType.HR:
+            self.hr[idx] = register
+        else:
+            self.cr[idx] = register
 
     def getValues(self, address, count=1):
         """
@@ -81,15 +96,16 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
 
     def validate(self, address, count=1):
         """Check to see if the request is in range."""
+        address = address - 1
         logger.info("modbus validate address %s - count %s...", address, count)
-        result = super().validate(address - 1, count=count)
+        result = super().validate(address, count=count)
         return result
 
 
-def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister]):
+def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]):
     try:
         nreg = 50_000  # number of registers
-        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr)
+        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, cr)
         # creating two slaves 0 & 1
         store = ModbusSlaveContext(
             di=block, co=block, hr=block, ir=block
@@ -127,25 +143,26 @@ def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister]):
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveHMI, hr: list[HRegister]) -> None:
+    def __init__(self, slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]) -> None:
         Thread.__init__(self)
         self.slave = slave
         self.hr = hr
+        self.cr = cr
         self.hmi_id = slave.hmi_id
 
     def run(self):
         logger.info("running slave thread %s", self.hmi_id)
         try:
-            server = run_sync_modbus_server(slave=self.slave, hr=self.hr)
+            server = run_sync_modbus_server(slave=self.slave, hr=self.hr, cr=self.cr)
             if server:
                 server.shutdown()
         except Exception as ex:
             logger.error("Error %s running slave thread %s", ex, self.hmi_id)
 
 
-def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister]):
+def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister], cr: list[CRegister]):
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(slave=slave, hr=hr)
+        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, cr=cr)
         slave_thread.daemon = True
         slave_thread.start()
     try:
@@ -159,7 +176,7 @@ if __name__ == "__main__":
     # this main method is basically for local test
     try:
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers)
+        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
         logger.info("slaves launched ...")
         while True:
             pass

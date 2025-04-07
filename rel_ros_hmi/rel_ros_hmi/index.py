@@ -20,7 +20,7 @@ class RelROSNode(Node):
         )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers)
+        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
         self.masters = create_masters_for_hmis(
             config.hmis, config.holding_registers, config.coil_registers

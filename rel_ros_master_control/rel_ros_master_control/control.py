@@ -221,13 +221,14 @@ class RelControl:
     ) -> ModbusStatus:
         status = ModbusStatus()
         master = self.get_master_connection(stype)
-        logger.info("writing to register %s value %s", register, value)
+        logger.info("writing to %s register %s value %s", rtype, register, value)
         if rtype == RegisterType.HOLDING:
             response = master.slave_conn.write_register(
                 address=self.get_register_with_offset(register, stype), value=value
             )
         else:
             coil_value = value > 0
+            logger.info("writing coil with %s", coil_value)
             response = master.slave_conn.write_coil(
                 address=self.get_register_with_offset(register, stype), value=coil_value
             )
