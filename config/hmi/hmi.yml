@@ -1,4 +1,4 @@
-  slaves:
+  hmis:
     - hmi_name: "HMI 0"
       hmi_id: 0
       slave_tcp:

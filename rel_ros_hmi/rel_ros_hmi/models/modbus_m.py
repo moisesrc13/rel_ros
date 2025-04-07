@@ -51,7 +51,7 @@ class SlaveHMI(BaseModel):
 
 
 class ModbusConfig(BaseModel):
-    slaves: list[SlaveHMI]
+    hmis: list[SlaveHMI]
     holding_registers: list[HRegister]
     coil_registers: list[CRegister]
 

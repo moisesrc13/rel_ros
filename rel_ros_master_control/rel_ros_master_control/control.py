@@ -5,7 +5,11 @@ from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
-from rel_ros_master_control.config import load_modbus_config, load_status_device_config
+from rel_ros_master_control.config import (
+    load_hmi_config,
+    load_modbus_config,
+    load_status_device_config,
+)
 from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
@@ -74,6 +78,8 @@ class RelControl:
         self.master_io_link = RelModbusMaster(iolink_slave)
         self.master_hmi = RelModbusMaster(hmi_slave)
         self.iolink_hr = iolink_hr
+        self.hmi_hr = hmi_hr
+        self.hmi_cr = hmi_cr
         self.hmi_id = iolink_slave.hmi_id
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
@@ -266,8 +272,15 @@ def run():
     )
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
-    config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[args.id], iolink_hr=config.holding_registers)
+    iolink_config = load_modbus_config()
+    hmi_config = load_hmi_config()
+    control = RelControl(
+        iolink_slave=iolink_config.iolinks[args.id],
+        iolink_hr=iolink_config.holding_registers,
+        hmi_slave=hmi_config.hmis[args.id],
+        hmi_hr=hmi_config.holding_registers,
+        hmi_cr=hmi_config.coil_registers,
+    )
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

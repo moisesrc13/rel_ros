@@ -48,9 +48,9 @@ def test_get_registers_addrresses():
 def test_config(config):
     assert isinstance(config, ModbusConfig)
     assert isinstance(config.holding_registers, list)
-    assert isinstance(config.slaves, list)
-    assert isinstance(config.slaves[0], SlaveHMI)
-    hmi_slave = config.slaves[0]
+    assert isinstance(config.hmis, list)
+    assert isinstance(config.hmis[0], SlaveHMI)
+    hmi_slave = config.hmis[0]
     assert isinstance(hmi_slave.slave_tcp, SlaveTCP)
 
 
