@@ -96,6 +96,9 @@ class RelControl:
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
+        logger.info("connecting master HMI")
+        self.master_hmi.do_connect()
+        logger.info("master_HMI connected .✨")
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -272,7 +275,9 @@ class RelControl:
         master = self.get_master_connection(SlaveType.HMI)
         addresses = [r.address for r in self.hmi_hr]
         addresses.sort()
-        logger.info("reading HMI holding register data, addresses %s", addresses)
+        logger.info(
+            "reading HMI %s holding register data, addresses %s", master.slave_conn, addresses
+        )
         logger.info("reading total records %s", len(addresses))
         registers_data = {}
         try:

@@ -7,25 +7,26 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.hmi_m import SlaveHMI
-from rel_ros_master_control.models.modbus_m import SlaveIOLink, SlaveSerial, SlaveTCP
+from rel_ros_master_control.models.modbus_m import SlaveIOLink, SlaveTCP
 
 logger = new_logger(__name__)
 
 
 def setup_sync_client(
-    slave: SlaveTCP | SlaveSerial,
+    slave: SlaveIOLink | SlaveHMI,
 ) -> Union[modbusClient.ModbusTcpClient, modbusClient.ModbusSerialClient]:
     """Run client setup."""
     logger.info("creating modbus master 👾 ...")
+    is_hmi = isinstance(slave, SlaveHMI)
     try:
-        host = slave.host
-        port = slave.port
-        if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
+        host = slave.slave_tcp.host
+        port = slave.slave_tcp.port
+        if not is_hmi and os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
             logger.info("connecting to test modbus slave")
             host = "0.0.0.0"
             port = 8844
         client = None
-        if isinstance(slave, SlaveTCP):
+        if isinstance(slave.slave_tcp, SlaveTCP):
             logger.info(
                 "Creating TCP master connection to slave on host %s port %s ⭐",
                 host,
@@ -35,19 +36,7 @@ def setup_sync_client(
                 host=host,
                 port=port,
                 framer=FramerType.SOCKET,
-                timeout=slave.timeout_seconds,
-            )
-        elif isinstance(slave, SlaveSerial):
-            logger.info("Creating Serial client 🕯️ on port %s", slave)
-            client = modbusClient.ModbusSerialClient(
-                port=slave.port,  # serial port
-                # Common optional parameters:
-                framer=FramerType.RTU,
-                timeout=slave.timeout_seconds,
-                baudrate=slave.baudrate,
-                bytesize=slave.data_bit,
-                parity=slave.parity,
-                stopbits=slave.stop_bit,
+                timeout=slave.slave_tcp.timeout_seconds,
             )
         else:
             logger.error("modbus master type not supported")
@@ -60,8 +49,8 @@ def setup_sync_client(
 
 class RelModbusMaster:
     def __init__(self, slave: SlaveIOLink | SlaveHMI) -> None:
-        logger.info("✨ Starting iolink modbus master ...")
-        self.slave_conn = setup_sync_client(slave.slave_tcp)
+        logger.info("✨ Starting modbus master to slave %s...", slave)
+        self.slave_conn = setup_sync_client(slave)
         self.slave = slave
         self.hmi_id = slave.hmi_id
         self.hmi_name = slave.hmi_name
@@ -79,24 +68,24 @@ class RelModbusMaster:
     )
     def do_connect(self):
         try:
-            logger.info("connecting to iolink modbus slave")
+            logger.info("connecting to modbus slave")
             assert self.slave_conn.connect()
             logger.info(
                 "modbus slave connected 🤘 is socked opened %s, transport %s",
                 self.slave_conn.is_socket_open(),
                 self.slave_conn.transport,
             )
-            logger.info("iolink modbus socket %s", self.slave_conn.socket)
+            logger.info("modbus socket %s", self.slave_conn.socket)
         except Exception as err:
-            logger.error("❌ Error connecting to iolink modbus slave - %s", err)
+            logger.error("❌ Error connecting to modbus slave - %s", err)
             raise err
 
     def do_close(self):
         try:
-            logger.info("closing connection to iolink modbus slave")
+            logger.info("closing connection to modbus slave")
             self.slave_conn.close()
-            logger.info("iolink slave connection closed")
+            logger.info("slave connection closed")
             self.connection_state = "closed"
         except Exception as err:
-            logger.error("❌ Error closing connection to iolink modbus server - %s", err)
+            logger.error("❌ Error closing connection to modbus server - %s", err)
             self.connection_state = "❌ error closing"
