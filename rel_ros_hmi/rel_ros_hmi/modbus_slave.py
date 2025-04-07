@@ -68,6 +68,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         Automation inputs (from dispenser to modbus)
         """
         logger.debug("calling GET values from modbus slave ...")
+        address = address - 1
         builder = BinaryPayloadBuilder(wordorder=Endian.LITTLE, byteorder=Endian.BIG)
         try:
             address_value = super().getValues(address, count=count)
@@ -81,8 +82,17 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
             addresses = list(range(address, address + count))
             logger.info("addresses to get %s", addresses)
             total = 0
+            register, _ = get_register_by_address(self.hr, address)
+            register_list = self.hr
+            if not register:
+                register, _ = get_register_by_address(self.cr, address)
+                if not register:
+                    logger.warning("register with address %s not found", addresses)
+                    return
+                logger.info("this is a coil register")
+                register_list = self.cr
             for addr in addresses:
-                register, _ = get_register_by_address(self.hr, addr)
+                register, _ = get_register_by_address(register_list, addr)
                 if not register:
                     continue
                 builder.add_16bit_uint(register.value)

@@ -197,18 +197,17 @@ class RelControl:
 
     def read_hmi_cregister(self, register: int) -> ModbusStatus:
         status = ModbusStatus()
-        logger.info("reading register %s", register)
+        logger.info("reading coil register %s", register)
         master = self.get_master_connection(SlaveType.HMI)
         response = master.slave_conn.read_coils(
             address=self.get_register_with_offset(register, SlaveType.HMI), count=1
         )
         if response.isError():
-            logger.error("error reading hmi col register on")
+            logger.error("error reading hmi coil register on")
             status.error = response
             return status
-        logger.info("reading ok ✨ %s", response.registers)
-        decoder = get_decoder(response)
-        status.value = get_value(decoder)
+        logger.info("reading coil ok ✨ %s", response.registers)
+        status.value = int(response.bits[0])
         status.status = "read coil ok"
         return status
 
@@ -227,10 +226,9 @@ class RelControl:
                 address=self.get_register_with_offset(register, stype), value=value
             )
         else:
-            coil_value = value > 0
-            logger.info("writing coil with %s", coil_value)
+            logger.info("writing coil with %s", bool(value))
             response = master.slave_conn.write_coil(
-                address=self.get_register_with_offset(register, stype), value=coil_value
+                address=self.get_register_with_offset(register, stype), value=bool(value)
             )
         if response.isError():
             logger.error("error writing register on %s", stype)
