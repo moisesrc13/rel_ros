@@ -209,11 +209,24 @@ class RelControl:
 
 
 def run_masters_to_iolinks(
-    iolink_slaves: list[SlaveIOLink], hr: list[HRegister]
+    iolink_slaves: list[SlaveIOLink],
+    hr: list[HRegister],
+    hmi_slaves: list[SlaveHMI],
+    hmi_hr: list[HRegister],
+    hmi_cr: list[CRegister],
 ) -> list[RelControl]:
     masters = []
     for iolink_slave in iolink_slaves:
-        masters.append(RelControl(iolink_slave=iolink_slave, iolink_hr=hr))
+        hmi_slave = next((s for s in hmi_slaves if s.hmi_id == iolink_slave.hmi_id), None)
+        masters.append(
+            RelControl(
+                iolink_slave=iolink_slave,
+                iolink_hr=hr,
+                hmi_slave=hmi_slave,
+                hmi_hr=hmi_hr,
+                hmi_cr=hmi_cr,
+            )
+        )
     logger.info("finish to run masters ...")
     return masters
 

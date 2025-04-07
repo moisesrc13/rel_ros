@@ -51,10 +51,15 @@ class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.is_control_running = False
-        self.config = load_modbus_config()
+        self.iolink_config = load_modbus_config()
+        self.hmi_config = load_hmi_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
-            iolink_slaves=self.config.iolinks, hr=self.config.holding_registers
+            iolink_slaves=self.iolink_config.iolinks,
+            hr=self.iolink_config.holding_registers,
+            hmi_slaves=self.hmi_config.hmis,
+            hmi_hr=self.hmi_config.holding_registers,
+            hmi_cr=self.hmi_config.coil_registers,
         )
         self.create_timers_for_iolink_masters()
         self.control_cluster = create_control_cluster(size=len(self.masters))
