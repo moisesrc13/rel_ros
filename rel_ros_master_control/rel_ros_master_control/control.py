@@ -211,6 +211,21 @@ class RelControl:
         status.status = "read coil ok"
         return status
 
+    def write_register_by_address_name(
+        self,
+        name: str,
+        value: int,
+        stype: SlaveType = SlaveType.IOLINK,
+        rtype: RegisterType = RegisterType.HOLDING,
+    ) -> ModbusStatus:
+        registers = self.iolink_hr  # no coils for IOLINK
+        if stype == SlaveType.HMI and rtype == RegisterType.HOLDING:
+            registers = self.hmi_hr
+        elif stype == SlaveType.HMI and rtype == RegisterType.COIL:
+            registers = self.hmi_cr
+        register = get_register_by_name(registers, name)
+        return self.write_register(register=register.address, value=value, rtype=rtype, stype=stype)
+
     def write_register(
         self,
         register: int,
@@ -249,7 +264,7 @@ class RelControl:
             return self.read_hregister(register, SlaveType.HMI)
         return self.read_hmi_cregister(register)
 
-    def get_data_by_hr_name(self, register_name: str) -> int:
+    def get_iolink_data_by_hr_name(self, register_name: str) -> int:
         register = get_register_by_name(self.iolink_hr, register_name)
         return self.read_iolink_hregister(register.address).value
 

@@ -1,9 +1,7 @@
 import time
-from typing import Any
 
 from hamilton.function_modifiers import config
 
-from rel_interfaces.msg import HMIAction
 from rel_ros_master_control.constants import (
     Constants,
     HMIWriteAction,
@@ -14,7 +12,7 @@ from rel_ros_master_control.constants import (
     SensorDistanceStateName,
     Sensors,
 )
-from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
 
@@ -120,51 +118,67 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
-    hmi_action_publisher: Any,
     control: RelControl,
     sensor_distance_state: SensorDistanceState,
     bucket_state: TowerState,
-    control_iolink_data: dict,
+    iolink_hr_data: dict,
 ):
-    msg = HMIAction()
-    msg.hmi_id = control.hmi_id
-    msg.action_value = 1
-    msg.action_name = HMIWriteAction.STATUS_ALARM.value  # vacuum alarm
-    hmi_action_publisher.publish(msg)
-    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value
-    hmi_action_publisher.publish(msg)
+    control.write_register_by_address_name(
+        name=HMIWriteAction.STATUS_ALARM.value,
+        value=1,
+        stype=SlaveType.HMI,
+        rtype=RegisterType.COIL,
+    )  #  vacuum alarm
+
+    control.write_register_by_address_name(
+        name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
+        value=1,
+        stype=SlaveType.HMI,
+        rtype=RegisterType.COIL,
+    )
+
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
-    data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+    data = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    if data == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
         control.apply_tower_state(TowerState.BUCKET_CHANGE)
-        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
-        hmi_action_publisher.publish(msg)
-        # else will pass to A state next iteration
+        control.write_register_by_address_name(
+            name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
+            value=1,
+            stype=SlaveType.HMI,
+            rtype=RegisterType.COIL,
+        )
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(
-    hmi_action_publisher: Any,
     control: RelControl,
     bucket_state: TowerState,
-    control_iolink_data: dict,
+    iolink_hr_data: dict,
 ):
     control.apply_tower_state(bucket_state)
-    msg = HMIAction()
-    msg.hmi_id = control.hmi_id
-    msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
-    msg.action_value = 1
-    hmi_action_publisher.publish(msg)
-    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET
-    hmi_action_publisher.publish(msg)
+    control.write_register_by_address_name(
+        name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
+        value=1,
+        stype=SlaveType.HMI,
+        rtype=RegisterType.COIL,
+    )
+    control.write_register_by_address_name(
+        name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
+        value=1,
+        stype=SlaveType.HMI,
+        rtype=RegisterType.COIL,
+    )
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
-    data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
-        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
-        hmi_action_publisher.publish(msg)
-        # continue....
+    data = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    if data == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+        control.write_register_by_address_name(
+            name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
+            value=1,
+            stype=SlaveType.HMI,
+            rtype=RegisterType.COIL,
+        )
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
