@@ -90,7 +90,7 @@ def test_get_data(rel_control: RelControl, test_value):
             value=test_value,
         )
     )
-    registers = rel_control.get_data()
+    registers = rel_control.get_iolink_data()
     for register in registers:
         assert register.value == test_value
 

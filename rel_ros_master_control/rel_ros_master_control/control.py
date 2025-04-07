@@ -186,7 +186,7 @@ class RelControl:
         register = get_register_by_name(self.iolink_hr, register_name)
         return self.read_holding_register(register.address).value
 
-    def get_data(self) -> list[HRegister]:
+    def get_iolink_data(self) -> list[HRegister]:
         updated_registers = []
 
         def worker(register: HRegister):
@@ -280,7 +280,7 @@ def run():
     elif args.action == "read":
         value = -1
         if args.register == 0:
-            value = control.get_data()
+            value = control.get_iolink_data()
             logger.info("value size %s", len(value))
         else:
             value = control.read_holding_register(args.register)

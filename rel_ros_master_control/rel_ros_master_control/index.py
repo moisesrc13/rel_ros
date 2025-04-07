@@ -126,7 +126,7 @@ class RelROSNode(Node):
         msg = IOLinkData()
         msg.hmi_name = master.master_io_link.slave.hmi_name
         msg.hmi_id = master.master_io_link.slave.hmi_id
-        registers = master.get_data()
+        registers = master.get_iolink_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
 
