@@ -1,17 +1,18 @@
-  slaves:
-    - name: "HMI 0"
-      id: 0
-      host: 0.0.0.0  # localhost for ROS working as HMI slave
-      port: 8845  # 502 is the standard
-      offset: 0
+  hmis:
+    - hmi_name: "HMI 0"
+      hmi_id: 0
+      slave_tcp:
+        host: 0.0.0.0  # localhost for ROS working as HMI slave
+        port: 8845  # 502 is the standard
+        offset: 0
   coil_registers:  # default value to 0
     - name: "open_local_window_1_1"
       address: 0
     - name: "enter_screen_5_0"
       address: 1
-    - name: "param_turn_on_pumping_process"
+    - name: "action_turn_on_pumping_process"
       address: 2
-    - name: "param_recycle"
+    - name: "action_recycle"
       address: 3
     - name: "enter_screen_3_0"
       address: 4
@@ -27,19 +28,21 @@
       address: 9
     - name: "button_load_password"
       address: 10
+    - name: "not_used"
+      address: 11
     - name: "open_local_window_0_2"
-      address: 12  # jumped 11 - ok
+      address: 12
     - name: "close_local_window_0_2"
       address: 13
-    - name: "param_pre_fill_line"
+    - name: "action_pre_fill_line"
       address: 14
-    - name: "param_pull_down_pistons_manual"
+    - name: "action_pull_down_pistons_manual"
       address: 15
-    - name: "param_pull_up_pistons_manual"
+    - name: "action_pull_up_pistons_manual"
       address: 16
-    - name: "param_vacuum_air"
+    - name: "action_vacuum_air"
       address: 17
-    - name: "param_depressurize"
+    - name: "action_depressurize"
       address: 18
     - name: "open_local_window_1_1"
       address: 19
@@ -47,21 +50,21 @@
       address: 20
     - name: "enter_screen_0_0"
       address: 21
-    - name: "param_recycle_car"
+    - name: "action_recycle_car"
       address: 22
-    - name: "param_recycle_retractil"
+    - name: "action_recycle_retractil"
       address: 23
     - name: "enter_screen_1_0"
       address: 24
-    - name: "param_button_start_bucket_change_1"
+    - name: "action_button_start_bucket_change_1"
       address: 25
-    - name: "param_button_start_bucket_change_2"
+    - name: "action_button_start_bucket_change_2"
       address: 26
-    - name: "param_pull_down_pistons_bucket"
+    - name: "action_pull_down_pistons_bucket"
       address: 27
-    - name: "param_pull_up_pistons_bucket"
+    - name: "action_pull_up_pistons_bucket"
       address: 28
-    - name: "param_button_change_bucket_3"
+    - name: "action_button_change_bucket_3"
       address: 29
     - name: "enter_screen_0_0"
       address: 30
@@ -119,6 +122,18 @@
     - name: "param_pre_vacuum_limit_low"
       address: 40016
       data_type: "uint16"
+    - name: "not_used"
+      address: 40017
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40018
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40019
+      data_type: "uint16"
+    - name: "not_used"
+      address: 40020
+      data_type: "uint16"
     - name: "param_pulse_train_low"
       address: 40021
       data_type: "uint16"
@@ -155,22 +170,25 @@
     - name: "param_client_password"
       address: 40032
       data_type: "uint16"
+    - name: "param_bucket_size_selection"
+      address: 40033
+      data_type: "uint16"
     # --------------------------------------- SENSORS START
     - name: "sensor_material_pressure"
-      address: 40048
+      address: 40034
       data_type: "uint16"
     - name: "sensor_material_temperature"
-      address: 40049
+      address: 40035
       data_type: "uint16"
     - name: "sensor_laser_distance"
-      address: 40050
+      address: 40036
       data_type: "uint16"
     - name: "sensor_pressure_regulator_read_set"
-      address: 40051
+      address: 40037
       data_type: "uint16"
     - name: "sensor_pressure_regulator_read_real"
-      address: 40052
+      address: 40038
       data_type: "uint16"
     - name: "sensor_pressure_regulator_valve_read_state"
-      address: 40053
+      address: 40039
       data_type: "uint16"

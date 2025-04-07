@@ -37,16 +37,21 @@ class HRegister(BaseModel):
 
 
 class SlaveTCP(BaseModel):
-    name: str
     host: str
     port: int
-    id: int
     framer: str = "socket"
-    timeout_seconds: int = 1
+    timeout_seconds: int = 5
+    offset: int = 0
+
+
+class SlaveHMI(BaseModel):
+    hmi_name: str = ""
+    hmi_id: int = 0
+    slave_tcp: SlaveTCP
 
 
 class ModbusConfig(BaseModel):
-    slaves: list[SlaveTCP]
+    hmis: list[SlaveHMI]
     holding_registers: list[HRegister]
     coil_registers: list[CRegister]
 
@@ -60,7 +65,9 @@ def get_register_by_address(
     return (None, None)
 
 
-def get_register_by_name(registers: list[HRegister], name: str) -> Optional[HRegister]:
+def get_register_by_name(
+    registers: list[HRegister] | list[CRegister], name: str
+) -> Optional[HRegister | CRegister]:
     return next((r for r in registers if r.name == name), None)
 
 

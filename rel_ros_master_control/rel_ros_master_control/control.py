@@ -5,16 +5,20 @@ from pydantic import BaseModel
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
-from rel_ros_master_control.config import load_modbus_config, load_status_device_config
+from rel_ros_master_control.config import (
+    load_hmi_config,
+    load_modbus_config,
+    load_status_device_config,
+)
+from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
+from rel_ros_master_control.models.hmi_m import SlaveHMI
 from rel_ros_master_control.models.modbus_m import (
-    DigitalHydValve,
+    CRegister,
     HRegister,
-    IOLinkHR,
     RegisterDataType,
     RegisterMode,
-    SlaveHMI,
     SlaveIOLink,
     get_register_by_name,
 )
@@ -59,12 +63,24 @@ class ModbusStatus(BaseModel):
 
 
 class RelControl:
-    def __init__(self, iolink_slave: SlaveIOLink, hmi_slave: SlaveHMI, hr: list[HRegister]) -> None:
+    """Main class for control"""
+
+    def __init__(
+        self,
+        iolink_slave: SlaveIOLink,
+        iolink_hr: list[HRegister],
+        hmi_slave: SlaveHMI,
+        hmi_hr: list[HRegister],
+        hmi_cr: list[CRegister],
+    ) -> None:
         self.tower_devive = TowerStatusDevice(load_status_device_config())
         self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
         self.master_hmi = RelModbusMaster(hmi_slave)
-        self.hr = hr
+        self.iolink_hr = iolink_hr
+        self.hmi_hr = hmi_hr
+        self.hmi_cr = hmi_cr
+        self.hmi_id = iolink_slave.hmi_id
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
         logger.info("master_io_link connected .✨")
@@ -72,18 +88,21 @@ class RelControl:
     def apply_state(self, hr: HRegister, state_value: int):
         try:
             self.master_io_link.slave_conn.write_register(
-                hr.address,
+                self.get_register_with_offset(hr.address),
                 state_value,
             )
         except Exception as err:
             logger.error("error writing state %s - %s", state_value, err)
 
     def apply_manifold_state(self, state_value: int):
-        self.apply_state(get_register_by_name(self.hr, IOLinkHR.MANIFOLD.value), state_value)
+        self.apply_state(
+            get_register_by_name(self.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value), state_value
+        )
 
     def apply_hyd_valve_state(self, state_value: int):
         self.apply_state(
-            get_register_by_name(self.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value), state_value
+            get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value),
+            state_value,
         )
 
     def apply_tower_state(self, state: TowerState):
@@ -124,25 +143,6 @@ class RelControl:
         logger.debug("register with offset %s", register)
         return register
 
-    def read_device_port_register(self, register: HRegister) -> int:
-        logger.debug("read device register %s", register)
-        rr = self.master_io_link.slave_conn.read_holding_registers(
-            address=self.get_register_with_offset(register.address),
-            count=register.words,
-        )
-        decoder = get_decoder(rr)
-        return get_value(decoder, register.data_type)
-
-    def write_device_port_register(self, register: HRegister, value: int) -> int:
-        logger.debug("write device register %s", register)
-        response = self.master_io_link.slave_conn.write_register(
-            address=self.get_register_with_offset(register.address), value=value
-        )
-        if response.isError():
-            logger.error("error writing register")
-            return
-        logger.info("writing ok ✨")
-
     def write_holding_register(self, register: int, value: int) -> ModbusStatus:
         status = ModbusStatus()
         logger.info("writing to register %s value %s", register, value)
@@ -157,6 +157,14 @@ class RelControl:
         status.status = "write ok"
         status.value = value
         return status
+
+    def eletrovalve_on(self):
+        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
+        self.write_holding_register(register.address, 3)
+
+    def eletrovalve_off(self):
+        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
+        self.write_holding_register(register.address, 5)
 
     def read_holding_register(self, register: int) -> ModbusStatus:
         status = ModbusStatus()
@@ -174,6 +182,10 @@ class RelControl:
         status.status = "read ok"
         return status
 
+    def get_data_by_hr_name(self, register_name: str) -> int:
+        register = get_register_by_name(self.iolink_hr, register_name)
+        return self.read_holding_register(register.address).value
+
     def get_data(self) -> list[HRegister]:
         updated_registers = []
 
@@ -183,7 +195,7 @@ class RelControl:
 
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            for register in self.hr:
+            for register in self.iolink_hr:
                 if register.mode == RegisterMode.R:
                     futures.append(executor.submit(worker, register))
         if not futures:
@@ -197,12 +209,11 @@ class RelControl:
 
 
 def run_masters_to_iolinks(
-    iolink_slaves: list[SlaveIOLink], hmi_slaves: list[SlaveHMI], hr: list[HRegister]
+    iolink_slaves: list[SlaveIOLink], hr: list[HRegister]
 ) -> list[RelControl]:
     masters = []
     for iolink_slave in iolink_slaves:
-        hmi_slave = next((s for s in hmi_slaves if s.id == iolink_slave.hmi_id), None)
-        masters.append(RelControl(iolink_slave=iolink_slave, hmi_slave=hmi_slave, hr=hr))
+        masters.append(RelControl(iolink_slave=iolink_slave, iolink_hr=hr))
     logger.info("finish to run masters ...")
     return masters
 
@@ -242,8 +253,15 @@ def run():
     )
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
-    config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[args.id], hr=config.holding_registers)
+    iolink_config = load_modbus_config()
+    hmi_config = load_hmi_config()
+    control = RelControl(
+        iolink_slave=iolink_config.iolinks[args.id],
+        iolink_hr=iolink_config.holding_registers,
+        hmi_slave=hmi_config.hmis[args.id],
+        hmi_hr=hmi_config.holding_registers,
+        hmi_cr=hmi_config.coil_registers,
+    )
     if args.action == "write":
         control.write_holding_register(args.register, args.value)
     elif args.action == "read":

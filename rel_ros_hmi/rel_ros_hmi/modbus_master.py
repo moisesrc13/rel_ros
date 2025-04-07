@@ -11,9 +11,11 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.logger import new_logger
 from rel_ros_hmi.models.modbus_m import (
+    CRegister,
     HRegister,
     RegisterDataType,
     RegisterModbusType,
+    SlaveHMI,
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
@@ -46,19 +48,19 @@ def get_value(decoder: BinaryPayloadDecoder, data_type: RegisterDataType) -> int
 
 
 def setup_sync_client(
-    slave: SlaveTCP,
+    slave: SlaveHMI,
 ) -> Union[modbusClient.ModbusTcpClient, modbusClient.ModbusSerialClient]:
     """Run client setup."""
-    logger.info("creating modbus master for slave %s 👾 ...", slave.id)
+    logger.info("creating modbus master for HMI slave %s 👾 ...", slave.hmi_id)
     try:
-        host = slave.host
-        port = slave.port
+        host = slave.slave_tcp.host
+        port = slave.slave_tcp.port
         if os.getenv("USE_TEST_MODBUS", "false").lower() in ["yes", "true"]:
             logger.info("connecting to test modbus slave")
             host = "0.0.0.0"
             port = 8845
         client = None
-        if isinstance(slave, SlaveTCP):
+        if isinstance(slave.slave_tcp, SlaveTCP):
             logger.info(
                 "Creating TCP master connection to slave on host %s port %s ⭐",
                 host,
@@ -68,7 +70,7 @@ def setup_sync_client(
                 host=host,
                 port=port,
                 framer=FramerType.SOCKET,
-                timeout=slave.timeout_seconds,
+                timeout=slave.slave_tcp.timeout_seconds,
             )
         else:
             logger.error("modbus master type not supported")
@@ -80,13 +82,14 @@ def setup_sync_client(
 
 
 class RelModbusMaster:
-    def __init__(self, slave: SlaveTCP, hr: list[HRegister]) -> None:
+    def __init__(self, slave: SlaveHMI, hr: list[HRegister], coils: list[CRegister]) -> None:
         logger.info("✨ Starting modbus HMI master ...")
-        self.hmi_name = slave.name
-        self.hmi_id = slave.id
+        self.hmi_name = slave.hmi_name
+        self.hmi_id = slave.hmi_id
         self.slave_conn = setup_sync_client(slave)
         self.slave = slave
         self.hr = hr
+        self.coils = coils
 
     def connection_state(self):
         if self.slave_conn.connected:
@@ -147,11 +150,13 @@ class RelModbusMaster:
         return get_value(decoder, RegisterDataType.uint16)
 
     def get_holding_registers_data(self) -> list[HRegister]:
-        logger.info("reading holding register data")
         addresses = get_hr_addresses(self.hr)
+        logger.info("reading holding register data, addresses %s", addresses)
+        logger.info("reading total records %s", len(addresses))
         rr = self.slave_conn.read_holding_registers(
             address=addresses[0], count=len(addresses)
         )  # start with first address
+        logger.info("results %s", rr)
         decoder = get_decoder(rr)
         updated_registers = []
         for addr in addresses:
@@ -161,8 +166,10 @@ class RelModbusMaster:
         return updated_registers
 
 
-def create_masters_for_hmis(slaves: list[SlaveTCP], hr: list[HRegister]) -> list[RelModbusMaster]:
-    return [RelModbusMaster(s, hr) for s in slaves]
+def create_masters_for_hmis(
+    slaves: list[SlaveTCP], hr: list[HRegister], coils: list[CRegister]
+) -> list[RelModbusMaster]:
+    return [RelModbusMaster(s, hr, coils) for s in slaves]
 
 
 def run():
@@ -201,14 +208,14 @@ def run():
     )
     args = parser.parse_args()
     config = load_modbus_config()
-    modbus_master = RelModbusMaster(config.slaves[0], config.holding_registers)
+    modbus_master = RelModbusMaster(config.hmis[0], config.holding_registers, config.coil_registers)
     modbus_master.do_connect()
     if args.action == "write":
         modbus_master.do_write(args.register, args.value, RegisterModbusType(args.type))
     elif args.action == "read":
         value = -1
         if args.register == 0:
-            value = modbus_master.get_holding_registers_data()
+            value = modbus_master.get_holding_registers_data()  # read all data
         else:
             value = modbus_master.do_read(args.register)
         logger.info("read value %s", value)

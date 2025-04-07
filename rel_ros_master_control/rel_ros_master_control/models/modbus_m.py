@@ -4,36 +4,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class ManifoldActions(BaseModel):
-    ACTIVATE: int = int("0000_0000_0000_0001", 2)
-    EXTRA: int = int("0000_0001_0000_0000", 2)
-    RECYCLE: int = int("0000_0100_0000_0000", 2)
-    VENTING_RETRACTIL_UP: int = int("0001_0000_0000_0000", 2)
-    VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
-    PISTONS_UP: int = int("0100_0000_0000_0000", 2)
-    PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
-
-
-class IOLinkHR(Enum):
-    SENSOR_MATERIAL_PRESSURE = "sensor_material_pressure"
-    SENSOR_MATERIAL_TEMPERATURE = "sensor_material_temperature"
-    SENSOR_LASER_DISTANCE = "sensor_laser_distance"
-    SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
-    SENSOR_PRESSURE_REGULATOR_READ_REAL = "sensor_pressure_regulator_read_real"
-    SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
-    REGULATOR_PRESSURE_SET = "regulator_pressure_set"
-    REGULATOR_ACTIVATE_VALVE = "regulator_activate_valve"
-    MANIFOLD = "manifold"
-    DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
-
-
-class DigitalHydValve(BaseModel):
-    out1_off_out2_off: int = 1
-    out1_on_out2_off: int = 3
-    out1_off_out2_on: int = 5
-    out1_on_out2_on: int = 7
-
-
 class RegisterDataType(Enum):
     float16 = "float16"
     uint16 = "uint16"
@@ -82,12 +52,6 @@ class SlaveIOLink(BaseModel):
     slave_tcp: SlaveTCP
 
 
-class SlaveHMI(BaseModel):
-    name: str = ""
-    id: int = 0
-    slave_tcp: SlaveTCP
-
-
 class SlaveSerial(BaseModel):
     name: str = ""
     hmi_id: int = 0
@@ -104,7 +68,6 @@ class SlaveSerial(BaseModel):
 class ModbusConfig(BaseModel):
     iolinks: list[SlaveIOLink]
     holding_registers: list[HRegister]
-    hmis: list[SlaveHMI]
 
 
 def get_register_by_address(

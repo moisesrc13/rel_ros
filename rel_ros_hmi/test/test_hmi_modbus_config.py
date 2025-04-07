@@ -4,6 +4,7 @@ from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.models.modbus_m import (
     HRegister,
     ModbusConfig,
+    SlaveHMI,
     SlaveTCP,
     get_hr_addresses,
     get_register_by_address,
@@ -47,8 +48,10 @@ def test_get_registers_addrresses():
 def test_config(config):
     assert isinstance(config, ModbusConfig)
     assert isinstance(config.holding_registers, list)
-    assert isinstance(config.slaves, list)
-    assert isinstance(config.slaves[0], SlaveTCP)
+    assert isinstance(config.hmis, list)
+    assert isinstance(config.hmis[0], SlaveHMI)
+    hmi_slave = config.hmis[0]
+    assert isinstance(hmi_slave.slave_tcp, SlaveTCP)
 
 
 def test_get_register_by_address():

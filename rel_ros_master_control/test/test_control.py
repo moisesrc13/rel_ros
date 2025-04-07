@@ -2,22 +2,25 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_ros_master_control.constants import (
+    DigitalHydValve,
+    DigitalOutput,
+    HMIWriteAction,
+    ManifoldActions,
+)
 from rel_ros_master_control.control import (
     ModbusStatus,
     RelControl,
     RelModbusMaster,
-    SlaveHMI,
     SlaveIOLink,
     get_builder,
     get_decoder_from_rr,
     get_value,
 )
+from rel_ros_master_control.models.hmi_m import SlaveHMI
 from rel_ros_master_control.models.modbus_m import (
-    DigitalHydValve,
     HRegister,
-    IOLinkHR,
-    ManifoldActions,
     RegisterDataType,
     SlaveTCP,
     get_register_by_name,
@@ -60,9 +63,16 @@ def rel_control(monkeypatch):
         port=9090,
     )
     iolink_slave = SlaveIOLink(slave_tcp=slave_tcp)
-    hmi_slave = SlaveHMI(slave_tcp=slave_tcp)
+    hmi_slave = SlaveIOLink(slave_tcp=slave_tcp)
+    hmi_config = load_hmi_config()
     monkeypatch.setattr(RelModbusMaster, "do_connect", MagicMock(return_value=None))
-    return RelControl(iolink_slave=iolink_slave, hmi_slave=hmi_slave, hr=config.holding_registers)
+    return RelControl(
+        iolink_slave=iolink_slave,
+        iolink_hr=config.holding_registers,
+        hmi_slave=hmi_slave,
+        hmi_hr=hmi_config.holding_registers,
+        hmi_cr=hmi_config.coil_registers,
+    )
 
 
 @pytest.mark.parametrize(
@@ -107,7 +117,9 @@ def test_read_holding_register(rel_control: RelControl, test_address, modbus_val
 def test_manifold_actions(rel_control: RelControl):
     manifold = ManifoldActions()
     write_register = writer_register_mock(rel_control)
-    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.MANIFOLD.value)
+    hr: HRegister = get_register_by_name(
+        rel_control.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value
+    )
     for _, value in manifold.model_dump().items():
         rel_control.apply_manifold_state(value)
         write_register.assert_called_with(
@@ -119,7 +131,9 @@ def test_manifold_actions(rel_control: RelControl):
 def test_control_hyd_valve(rel_control: RelControl):
     digital_valve = DigitalHydValve()
     write_register = writer_register_mock(rel_control)
-    hr: HRegister = get_register_by_name(rel_control.hr, IOLinkHR.DIGITAL_OUT_HYD_VALVE.value)
+    hr: HRegister = get_register_by_name(
+        rel_control.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value
+    )
     for _, value in digital_valve.model_dump().items():
         rel_control.apply_hyd_valve_state(value)
         write_register.assert_called_with(

@@ -39,7 +39,7 @@ holding_registers:
       words: 1
       data_type: "uint16"
       mode: "w"
-    - name: "manifold"
+    - name: "action_manifold"
       address: 5051
       words: 1
       data_type: "uint16"
@@ -64,12 +64,3 @@ iolinks:
       framer: "socket"
       timeout_seconds: 1
       offset: -1
-hmis:  # the HMIs should match the slaves under rel_ros_hmi
-  - name: "HMI 0"
-    id: 0
-    slave_tcp:
-       host: 0.0.0.0  # localhost for ROS working as HMI slave
-       port: 8845  # 502 is the standard
-       framer: "socket"
-       timeout_seconds: 1
-       offset: 0

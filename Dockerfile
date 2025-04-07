@@ -2,15 +2,16 @@ FROM ros:humble
 
 ENV RELANT_PACKAGE=rel_ros_hmi
 ENV RELANT_NODE=rel_ros_hmi_node
+ENV CONFIG_PATH="/home/relant/config"
 
 USER root
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # install ros package
 RUN apt-get update && apt-get install -y \
-      ros-humble-demo-nodes-cpp curl wget python3.11-dev \
-      virtualenv nano qt5-* \
-      ros-humble-demo-nodes-py && \
-    rm -rf /var/lib/apt/lists/*
+  ros-humble-demo-nodes-cpp curl wget python3.11-dev \
+  virtualenv nano qt5-* \
+  ros-humble-demo-nodes-py && \
+  rm -rf /var/lib/apt/lists/*
 
 
 RUN useradd -m relant
@@ -24,6 +25,7 @@ COPY ./run.sh /home/relant/run.sh
 RUN mkdir -p /home/relant/ros2_ws/src
 COPY ./requirements.txt /home/relant/ros2_ws/requirements.txt
 COPY ./run-ros-*.sh /home/relant/ros2_ws/
+COPY ./config /home/relant/config
 RUN cd /home/relant/ros2_ws && virtualenv -p python3.10 ./venv && touch ./venv/COLCON_IGNORE
 
 

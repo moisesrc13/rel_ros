@@ -27,4 +27,5 @@ def load_config(file_path: str):
 
 
 def load_modbus_config() -> ModbusConfig:
-    return load_config("./config/hmi.yml")
+    config_path = os.getenv("CONFIG_PATH", "./config")
+    return load_config(f"{config_path}/hmi/hmi.yml")
