@@ -68,6 +68,11 @@ class SlaveType(Enum):
     HMI = "hmi"
 
 
+class RegisterType(Enum):
+    HOLDING = "holiding_register"
+    COIL = "coil_register"
+
+
 class RelControl:
     """Main class for control"""
 
@@ -183,14 +188,24 @@ class RelControl:
         return status
 
     def write_hregister(
-        self, register: int, value: int, stype: SlaveType = SlaveType.IOLINK
+        self,
+        register: int,
+        value: int,
+        stype: SlaveType = SlaveType.IOLINK,
+        rtype: RegisterType = RegisterType.HOLDING,
     ) -> ModbusStatus:
         status = ModbusStatus()
         master = self.get_master_connection(stype)
         logger.info("writing to register %s value %s", register, value)
-        response = master.slave_conn.write_register(
-            address=self.get_register_with_offset(register), value=value
-        )
+        if rtype == RegisterType.HOLDING:
+            response = master.slave_conn.write_register(
+                address=self.get_register_with_offset(register), value=value
+            )
+        else:
+            coil_value = value > 0
+            response = master.slave_conn.write_coil(
+                address=self.get_register_with_offset(register), value=coil_value
+            )
         if response.isError():
             logger.error("error writing register on %s", stype)
             status.error = response
