@@ -1,46 +1,14 @@
 import functools
 import os
-from typing import Optional
 
 import rclpy
-from pydantic import BaseModel
 from rclpy.node import Node
-from rospy_message_converter.message_converter import convert_ros_message_to_dictionary
 
 from rel_interfaces.msg import HMI, HMIAction, IOLinkData
 from rel_ros_master_control.config import load_hmi_config, load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import FlowControlInputs
 from rel_ros_master_control.flow_control import run as run_control
-
-
-class ControlHMIData(BaseModel):
-    hmi_id: int = 0
-    data: Optional[HMI] = None
-
-
-class ControlIOLinkData(BaseModel):
-    hmi_id: int = 0
-    data: Optional[IOLinkData] = None
-
-
-class ControlNode(BaseModel):
-    hmi_data: ControlHMIData
-    iolink_data: ControlIOLinkData
-
-
-def create_control_cluster(size: int) -> list[ControlNode]:
-    """
-    used to get data from sensors and user input in the HMI.
-    This data will be used for the control logic
-    """
-    cluster = []
-    for n in range(size):
-        control_node = ControlNode(
-            hmi_data=ControlHMIData(hmi_id=n), iolink_data=ControlIOLinkData(hmi_id=n)
-        )
-        cluster.append(control_node)
-    return cluster
 
 
 class RelROSNode(Node):
@@ -58,7 +26,6 @@ class RelROSNode(Node):
             hmi_cr=self.hmi_config.coil_registers,
         )
         self.create_timers_for_iolink_masters()
-        self.control_cluster = create_control_cluster(size=len(self.masters))
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
@@ -129,10 +96,6 @@ class RelROSNode(Node):
         registers = master.get_iolink_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
-
-        node: ControlNode = get_control_node_with_id(self.control_cluster, msg.hmi_id)
-        node.iolink_data = msg
-        # self.control_cluster[msg.hmi_id] = node  # may not be required
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
         self.iolink_publisher.publish(msg)
 
@@ -153,7 +116,7 @@ def main():
         rclpy.shutdown()
 
     except Exception as err:
-        print(f"terminating program {err}")
+        print(f"terminating ROS node {err}")
 
 
 if __name__ == "__main__":

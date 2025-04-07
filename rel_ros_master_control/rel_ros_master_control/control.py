@@ -155,7 +155,7 @@ class RelControl:
         return register
 
     def write_iolink_hregister(self, register: int, value: int) -> ModbusStatus:
-        return self.write_hregister(register, value, SlaveType.IOLINK)
+        return self.write_register(register, value, SlaveType.IOLINK)
 
     def eletrovalve_on(self):
         register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
@@ -187,7 +187,7 @@ class RelControl:
         status.status = f"read ok {stype.value}"
         return status
 
-    def write_hregister(
+    def write_register(
         self,
         register: int,
         value: int,

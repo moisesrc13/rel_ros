@@ -87,7 +87,7 @@ def main():
         rclpy.shutdown()
 
     except Exception as err:
-        print(f"terminating program {err}")
+        print(f"terminating ROS node {err}")
 
 
 if __name__ == "__main__":
