@@ -1,5 +1,6 @@
 import argparse
 import concurrent.futures
+from enum import Enum
 
 from pydantic import BaseModel
 from pymodbus.constants import Endian
@@ -60,6 +61,11 @@ class ModbusStatus(BaseModel):
     error: str = None
     status: str = ""
     value: int = 0
+
+
+class SlaveType(Enum):
+    IOLINK = "iolink"
+    HMI = "hmi"
 
 
 class RelControl:
@@ -143,54 +149,72 @@ class RelControl:
         logger.debug("register with offset %s", register)
         return register
 
-    def write_holding_register(self, register: int, value: int) -> ModbusStatus:
-        status = ModbusStatus()
-        logger.info("writing to register %s value %s", register, value)
-        response = self.master_io_link.slave_conn.write_register(
-            address=self.get_register_with_offset(register), value=value
-        )
-        if response.isError():
-            logger.error("error writing register")
-            status.error = response
-            return status
-        logger.info("writing ok ✨")
-        status.status = "write ok"
-        status.value = value
-        return status
+    def write_iolink_hregister(self, register: int, value: int) -> ModbusStatus:
+        return self.write_hregister(register, value, SlaveType.IOLINK)
 
     def eletrovalve_on(self):
         register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
-        self.write_holding_register(register.address, 3)
+        self.write_iolink_hregister(register.address, 3)
 
     def eletrovalve_off(self):
         register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
-        self.write_holding_register(register.address, 5)
+        self.write_iolink_hregister(register.address, 5)
 
-    def read_holding_register(self, register: int) -> ModbusStatus:
+    def get_master_connection(self, stype: SlaveType) -> RelModbusMaster:
+        if stype == SlaveType.IOLINK:
+            return self.master_io_link
+        return self.master_hmi
+
+    def read_hregister(self, register: int, stype: SlaveType = SlaveType.IOLINK) -> ModbusStatus:
         status = ModbusStatus()
         logger.info("reading register %s", register)
-        response = self.master_io_link.slave_conn.read_holding_registers(
+        master = self.get_master_connection(stype)
+        response = master.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register), count=1
         )
         if response.isError():
-            logger.error("error reading register")
+            logger.error("error reading register on %s", stype)
             status.error = response
             return status
-        logger.info("reading ok ✨ %s", response.registers)
+        logger.info("reading ok ✨ %s - %s", response.registers, stype)
         decoder = get_decoder(response)
         status.value = get_value(decoder)
-        status.status = "read ok"
+        status.status = f"read ok {stype.value}"
         return status
+
+    def write_hregister(
+        self, register: int, value: int, stype: SlaveType = SlaveType.IOLINK
+    ) -> ModbusStatus:
+        status = ModbusStatus()
+        master = self.get_master_connection(stype)
+        logger.info("writing to register %s value %s", register, value)
+        response = master.slave_conn.write_register(
+            address=self.get_register_with_offset(register), value=value
+        )
+        if response.isError():
+            logger.error("error writing register on %s", stype)
+            status.error = response
+            return status
+        logger.info("writing ok ✨ %s", stype)
+        status.status = f"write ok {stype.value}"
+        status.value = value
+        return status
+
+    def read_iolink_hregister(self, register: int) -> ModbusStatus:
+        return self.read_hregister(register, SlaveType.IOLINK)
+
+    def read_hmi_register(self, register: int) -> ModbusStatus:
+        return self.read_hregister(register, SlaveType.HMI)
 
     def get_data_by_hr_name(self, register_name: str) -> int:
         register = get_register_by_name(self.iolink_hr, register_name)
-        return self.read_holding_register(register.address).value
+        return self.read_iolink_hregister(register.address).value
 
     def get_iolink_data(self) -> list[HRegister]:
         updated_registers = []
 
         def worker(register: HRegister):
-            register.value = self.read_holding_register(register.address).value
+            register.value = self.read_iolink_hregister(register.address).value
             updated_registers.append(register)
 
         futures = []
@@ -276,14 +300,14 @@ def run():
         hmi_cr=hmi_config.coil_registers,
     )
     if args.action == "write":
-        control.write_holding_register(args.register, args.value)
+        control.write_iolink_hregister(args.register, args.value)
     elif args.action == "read":
         value = -1
         if args.register == 0:
             value = control.get_iolink_data()
             logger.info("value size %s", len(value))
         else:
-            value = control.read_holding_register(args.register)
+            value = control.read_iolink_hregister(args.register)
         logger.info("read value %s", value)
 
 

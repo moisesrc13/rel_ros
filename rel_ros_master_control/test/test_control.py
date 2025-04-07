@@ -84,7 +84,7 @@ def rel_control(monkeypatch):
     ],
 )
 def test_get_data(rel_control: RelControl, test_value):
-    rel_control.read_holding_register = MagicMock(
+    rel_control.read_iolink_hregister = MagicMock(
         return_value=ModbusStatus(
             status="ok",
             value=test_value,
@@ -110,7 +110,7 @@ def test_read_holding_register(rel_control: RelControl, test_address, modbus_val
     rel_control.master_io_link.slave_conn = slave_conn_mock
     offset = rel_control.master_io_link.slave.slave_tcp.offset
     called_address = test_address - offset
-    rel_control.read_holding_register(test_address)
+    rel_control.read_iolink_hregister(test_address)
     read_register.assert_called_with(address=called_address, count=count)
 
 
