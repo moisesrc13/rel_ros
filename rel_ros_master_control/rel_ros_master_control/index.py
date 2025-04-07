@@ -4,7 +4,7 @@ import os
 import rclpy
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMI, HMIAction, IOLinkData
+from rel_interfaces.msg import IOLinkData
 from rel_ros_master_control.config import load_hmi_config, load_modbus_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import FlowControlInputs
@@ -29,9 +29,6 @@ class RelROSNode(Node):
         self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
-        self.get_logger().info("creating publisher for rel/hmiaction topic 📨 ...")
-        self.hmi_action_publisher = self.create_publisher(HMIAction, "rel/hmiaction", 10)
-
         self.get_logger().info("======= creating MAIN CONTROL timers 🤖 =======")
         self.create_timers_for_main_control()
 
@@ -64,7 +61,6 @@ class RelROSNode(Node):
         control: RelControl = self.masters[hmi_id]
         flow_inputs = FlowControlInputs(
             control=control,
-            hmi_action_publisher=self.hmi_action_publisher,
         )
         self.is_control_running = True
         run_control(flow_inputs=flow_inputs)

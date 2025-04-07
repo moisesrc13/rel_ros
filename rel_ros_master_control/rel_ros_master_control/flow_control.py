@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_modbus_config
 from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
@@ -12,12 +12,6 @@ from rel_ros_master_control.logger import new_logger
 logger = new_logger(__name__)
 
 telemetry.disable_telemetry()
-
-
-@dataclass
-class FlowControlInputs:
-    hmi_action_publisher: Any
-    control: RelControl
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -58,12 +52,11 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(flow_inputs: FlowControlInputs, visualize: bool = False):
+def run(control: RelControl, visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
-        "hmi_action_publisher": flow_inputs.hmi_action_publisher,
-        "control": flow_inputs.control,
+        "control": control,
     }
     dr = (
         driver.Builder()
@@ -87,25 +80,15 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
 
 
 if __name__ == "__main__":
-    """this method is for manual testing"""
-
-    class TestPubliser:
-        def publish(self, msg: str):
-            print(f"publish {msg}")
-
-    config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[0], iolink_hr=config.holding_registers)
-    logger.info("visualize ...")
-    flow_inputs = FlowControlInputs(
-        control_hmi_data={
-            "param_vacuum_limit_high": 100,
-            "param_pre_vacuum_limit_high": 80,
-            "param_vacuum_distance": 10,
-        },
-        control_iolink_data={
-            "sensor_laser_distance": 100,
-        },
-        hmi_action_publisher=TestPubliser(),
-        control=control,
+    #  this method is for manual testing
+    iolink_config = load_modbus_config()
+    hmi_config = load_hmi_config()
+    control = RelControl(
+        iolink_slave=iolink_config.iolinks[0],
+        iolink_hr=iolink_config.holding_registers,
+        hmi_slave=hmi_config.hmis[0],
+        hmi_hr=hmi_config.holding_registers,
+        hmi_cr=hmi_config.coil_registers,
     )
-    run(flow_inputs=flow_inputs, visualize=True)
+    logger.info("visualize ...")
+    run(control, visualize=True)
