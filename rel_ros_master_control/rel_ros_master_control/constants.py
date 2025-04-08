@@ -11,7 +11,7 @@ class SensorLaserLectureState(Enum):
     NOT_HOLD_TO_C = 4
     SET_BUCKET = 5
     EMPTY_BUCKET = 6
-    PREVACUUM_BUCKET = 7
+    PREVACUUM_BUCKET_ON = 7
     BUCKET_ON = 8
 
 

@@ -205,7 +205,7 @@ def sensor_laser_on__c(
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
-        return SensorLaserLectureState.PREVACUUM_BUCKET
+        return SensorLaserLectureState.PREVACUUM_BUCKET_ON
     return SensorLaserLectureState.NOT_HOLD_TO_B
 
 
@@ -263,7 +263,7 @@ def bucket_state_action__empty(redirect_from_sensor_laser_state: SensorDistanceS
     pass
 
 
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET)
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET_ON)
 def bucket_state_action__prevacuum(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
 
@@ -273,6 +273,11 @@ def bucket_state_action__setbucket(redirect_from_sensor_laser_state: SensorDista
     pass
 
 
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.BUCKET_ON)
+@config.when_in(
+    redirect_from_sensor_laser_state=[
+        SensorLaserLectureState.BUCKET_ON,
+        SensorLaserLectureState.PREVACUUM_BUCKET_ON,
+    ]
+)
 def bucket_state_action__bucketon(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
