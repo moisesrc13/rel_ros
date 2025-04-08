@@ -159,7 +159,7 @@ def sensor_laser_on__b(
         )
         return SensorLaserLectureState.EMPTY_BUCKET
     while sensor_distance > sensor_distance_params.vacuum_distance:
-        time.sleep(0.10)  # TBD
+        time.sleep(Constants.wait_read_laser)  # TBD
         sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
 
     control.write_register_by_address_name(
@@ -197,8 +197,8 @@ def sensor_laser_on__c(
 ) -> SensorLaserLectureState:
     not_holded_sensor_on_c(control)
     wait_for_sensor_laser()
-    data = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
         control.write_register_by_address_name(
             name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
             value=1,
@@ -210,13 +210,31 @@ def sensor_laser_on__c(
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
-def sensor_laser_on__d(sensor_distance_state: SensorDistanceState):
-    pass
+def sensor_laser_on__d(
+    control: RelControl, sensor_distance_state: SensorDistanceState, iolink_hr_data: dict
+) -> SensorLaserLectureState:
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    wait_for_sensor_laser()
+    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+        return SensorLaserLectureState.BUCKET_ON
+    return SensorLaserLectureState.NOT_HOLD_TO_C
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
-def sensor_laser_on__e(sensor_distance_state: SensorDistanceState):
-    pass
+def sensor_laser_on__e(
+    control: RelControl, sensor_distance_state: SensorDistanceState, hmi_hr_data: dict
+) -> SensorLaserLectureState:
+    control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+    security_distance = hmi_hr_data.get(Params.PARAM_SECURITY_DISTANCE.value)
+    while sensor_distance < security_distance:
+        time.sleep(Constants.wait_read_laser)
+        sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    return SensorLaserLectureState.SET_BUCKET
 
 
 def redirect_sensor_laser_on_not_holded(

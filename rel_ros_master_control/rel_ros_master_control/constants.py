@@ -12,6 +12,7 @@ class SensorLaserLectureState(Enum):
     SET_BUCKET = 5
     EMPTY_BUCKET = 6
     PREVACUUM_BUCKET = 7
+    BUCKET_ON = 8
 
 
 class DigitalOutput(Enum):
@@ -114,6 +115,7 @@ class Params(Enum):
     PARAM_DISTANCE_BUCKET_3 = "param_distance_bucket_3"
     PARAM_PRE_VACUUM_LIMIT_HIGH = "param_pre_vacuum_limit_high"
     PARAM_VACUUM_LIMIT_HIGH = "param_vacuum_limit_high"
+    PARAM_SECURITY_DISTANCE = "param_security_distance"
 
 
 class Constants:
@@ -131,3 +133,4 @@ class Constants:
     ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
+    wait_read_laser: float = 0.20
