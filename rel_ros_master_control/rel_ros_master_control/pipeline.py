@@ -10,6 +10,7 @@ from rel_ros_master_control.constants import (
     SensorDistanceParams,
     SensorDistanceState,
     SensorDistanceStateName,
+    SensorLaserLectureState,
     Sensors,
 )
 from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
@@ -122,7 +123,7 @@ def sensor_laser_on__b(
     sensor_distance_state: SensorDistanceState,
     bucket_state: TowerState,
     iolink_hr_data: dict,
-):
+) -> SensorLaserLectureState:
     control.write_register_by_address_name(
         name=HMIWriteAction.STATUS_ALARM.value,
         value=1,
@@ -148,6 +149,8 @@ def sensor_laser_on__b(
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
+        return SensorLaserLectureState.HOLD
+    return SensorLaserLectureState.NOT_HOLD_TO_A
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
@@ -155,7 +158,7 @@ def sensor_laser_on__c(
     control: RelControl,
     bucket_state: TowerState,
     iolink_hr_data: dict,
-):
+) -> SensorLaserLectureState:
     control.apply_tower_state(bucket_state)
     control.write_register_by_address_name(
         name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
@@ -179,6 +182,8 @@ def sensor_laser_on__c(
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
+        return SensorLaserLectureState.HOLD
+    return SensorLaserLectureState.NOT_HOLD_TO_B
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)

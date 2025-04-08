@@ -3,6 +3,12 @@ from enum import Enum
 from pydantic import BaseModel
 
 
+class SensorLaserLectureState(Enum):
+    HOLD = 1
+    NOT_HOLD_TO_B = 2
+    NOT_HOLD_TO_A = 3
+
+
 class DigitalOutput(Enum):
     DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
 
