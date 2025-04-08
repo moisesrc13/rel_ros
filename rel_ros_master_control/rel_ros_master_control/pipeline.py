@@ -266,3 +266,13 @@ def bucket_state_action__empty(sensor_distance_state: SensorDistanceState):
 @config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.PREVACUUM_BUCKET)
 def bucket_state_action__prevacuum(sensor_distance_state: SensorDistanceState):
     pass
+
+
+@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.SET_BUCKET)
+def bucket_state_action__setbucket(sensor_distance_state: SensorDistanceState):
+    pass
+
+
+@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.BUCKET_ON)
+def bucket_state_action__bucketon(sensor_distance_state: SensorDistanceState):
+    pass
