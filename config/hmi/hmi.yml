@@ -77,7 +77,7 @@
     # ------------------- STATUS
     - name: "status_alarm_pre_vacuum"
       address: 34
-    - name: "status_alarm"
+    - name: "status_vacuum_alarm"
       address: 35
     - name: "status_no_air_pressure"
       address: 36

@@ -92,7 +92,7 @@ class HMIWriteAction(Enum):
     ACTION_RECYCLE = "action_recycle"
     ACTION_MANIFOLD = "action_manifold"
     STATUS_ALARM_PRE_VACUUM = "status_alarm_pre_vacuum"
-    STATUS_ALARM = "status_alarm"
+    STATUS_VACUUM_ALARM = "status_vacuum_alarm"
     STATUS_NO_AIR_PRESSURE = "status_no_air_pressure"
     STATUS_ERROR_CHANGE_BUCKET = "status_error_change_bucket"
     STATUS_PUMP_NO_PRESSURE = "status_pump_no_pressure"

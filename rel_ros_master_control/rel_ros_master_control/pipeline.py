@@ -124,11 +124,11 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 def not_holded_sensor_on_b(control: RelControl):
     control.write_register_by_address_name(
-        name=HMIWriteAction.STATUS_ALARM.value,
+        name=HMIWriteAction.STATUS_VACUUM_ALARM.value,
         value=1,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
-    )  #  vacuum alarm
+    )
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
         value=1,
