@@ -119,7 +119,7 @@ def not_holded_sensor_on_a(control: RelControl):
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
     not_holded_sensor_on_a(control)
-    # set bucket
+    return SensorLaserLectureState.SET_BUCKET
 
 
 def not_holded_sensor_on_b(control: RelControl):
@@ -157,7 +157,7 @@ def sensor_laser_on__b(
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
-        return SensorLaserLectureState.HOLD
+        return SensorLaserLectureState.EMPTY_BUCKET
     while sensor_distance > sensor_distance_params.vacuum_distance:
         time.sleep(0.10)  # TBD
         sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
@@ -205,7 +205,7 @@ def sensor_laser_on__c(
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
-        return SensorLaserLectureState.HOLD
+        return SensorLaserLectureState.PREVACUUM_BUCKET
     return SensorLaserLectureState.NOT_HOLD_TO_B
 
 
@@ -221,13 +221,30 @@ def sensor_laser_on__e(sensor_distance_state: SensorDistanceState):
 
 def redirect_sensor_laser_on_not_holded(
     control: RelControl, sensor_laser_on: SensorLaserLectureState
-):
+) -> SensorLaserLectureState:
+    next_state = SensorLaserLectureState.DO_NOTHING
     match sensor_laser_on:
         case SensorLaserLectureState.HOLD:
-            return  # do nothing
+            next_state = SensorLaserLectureState.HOLD  # do nothing
         case SensorLaserLectureState.NOT_HOLD_TO_A:
             not_holded_sensor_on_a(control)
+            next_state = SensorLaserLectureState.DO_NOTHING
         case SensorLaserLectureState.NOT_HOLD_TO_B:
             not_holded_sensor_on_b(control)
+            next_state = SensorLaserLectureState.DO_NOTHING
         case SensorLaserLectureState.NOT_HOLD_TO_C:
             not_holded_sensor_on_c(control)
+            next_state = SensorLaserLectureState.DO_NOTHING
+        case _:
+            next_state = sensor_laser_on
+    return next_state
+
+
+@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.EMPTY_BUCKET)
+def bucket_state_action__empty(sensor_distance_state: SensorDistanceState):
+    pass
+
+
+@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.PREVACUUM_BUCKET)
+def bucket_state_action__prevacuum(sensor_distance_state: SensorDistanceState):
+    pass

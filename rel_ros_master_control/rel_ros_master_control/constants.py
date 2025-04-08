@@ -4,10 +4,14 @@ from pydantic import BaseModel
 
 
 class SensorLaserLectureState(Enum):
+    DO_NOTHING = 0
     HOLD = 1
     NOT_HOLD_TO_A = 2
     NOT_HOLD_TO_B = 3
     NOT_HOLD_TO_C = 4
+    SET_BUCKET = 5
+    EMPTY_BUCKET = 6
+    PREVACUUM_BUCKET = 7
 
 
 class DigitalOutput(Enum):
