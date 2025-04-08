@@ -5,8 +5,9 @@ from pydantic import BaseModel
 
 class SensorLaserLectureState(Enum):
     HOLD = 1
-    NOT_HOLD_TO_B = 2
-    NOT_HOLD_TO_A = 3
+    NOT_HOLD_TO_A = 2
+    NOT_HOLD_TO_B = 3
+    NOT_HOLD_TO_C = 4
 
 
 class DigitalOutput(Enum):
@@ -25,7 +26,7 @@ class DigitalHydValve(BaseModel):
 
 
 class ManifoldActions(BaseModel):
-    ACTIVATE: int = int("0000_0000_0000_0001", 2)
+    DEACTIVATE: int = int("0000_0000_0000_0000", 2)
     EXTRA: int = int("0000_0001_0000_0000", 2)
     RECYCLE: int = int("0000_0100_0000_0000", 2)
     VENTING_RETRACTIL_UP: int = int("0001_0000_0000_0000", 2)
@@ -122,6 +123,7 @@ class Constants:
         "bucket_state",
         "check_distance_sensor_for_electrovales",
         "sensor_laser_on",
+        "redirect_sensor_laser_on_not_holded",
     ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
