@@ -237,7 +237,7 @@ def sensor_laser_on__e(
     return SensorLaserLectureState.SET_BUCKET
 
 
-def redirect_sensor_laser_on_not_holded(
+def redirect_from_sensor_laser_state(
     control: RelControl, sensor_laser_on: SensorLaserLectureState
 ) -> SensorLaserLectureState:
     next_state = SensorLaserLectureState.DO_NOTHING
@@ -258,21 +258,21 @@ def redirect_sensor_laser_on_not_holded(
     return next_state
 
 
-@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.EMPTY_BUCKET)
-def bucket_state_action__empty(sensor_distance_state: SensorDistanceState):
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.EMPTY_BUCKET)
+def bucket_state_action__empty(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
 
 
-@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.PREVACUUM_BUCKET)
-def bucket_state_action__prevacuum(sensor_distance_state: SensorDistanceState):
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET)
+def bucket_state_action__prevacuum(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
 
 
-@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.SET_BUCKET)
-def bucket_state_action__setbucket(sensor_distance_state: SensorDistanceState):
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.SET_BUCKET)
+def bucket_state_action__setbucket(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
 
 
-@config.when(redirect_sensor_laser_on_not_holded=SensorLaserLectureState.BUCKET_ON)
-def bucket_state_action__bucketon(sensor_distance_state: SensorDistanceState):
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.BUCKET_ON)
+def bucket_state_action__bucketon(redirect_from_sensor_laser_state: SensorDistanceState):
     pass

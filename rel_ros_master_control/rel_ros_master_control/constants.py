@@ -129,7 +129,7 @@ class Constants:
         "bucket_state",
         "check_distance_sensor_for_electrovales",
         "sensor_laser_on",
-        "redirect_sensor_laser_on_not_holded",
+        "redirect_from_sensor_laser_state",
     ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
