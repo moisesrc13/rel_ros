@@ -7,6 +7,8 @@ from rel_ros_master_control.constants import (
     HMIWriteAction,
     ManifoldActions,
     Params,
+    PressureSet,
+    PressureState,
     SensorDistanceParams,
     SensorDistanceState,
     SensorDistanceStateName,
@@ -260,7 +262,7 @@ def bucket_state_action__empty(
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET_ON)
 def bucket_state_action__prevacuum(
-    control: RelControl, redirect_from_sensor_laser_state: SensorDistanceState
+    control: RelControl, hmi_hr_data: dict, redirect_from_sensor_laser_state: SensorDistanceState
 ):
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
@@ -268,6 +270,13 @@ def bucket_state_action__prevacuum(
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
+    target_pressure = hmi_hr_data.get(Params.REGULATOR_PRESSURE_SET)
+    pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    if pressure != target_pressure:
+        control.apply_pressure_state(PressureState.ON)
+    while pressure != target_pressure:
+        pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    control.apply_pressure_state(PressureState.OFF)
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)

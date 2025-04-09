@@ -11,7 +11,13 @@ from rel_ros_master_control.config import (
     load_iolink_config,
     load_status_device_config,
 )
-from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
+from rel_ros_master_control.constants import (
+    DigitalHydValve,
+    DigitalOutput,
+    HMIWriteAction,
+    PressureSet,
+    PressureState,
+)
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.hmi_m import SlaveHMI
@@ -210,6 +216,14 @@ class RelControl:
         status.value = int(response.bits[0])
         status.status = "read coil ok"
         return status
+
+    def apply_pressure_state(self, state: PressureState):
+        self.write_register_by_address_name(
+            name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
+            stype=SlaveType.IOLINK,
+            rtype=RegisterType.HOLDING,
+            value=state.value,
+        )
 
     def write_register_by_address_name(
         self,

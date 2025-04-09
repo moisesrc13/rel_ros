@@ -30,9 +30,13 @@ class DigitalHydValve(BaseModel):
     out1_on_out2_on: int = 7
 
 
-class PressureAction(BaseModel):
-    ON: int = 257
-    OFF: int = 256
+class PressureSet(Enum):
+    REGULATOR_ACTIVATE_VALVE = "regulator_activate_valve"
+
+
+class PressureState(Enum):
+    ON = 257
+    OFF = 256
 
 
 class ManifoldActions(BaseModel):
@@ -121,6 +125,7 @@ class Params(Enum):
     PARAM_PRE_VACUUM_LIMIT_HIGH = "param_pre_vacuum_limit_high"
     PARAM_VACUUM_LIMIT_HIGH = "param_vacuum_limit_high"
     PARAM_SECURITY_DISTANCE = "param_security_distance"
+    REGULATOR_PRESSURE_SET = "regulator_pressure_set"
 
 
 class Constants:
