@@ -39,9 +39,9 @@ def load_config(file_path: str, config_type: ConfigType):
         raise err
 
 
-def load_modbus_config() -> ModbusConfig:
+def load_iolink_config() -> ModbusConfig:
     config_path = os.getenv("CONFIG_PATH", "./config")
-    return load_config(f"{config_path}/control/modbus.yml", ConfigType.MODBUS)
+    return load_config(f"{config_path}/control/iolink.yml", ConfigType.MODBUS)
 
 
 def load_status_device_config() -> TowerStatus:

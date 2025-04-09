@@ -8,7 +8,7 @@ from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from rel_ros_master_control.config import (
     load_hmi_config,
-    load_modbus_config,
+    load_iolink_config,
     load_status_device_config,
 )
 from rel_ros_master_control.constants import DigitalHydValve, DigitalOutput, HMIWriteAction
@@ -414,7 +414,7 @@ def run():
 
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
-    iolink_config = load_modbus_config()
+    iolink_config = load_iolink_config()
     hmi_config = load_hmi_config()
     control = RelControl(
         iolink_slave=iolink_config.iolinks[args.id],

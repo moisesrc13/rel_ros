@@ -119,7 +119,7 @@ def not_holded_sensor_on_a(control: RelControl):
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
     not_holded_sensor_on_a(control)
-    return SensorLaserLectureState.SET_BUCKET
+    return SensorLaserLectureState.WAITING_FOR_BUCKET
 
 
 def not_holded_sensor_on_b(control: RelControl):
@@ -150,13 +150,6 @@ def sensor_laser_on__b(
     wait_for_sensor_laser()
     sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
     if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
-        control.apply_tower_state(TowerState.BUCKET_CHANGE)
-        control.write_register_by_address_name(
-            name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
-            value=1,
-            stype=SlaveType.HMI,
-            rtype=RegisterType.COIL,
-        )
         return SensorLaserLectureState.EMPTY_BUCKET
     while sensor_distance > sensor_distance_params.vacuum_distance:
         time.sleep(Constants.wait_read_laser)  # TBD
@@ -234,7 +227,7 @@ def sensor_laser_on__e(
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
-    return SensorLaserLectureState.SET_BUCKET
+    return SensorLaserLectureState.WAITING_FOR_BUCKET
 
 
 def redirect_from_sensor_laser_state(
@@ -259,16 +252,25 @@ def redirect_from_sensor_laser_state(
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.EMPTY_BUCKET)
-def bucket_state_action__empty(redirect_from_sensor_laser_state: SensorDistanceState):
-    pass
+def bucket_state_action__empty(
+    control: RelControl, redirect_from_sensor_laser_state: SensorDistanceState
+):
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET_ON)
-def bucket_state_action__prevacuum(redirect_from_sensor_laser_state: SensorDistanceState):
-    pass
+def bucket_state_action__prevacuum(
+    control: RelControl, redirect_from_sensor_laser_state: SensorDistanceState
+):
+    control.write_register_by_address_name(
+        name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
+        value=1,
+        stype=SlaveType.HMI,
+        rtype=RegisterType.COIL,
+    )
 
 
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.SET_BUCKET)
+@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)
 def bucket_state_action__setbucket(redirect_from_sensor_laser_state: SensorDistanceState):
     pass
 

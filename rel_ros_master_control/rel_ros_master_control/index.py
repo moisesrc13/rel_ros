@@ -5,7 +5,7 @@ import rclpy
 from rclpy.node import Node
 
 from rel_interfaces.msg import IOLinkData
-from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import run as run_control
 
@@ -14,7 +14,7 @@ class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.is_control_running = False
-        self.iolink_config = load_modbus_config()
+        self.iolink_config = load_iolink_config()
         self.hmi_config = load_hmi_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(

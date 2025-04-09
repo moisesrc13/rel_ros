@@ -9,7 +9,7 @@ class SensorLaserLectureState(Enum):
     NOT_HOLD_TO_A = 2
     NOT_HOLD_TO_B = 3
     NOT_HOLD_TO_C = 4
-    SET_BUCKET = 5
+    WAITING_FOR_BUCKET = 5
     EMPTY_BUCKET = 6
     PREVACUUM_BUCKET_ON = 7
     BUCKET_ON = 8
@@ -28,6 +28,11 @@ class DigitalHydValve(BaseModel):
     out1_on_out2_off: int = 3
     out1_off_out2_on: int = 5
     out1_on_out2_on: int = 7
+
+
+class PressureAction(BaseModel):
+    ON: int = 257
+    OFF: int = 256
 
 
 class ManifoldActions(BaseModel):

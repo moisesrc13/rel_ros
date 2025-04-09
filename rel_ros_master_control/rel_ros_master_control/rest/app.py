@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_iolink_config
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -15,7 +15,7 @@ logger = new_logger(__name__)
 
 @asynccontextmanager
 async def lifespan_func(app: FastAPI):
-    config = load_modbus_config()
+    config = load_iolink_config()
     iolink_master_id = int(os.getenv("APP_MASTER_IOLINK_ID", "0"))
     logger.info("creating modbus io link master id %s connection 🚀...", iolink_master_id)
     control = RelControl(

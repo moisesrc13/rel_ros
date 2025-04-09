@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.constants import (
     DigitalHydValve,
     DigitalOutput,
@@ -57,7 +57,7 @@ def writer_registers_mock(rel_control: RelControl) -> MagicMock:
 
 @pytest.fixture
 def rel_control(monkeypatch):
-    config = load_modbus_config()
+    config = load_iolink_config()
     slave_tcp = SlaveTCP(
         host="0.0.0.0",
         port=9090,

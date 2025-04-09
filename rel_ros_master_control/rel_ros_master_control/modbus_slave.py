@@ -11,7 +11,7 @@ from pymodbus.framer import FramerType
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.server import StartSerialServer, StartTcpServer
 
-from rel_ros_master_control.config import load_modbus_config
+from rel_ros_master_control.config import load_iolink_config
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.modbus_m import (
     HRegister,
@@ -150,7 +150,7 @@ def run_sync_modbus_server(slave: SlaveSerial | SlaveTCP, hr: list[HRegister]):
 
 
 def main():
-    config = load_modbus_config()
+    config = load_iolink_config()
     server = run_sync_modbus_server(
         slave=SlaveTCP(
             host="0.0.0.0",

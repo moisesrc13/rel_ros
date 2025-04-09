@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
-from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
@@ -81,7 +81,7 @@ def run(control: RelControl, visualize: bool = False):
 
 if __name__ == "__main__":
     #  this method is for manual testing
-    iolink_config = load_modbus_config()
+    iolink_config = load_iolink_config()
     hmi_config = load_hmi_config()
     control = RelControl(
         iolink_slave=iolink_config.iolinks[0],
