@@ -7,7 +7,6 @@ from rel_ros_master_control.constants import (
     HMIWriteAction,
     ManifoldActions,
     Params,
-    PressureSet,
     PressureState,
     SensorDistanceParams,
     SensorDistanceState,
