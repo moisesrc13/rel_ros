@@ -8,6 +8,7 @@ from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
+from rel_ros_master_control.services.pwm import RelPWM
 
 logger = new_logger(__name__)
 
@@ -52,11 +53,12 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, visualize: bool = False):
+def run(control: RelControl, pwm: RelPWM, visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
         "control": control,
+        "pwm": pwm,
     }
     dr = (
         driver.Builder()

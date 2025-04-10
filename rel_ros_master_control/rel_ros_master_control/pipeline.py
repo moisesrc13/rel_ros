@@ -18,6 +18,7 @@ from rel_ros_master_control.constants import (
 from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
+from rel_ros_master_control.services.pwm import RelPWM
 
 logger = new_logger(__name__)
 
