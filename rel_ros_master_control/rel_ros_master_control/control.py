@@ -15,8 +15,10 @@ from rel_ros_master_control.constants import (
     DigitalHydValve,
     DigitalOutput,
     HMIWriteAction,
+    Params,
     PressureSet,
     PressureState,
+    PWMPulseSet,
 )
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
@@ -30,9 +32,14 @@ from rel_ros_master_control.models.modbus_m import (
     get_register_by_address,
     get_register_by_name,
 )
+from rel_ros_master_control.models.pwm_m import PWMConfig
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
 logger = new_logger(__name__)
+try:
+    from rel_ros_master_control.services.pwm import RelPWM
+except Exception as err:
+    logger.warning("expected error if not running on RPi - %s", err)
 
 
 def get_builder():
@@ -91,20 +98,33 @@ class RelControl:
         hmi_hr: list[HRegister],
         hmi_cr: list[CRegister],
     ) -> None:
-        self.tower_devive = TowerStatusDevice(load_status_device_config())
-        self.hyd_valve_io = DigitalHydValve()
-        self.master_io_link = RelModbusMaster(iolink_slave)
-        self.master_hmi = RelModbusMaster(hmi_slave)
         self.iolink_hr = iolink_hr
         self.hmi_hr = hmi_hr
         self.hmi_cr = hmi_cr
         self.hmi_id = iolink_slave.hmi_id
+        self.init_control(iolink_slave, hmi_slave)
+
+    def init_control(
+        self,
+        iolink_slave: SlaveIOLink,
+        hmi_slave: SlaveHMI,
+    ):
+        self.tower_devive = TowerStatusDevice(load_status_device_config())
+        self.hyd_valve_io = DigitalHydValve()
+        self.master_io_link = RelModbusMaster(iolink_slave)
+        self.master_hmi = RelModbusMaster(hmi_slave)
         logger.info("connecting master io_link")
         self.master_io_link.do_connect()
-        logger.info("master_io_link connected .✨")
+        logger.info("master_io_link connected ✨")
         logger.info("connecting master HMI")
         self.master_hmi.do_connect()
-        logger.info("master_HMI connected .✨")
+        logger.info("master_HMI connected ✨")
+        logger.info("creating PWM")
+        try:
+            self.pwm = RelPWM(PWMConfig())
+            logger.info("PWM set ✨")
+        except Exception as err:
+            logger.warning("error creating pwm service - %s", err)
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -224,6 +244,23 @@ class RelControl:
             rtype=RegisterType.HOLDING,
             value=state.value,
         )
+
+    def apply_pwm_state(self):
+        option_register = get_register_by_name(
+            self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
+        )
+        option = self.read_hmi_register(option_register.address)
+        register_name = Params.PARAM_PULSE_TRAIN_LOW
+        match option:
+            case PWMPulseSet.HIGH.value:
+                register_name = Params.PARAM_PULSE_TRAIN_HIGH
+            case PWMPulseSet.MEDIUM.value:
+                register_name = Params.PARAM_PULSE_TRAIN_MEDIUM
+            case _:
+                register_name = Params.PARAM_PULSE_TRAIN_LOW
+        register = get_register_by_name(self.hmi_hr, register_name.value)
+        pulse_value = self.read_hmi_register(register.address)
+        self.pwm.run(time_seconds=10, duty=pulse_value)  # TODO define time
 
     def write_register_by_address_name(
         self,

@@ -30,6 +30,12 @@ class DigitalHydValve(BaseModel):
     out1_on_out2_on: int = 7
 
 
+class PWMPulseSet(Enum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 3
+
+
 class PressureSet(Enum):
     REGULATOR_ACTIVATE_VALVE = "regulator_activate_valve"
 
@@ -126,6 +132,10 @@ class Params(Enum):
     PARAM_VACUUM_LIMIT_HIGH = "param_vacuum_limit_high"
     PARAM_SECURITY_DISTANCE = "param_security_distance"
     REGULATOR_PRESSURE_SET = "regulator_pressure_set"
+    PARAM_PULSE_TRAIN_LOW = "param_pulse_train_low"
+    PARAM_PULSE_TRAIN_MEDIUM = "param_pulse_train_medium"
+    PARAM_PULSE_TRAIN_HIGH = "param_pulse_train_high"
+    PARAM_PULSE_TRAIN_SELECTION = "param_pulse_train_selection"
 
 
 class Constants:

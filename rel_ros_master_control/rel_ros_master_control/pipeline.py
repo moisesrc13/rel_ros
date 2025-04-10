@@ -17,9 +17,12 @@ from rel_ros_master_control.constants import (
 from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
-from rel_ros_master_control.services.pwm import RelPWM
 
 logger = new_logger(__name__)
+try:
+    from rel_ros_master_control.services.pwm import RelPWM
+except Exception as err:
+    logger.warning("expected error if not running on RPi - %s", err)
 
 
 def wait_for_sensor_laser():
@@ -262,7 +265,10 @@ def bucket_state_action__empty(
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET_ON)
 def bucket_state_action__prevacuum(
-    control: RelControl, hmi_hr_data: dict, redirect_from_sensor_laser_state: SensorDistanceState
+    control: RelControl,
+    pwm: RelPWM,
+    hmi_hr_data: dict,
+    redirect_from_sensor_laser_state: SensorDistanceState,
 ):
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
@@ -277,6 +283,7 @@ def bucket_state_action__prevacuum(
     while pressure != target_pressure:
         pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
     control.apply_pressure_state(PressureState.OFF)
+    control.apply_pwm_state()
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)

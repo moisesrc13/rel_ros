@@ -8,15 +8,11 @@ from rel_interfaces.msg import IOLinkData
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
 from rel_ros_master_control.flow_control import run as run_control
-from rel_ros_master_control.models.pwm_m import PWMConfig
-from rel_ros_master_control.services.pwm import RelPWM
 
 
 class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
-        self.get_logger().info("creating PWM service ✨...")
-        self.pwm = RelPWM(PWMConfig())
         self.is_control_running = False
         self.iolink_config = load_iolink_config()
         self.hmi_config = load_hmi_config()
@@ -63,7 +59,7 @@ class RelROSNode(Node):
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
         control: RelControl = self.masters[hmi_id]
         self.is_control_running = True
-        run_control(control=control, pwm=self.pwm)
+        run_control(control)
         self.is_control_running = False
 
     def create_timers_for_iolink_masters(self):
