@@ -3,6 +3,7 @@ import time
 from hamilton.function_modifiers import config
 
 from rel_ros_master_control.constants import (
+    BucketStateAction,
     Constants,
     HMIWriteAction,
     ManifoldActions,
@@ -259,17 +260,23 @@ def redirect_from_sensor_laser_state(
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.EMPTY_BUCKET)
 def bucket_state_action__empty(
     control: RelControl, redirect_from_sensor_laser_state: SensorDistanceState
-):
+) -> BucketStateAction:
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    return BucketStateAction.CONTINUE_BUCKET_CHANGE
 
 
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.PREVACUUM_BUCKET_ON)
+@config.when_in(
+    redirect_from_sensor_laser_state=[
+        SensorLaserLectureState.BUCKET_ON,
+        SensorLaserLectureState.PREVACUUM_BUCKET_ON,
+    ]
+)
 def bucket_state_action__prevacuum(
     control: RelControl,
     pwm: RelPWM,
     hmi_hr_data: dict,
     redirect_from_sensor_laser_state: SensorDistanceState,
-) -> int:
+) -> BucketStateAction:
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
         value=1,
@@ -284,19 +291,39 @@ def bucket_state_action__prevacuum(
         pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
-    return control.read_hmi_cregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL).value
+    if control.read_hmi_cregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL).value > 0:
+        return BucketStateAction.RECYCLE_ENABLED
+    return BucketStateAction.RECYCLE_DISABLED
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)
-def bucket_state_action__setbucket(redirect_from_sensor_laser_state: SensorDistanceState):
+def bucket_state_action__setbucket(
+    redirect_from_sensor_laser_state: SensorDistanceState,
+) -> BucketStateAction:
+    return BucketStateAction.CONTINUE_BUCKET_CHANGE
+
+
+@config.when(bucket_state_action=BucketStateAction.RECYCLE_ENABLED)
+def after_bucket_state_action__recycleon(
+    control: RelControl, bucket_state_action: BucketStateAction
+):
     pass
 
 
-@config.when_in(
-    redirect_from_sensor_laser_state=[
-        SensorLaserLectureState.BUCKET_ON,
-        SensorLaserLectureState.PREVACUUM_BUCKET_ON,
-    ]
-)
-def bucket_state_action__bucketon(redirect_from_sensor_laser_state: SensorDistanceState):
+@config.when(bucket_state_action=BucketStateAction.RECYCLE_DISABLED)
+def after_bucket_state_action__recycleoff(
+    control: RelControl, bucket_state_action: BucketStateAction
+):
+    pass
+
+
+@config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
+def after_bucket_state_action__continue(
+    control: RelControl, bucket_state_action: BucketStateAction
+) -> BucketStateAction:
+    return bucket_state_action
+
+
+@config.when(after_bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
+def bucket_change(after_bucket_state_action: BucketStateAction):
     pass

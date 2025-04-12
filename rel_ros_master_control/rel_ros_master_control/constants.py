@@ -15,6 +15,12 @@ class SensorLaserLectureState(Enum):
     BUCKET_ON = 8
 
 
+class BucketStateAction(Enum):
+    CONTINUE_BUCKET_CHANGE = 1
+    RECYCLE_ENABLED = 2
+    RECYCLE_DISABLED = 3
+
+
 class DigitalOutput(Enum):
     DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
 
@@ -154,6 +160,9 @@ class Constants:
         "check_distance_sensor_for_electrovales",
         "sensor_laser_on",
         "redirect_from_sensor_laser_state",
+        "bucket_state_action",
+        "after_bucket_state_action",
+        "bucket_change",
     ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
