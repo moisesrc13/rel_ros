@@ -283,7 +283,7 @@ def bucket_state_action__prevacuum(
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
-    target_pressure = hmi_hr_data.get(Params.REGULATOR_PRESSURE_SET)
+    target_pressure = hmi_hr_data.get(Params.PARAM_REGULATOR_PRESSURE_SET)
     pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
     if pressure != target_pressure:
         control.apply_pressure_state(PressureState.ON)
@@ -291,7 +291,7 @@ def bucket_state_action__prevacuum(
         pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
-    if control.read_hmi_cregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL).value > 0:
+    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE).value > 0:
         return BucketStateAction.RECYCLE_ENABLED
     return BucketStateAction.RECYCLE_DISABLED
 
@@ -307,7 +307,7 @@ def bucket_state_action__setbucket(
 def after_bucket_state_action__recycleon(
     control: RelControl, bucket_state_action: BucketStateAction
 ):
-    pass
+    control.apply_manifold_state(ManifoldActions.RECYCLE)
 
 
 @config.when(bucket_state_action=BucketStateAction.RECYCLE_DISABLED)

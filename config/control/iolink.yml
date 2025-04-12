@@ -29,7 +29,7 @@ holding_registers:
       words: 1
       data_type: "uint16"
       mode: "r"
-    - name: "regulator_pressure_set"
+    - name: "param_regulator_pressure_set"
       address: 3052
       words: 1
       data_type: "uint16"

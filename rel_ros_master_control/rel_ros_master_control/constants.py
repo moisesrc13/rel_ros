@@ -137,7 +137,7 @@ class Params(Enum):
     PARAM_PRE_VACUUM_LIMIT_HIGH = "param_pre_vacuum_limit_high"
     PARAM_VACUUM_LIMIT_HIGH = "param_vacuum_limit_high"
     PARAM_SECURITY_DISTANCE = "param_security_distance"
-    REGULATOR_PRESSURE_SET = "regulator_pressure_set"
+    PARAM_REGULATOR_PRESSURE_SET = "param_regulator_pressure_set"  # this is in IOLink
     PARAM_PULSE_TRAIN_LOW = "param_pulse_train_low"
     PARAM_PULSE_TRAIN_MEDIUM = "param_pulse_train_medium"
     PARAM_PULSE_TRAIN_HIGH = "param_pulse_train_high"
@@ -146,6 +146,7 @@ class Params(Enum):
     PARAM_TARGET_PRESSURE_HYD_MANUAL = "param_target_pressure_hyd_manual"
     PARAM_RECYCLE_TIME_MANUAL = "param_recycle_time_manual"
     PARAM_RECYCLE_TIME_CYCLE = "param_recycle_time_cycle"
+    PARAM_TARGET_PRESSURE_HYD_HOME = "param_target_pressure_hyd_home"
 
 
 class Constants:
