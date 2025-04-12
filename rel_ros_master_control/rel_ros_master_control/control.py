@@ -237,6 +237,10 @@ class RelControl:
         status.status = "read coil ok"
         return status
 
+    def read_hmi_cregister_by_name(self, name: str) -> ModbusStatus:
+        register = get_register_by_name(self.hmi_cr, name)
+        return self.read_hmi_cregister(register.address)
+
     def apply_pressure_state(self, state: PressureState):
         self.write_register_by_address_name(
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,

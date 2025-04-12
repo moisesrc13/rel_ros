@@ -269,7 +269,7 @@ def bucket_state_action__prevacuum(
     pwm: RelPWM,
     hmi_hr_data: dict,
     redirect_from_sensor_laser_state: SensorDistanceState,
-):
+) -> int:
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
         value=1,
@@ -277,13 +277,14 @@ def bucket_state_action__prevacuum(
         rtype=RegisterType.COIL,
     )
     target_pressure = hmi_hr_data.get(Params.REGULATOR_PRESSURE_SET)
-    pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
     if pressure != target_pressure:
         control.apply_pressure_state(PressureState.ON)
     while pressure != target_pressure:
-        pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+        pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
+    return control.read_hmi_cregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL).value
 
 
 @config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)
