@@ -136,6 +136,10 @@ class Params(Enum):
     PARAM_PULSE_TRAIN_MEDIUM = "param_pulse_train_medium"
     PARAM_PULSE_TRAIN_HIGH = "param_pulse_train_high"
     PARAM_PULSE_TRAIN_SELECTION = "param_pulse_train_selection"
+    PARAM_TARGET_PRESSURE_PISTONS_MANUAL = "param_target_pressure_pistons_manual"
+    PARAM_TARGET_PRESSURE_HYD_MANUAL = "param_target_pressure_hyd_manual"
+    PARAM_RECYCLE_TIME_MANUAL = "param_recycle_time_manual"
+    PARAM_RECYCLE_TIME_CYCLE = "param_recycle_time_cycle"
 
 
 class Constants:
