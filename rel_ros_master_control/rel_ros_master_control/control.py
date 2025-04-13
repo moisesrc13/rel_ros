@@ -191,6 +191,10 @@ class RelControl:
     def write_iolink_hregister(self, register: int, value: int) -> ModbusStatus:
         return self.write_register(register, value, SlaveType.IOLINK)
 
+    def write_iolink_hregister_by_name(self, name: str, value: int) -> ModbusStatus:
+        register = get_register_by_name(self.iolink_hr, name)
+        return self.write_register(register.address, value, SlaveType.IOLINK)
+
     def eletrovalve_on(self):
         register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
         self.write_iolink_hregister(register.address, 3)
@@ -229,7 +233,7 @@ class RelControl:
             address=self.get_register_with_offset(register, SlaveType.HMI), count=1
         )
         if response.isError():
-            logger.error("error reading hmi coil register on")
+            logger.error("error hmi reading hmi coil register")
             status.error = response
             return status
         logger.info("reading coil ok ✨ %s", response.registers)
@@ -237,9 +241,29 @@ class RelControl:
         status.status = "read coil ok"
         return status
 
+    def read_hmi_hregister(self, register: int) -> ModbusStatus:
+        status = ModbusStatus()
+        logger.info("reading hmi holding register %s", register)
+        master = self.get_master_connection(SlaveType.HMI)
+        response = master.slave_conn.read_holding_registers(
+            address=self.get_register_with_offset(register, SlaveType.HMI), count=1
+        )
+        if response.isError():
+            logger.error("error reading hmi holding register")
+            status.error = response
+            return status
+        logger.info("reading hmi hr ok ✨ %s", response.registers)
+        status.value = int(response.bits[0])
+        status.status = "read hr ok"
+        return status
+
     def read_hmi_cregister_by_name(self, name: str) -> ModbusStatus:
         register = get_register_by_name(self.hmi_cr, name)
         return self.read_hmi_cregister(register.address)
+
+    def read_hmi_hregister_by_name(self, name: str) -> ModbusStatus:
+        register = get_register_by_name(self.hmi_hr, name)
+        return self.read_hmi_hregister(register.address)
 
     def apply_pressure_state(self, state: PressureState):
         self.write_register_by_address_name(
@@ -311,6 +335,10 @@ class RelControl:
 
     def read_iolink_hregister(self, register: int) -> ModbusStatus:
         return self.read_hregister(register, SlaveType.IOLINK)
+
+    def read_iolink_hregister_by_name(self, name: str) -> ModbusStatus:
+        register = get_register_by_name(self.iolink_hr, name)
+        return self.read_hregister(register.address, SlaveType.IOLINK)
 
     def read_hmi_register(
         self, register: int, rtype: RegisterType = RegisterType.HOLDING

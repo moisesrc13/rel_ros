@@ -308,6 +308,20 @@ def after_bucket_state_action__recycleon(
     control: RelControl, bucket_state_action: BucketStateAction
 ):
     control.apply_manifold_state(ManifoldActions.RECYCLE)
+    while (
+        control.read_hmi_hregister_by_name(
+            HMIWriteAction.ACTION_RECYCLE,
+        ).value
+        != 1
+    ):
+        continue
+    control.apply_pressure_state(PressureState.ON)
+
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
+        != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME).value
+    ):
+        continue
 
 
 @config.when(bucket_state_action=BucketStateAction.RECYCLE_DISABLED)
