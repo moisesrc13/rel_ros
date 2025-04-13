@@ -284,11 +284,15 @@ def bucket_state_action__prevacuum(
         rtype=RegisterType.COIL,
     )
     target_pressure = hmi_hr_data.get(Params.PARAM_REGULATOR_PRESSURE_SET)
-    pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
+    pressure = control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ).value
     if pressure != target_pressure:
         control.apply_pressure_state(PressureState.ON)
     while pressure != target_pressure:
-        pressure = control.read_iolink_hregister(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
+        pressure = control.read_iolink_hregister_by_name(
+            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+        ).value
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
     if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE).value > 0:
@@ -305,9 +309,10 @@ def bucket_state_action__setbucket(
 
 @config.when(bucket_state_action=BucketStateAction.RECYCLE_ENABLED)
 def after_bucket_state_action__recycleon(
-    control: RelControl, bucket_state_action: BucketStateAction
+    control: RelControl,
+    bucket_state_action: BucketStateAction,
+    hmi_hr_data: dict,
 ):
-    control.apply_manifold_state(ManifoldActions.RECYCLE)
     while (
         control.read_hmi_hregister_by_name(
             HMIWriteAction.ACTION_RECYCLE,
@@ -316,12 +321,16 @@ def after_bucket_state_action__recycleon(
     ):
         continue
     control.apply_pressure_state(PressureState.ON)
-
     while (
         control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL).value
         != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME).value
     ):
         continue
+    control.apply_pressure_state(PressureState.OFF)
+    control.apply_manifold_state(ManifoldActions.RECYCLE)
+    recycle_time_ms = hmi_hr_data.get(Params.PARAM_RECYCLE_TIME_CYCLE)  # assume ms
+    time.sleep(recycle_time_ms)
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
 
 
 @config.when(bucket_state_action=BucketStateAction.RECYCLE_DISABLED)
