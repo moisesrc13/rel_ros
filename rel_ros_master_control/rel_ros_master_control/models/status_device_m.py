@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum, StrEnum
 
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ class StatusRegister(BaseModel):
     value: int
 
 
-class TowerState(Enum):
+class TowerState(StrEnum):
     FULL = "full"
     MEDIUM_HIGH = "medium_high"
     MEDIUM = "medium"
@@ -19,7 +19,7 @@ class TowerState(Enum):
     ACOSTIC_ALARM_OFF = "acoustic_alarm_on"
 
 
-class BasicActions(Enum):
+class BasicActions(IntEnum):
     TURN_OFF = 0
     TURN_ON = 1
     FLASH = 2

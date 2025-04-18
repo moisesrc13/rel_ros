@@ -1,4 +1,4 @@
-from enum import Enum, IntEnum, StrEnum
+from enum import IntEnum, StrEnum
 
 from pydantic import BaseModel
 

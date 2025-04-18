@@ -130,6 +130,7 @@ class RelControl:
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
         self.apply_manifold_state(ManifoldActions.DEACTIVATE)
         self.apply_pressure_state(PressureState.OFF)
+        self.apply_tower_state(TowerState)
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
