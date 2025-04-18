@@ -127,9 +127,9 @@ class RelControl:
             logger.warning("error creating pwm service - %s", err)
 
     def inital_state(self):
-        self.apply_hyd_valve_state(PressureState.OFF)
+        self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
         self.apply_manifold_state(ManifoldActions.DEACTIVATE)
-        self.apply_pressure_state()
+        self.apply_pressure_state(PressureState.OFF)
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -140,15 +140,15 @@ class RelControl:
         except Exception as err:
             logger.error("error writing state %s - %s", state_value, err)
 
-    def apply_manifold_state(self, state_value: int):
+    def apply_manifold_state(self, state: ManifoldActions):
         self.apply_state(
-            get_register_by_name(self.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value), state_value
+            get_register_by_name(self.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value), state.value
         )
 
-    def apply_hyd_valve_state(self, state_value: int):
+    def apply_hyd_valve_state(self, state: DigitalHydValve):
         self.apply_state(
             get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value),
-            state_value,
+            state.value,
         )
 
     def apply_tower_state(self, state: TowerState):
@@ -275,7 +275,7 @@ class RelControl:
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
             stype=SlaveType.IOLINK,
             rtype=RegisterType.HOLDING,
-            value=state,
+            value=state.value,
         )
 
     def apply_pwm_state(self):

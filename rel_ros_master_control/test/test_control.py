@@ -115,13 +115,13 @@ def test_read_holding_register(rel_control: RelControl, test_address, modbus_val
 
 
 def test_manifold_actions(rel_control: RelControl):
-    manifold = ManifoldActions()
     write_register = writer_register_mock(rel_control)
     hr: HRegister = get_register_by_name(
         rel_control.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value
     )
-    for _, value in manifold.model_dump().items():
-        rel_control.apply_manifold_state(value)
+    enum_list = list(map(int, ManifoldActions))
+    for value in enum_list:
+        rel_control.apply_manifold_state(ManifoldActions(value))
         write_register.assert_called_with(
             hr.address,
             value,
@@ -135,7 +135,7 @@ def test_control_hyd_valve(rel_control: RelControl):
     )
     enum_list = list(map(int, DigitalHydValve))
     for value in enum_list:
-        rel_control.apply_hyd_valve_state(value)
+        rel_control.apply_hyd_valve_state(DigitalHydValve(value))
         write_register.assert_called_with(
             hr.address,
             value,

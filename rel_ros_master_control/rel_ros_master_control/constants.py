@@ -51,7 +51,7 @@ class PressureState(IntEnum):
     OFF = 256
 
 
-class ManifoldActions(BaseModel):
+class ManifoldActions(IntEnum):
     DEACTIVATE: int = int("0000_0000_0000_0000", 2)
     EXTRA: int = int("0000_0001_0000_0000", 2)
     RECYCLE: int = int("0000_0100_0000_0000", 2)
