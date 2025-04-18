@@ -129,12 +129,12 @@ def test_manifold_actions(rel_control: RelControl):
 
 
 def test_control_hyd_valve(rel_control: RelControl):
-    digital_valve = DigitalHydValve()
     write_register = writer_register_mock(rel_control)
     hr: HRegister = get_register_by_name(
         rel_control.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value
     )
-    for _, value in digital_valve.model_dump().items():
+    enum_list = list(map(int, DigitalHydValve))
+    for value in enum_list:
         rel_control.apply_hyd_valve_state(value)
         write_register.assert_called_with(
             hr.address,

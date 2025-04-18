@@ -15,6 +15,7 @@ from rel_ros_master_control.constants import (
     DigitalHydValve,
     DigitalOutput,
     HMIWriteAction,
+    ManifoldActions,
     Params,
     PressureSet,
     PressureState,
@@ -110,7 +111,6 @@ class RelControl:
         hmi_slave: SlaveHMI,
     ):
         self.tower_devive = TowerStatusDevice(load_status_device_config())
-        self.hyd_valve_io = DigitalHydValve()
         self.master_io_link = RelModbusMaster(iolink_slave)
         self.master_hmi = RelModbusMaster(hmi_slave)
         logger.info("connecting master io_link")
@@ -125,6 +125,11 @@ class RelControl:
             logger.info("PWM set ✨")
         except Exception as err:
             logger.warning("error creating pwm service - %s", err)
+
+    def inital_state(self):
+        self.apply_hyd_valve_state(PressureState.OFF)
+        self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+        self.apply_pressure_state()
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -270,7 +275,7 @@ class RelControl:
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
             stype=SlaveType.IOLINK,
             rtype=RegisterType.HOLDING,
-            value=state.value,
+            value=state,
         )
 
     def apply_pwm_state(self):

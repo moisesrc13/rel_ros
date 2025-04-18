@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import Enum, IntEnum
 
 from pydantic import BaseModel
 
 
-class SensorLaserLectureState(Enum):
+class SensorLaserLectureState(IntEnum):
     DO_NOTHING = 0
     HOLD = 1
     NOT_HOLD_TO_A = 2
@@ -15,7 +15,7 @@ class SensorLaserLectureState(Enum):
     BUCKET_ON = 8
 
 
-class BucketStateAction(Enum):
+class BucketStateAction(IntEnum):
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
     RECYCLE_DISABLED = 3
@@ -29,14 +29,14 @@ class DigitalInput(Enum):
     DIGITAL_IN_EMERGENCY_STOP = "digital_in_emergency_stop"
 
 
-class DigitalHydValve(BaseModel):
-    out1_off_out2_off: int = 1
-    out1_on_out2_off: int = 3
-    out1_off_out2_on: int = 5
-    out1_on_out2_on: int = 7
+class DigitalHydValve(IntEnum):
+    OUT1_OFF_OUT2_OFF: int = 1
+    OUT1_ON_OUT2_OFF: int = 3
+    OUT1_OFF_OUT2_ON: int = 5
+    OUT1_ON_OUT2_ON: int = 7
 
 
-class PWMPulseSet(Enum):
+class PWMPulseSet(IntEnum):
     LOW = 0
     MEDIUM = 1
     HIGH = 3
@@ -46,7 +46,7 @@ class PressureSet(Enum):
     REGULATOR_ACTIVATE_VALVE = "regulator_activate_valve"
 
 
-class PressureState(Enum):
+class PressureState(IntEnum):
     ON = 257
     OFF = 256
 

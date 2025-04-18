@@ -346,7 +346,17 @@ def after_bucket_state_action__recycleon(
 def after_bucket_state_action__recycleoff(
     control: RelControl, bucket_state_action: BucketStateAction
 ):
-    pass
+    target_pressure_hyd_home = control.read_hmi_hregister_by_name(
+        Params.PARAM_TARGET_PRESSURE_HYD_HOME.value
+    )
+    control.apply_pressure_state(PressureState.ON)
+    while (
+        control.read_iolink_hregister_by_name(
+            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
+        ).value
+        != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME.value).value
+    ):
+        continue
 
 
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
