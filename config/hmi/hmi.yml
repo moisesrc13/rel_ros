@@ -152,7 +152,7 @@
     - name: "param_recycle_time"
       address: 40026
       data_type: "uint16"
-    - name: "param_recycle_time_interval"
+    - name: "param_recycle_time_interval"  # time between recycle and recycle loop
       address: 40027
       data_type: "uint16"
     - name: "param_distance_bucket_1"
