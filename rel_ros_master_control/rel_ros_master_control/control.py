@@ -201,6 +201,10 @@ class RelControl:
         register = get_register_by_name(self.iolink_hr, name)
         return self.write_register(register.address, value, SlaveType.IOLINK)
 
+    def write_hmi_hregister_by_name(self, name: str, value: int) -> ModbusStatus:
+        register = get_register_by_name(self.hmi_hr, name)
+        return self.write_register(register.address, value, SlaveType.HMI)
+
     def eletrovalve_on(self):
         register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
         self.write_iolink_hregister(register.address, 3)

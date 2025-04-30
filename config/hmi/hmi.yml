@@ -192,3 +192,6 @@
     - name: "sensor_pressure_regulator_valve_read_state"
       address: 40039
       data_type: "uint16"
+    - name: "sensor_manual_recycle_count"
+      address: 40040
+      data_type: "uint16"

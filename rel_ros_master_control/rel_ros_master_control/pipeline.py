@@ -332,7 +332,7 @@ def after_bucket_state_action__recycleon(
     control.apply_manifold_state(ManifoldActions.RECYCLE)
     recycle_time_ms = control.read_hmi_hregister_by_name(
         Params.PARAM_RECYCLE_TIME_CYCLE.value
-    )  # assume ms
+    ).value  # assume ms
     time.sleep(recycle_time_ms)
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     if (
@@ -347,7 +347,7 @@ def after_bucket_state_action__recycleon(
 def after_bucket_state_action__recycleoff(
     control: RelControl, bucket_state_action: BucketStateAction
 ) -> BucketStateAction:
-    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME.value)
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME.value).value
     start = timer()
     control.apply_pressure_state(PressureState.ON)
     is_timeout = False
@@ -375,10 +375,16 @@ def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control
     # TODO
     # wait for confirmation to continue
     # lets assume this is manual recycle
-    logger.info("waiting for manual recycle ...")
-    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL.value) != 0:
+    logger.info("waiting for manual recycle, STANDBY ⏲ ...")
+    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL.value).value != 0:
         continue
     logger.info("recycle manual received")
+    recycle_manual_count = control.read_hmi_hregister_by_name(
+        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value
+    ).value
+    control.write_hmi_hregister_by_name(
+        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value, recycle_manual_count + 1
+    )
 
 
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)

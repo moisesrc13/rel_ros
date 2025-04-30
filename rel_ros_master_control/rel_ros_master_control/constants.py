@@ -129,6 +129,7 @@ class Sensors(StrEnum):
     SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
     SENSOR_PRESSURE_REGULATOR_READ_REAL = "sensor_pressure_regulator_read_real"
     SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
+    SENSOR_MANUAL_RECYCLE_COUNT = "sensor_manual_recycle_count"
 
 
 class Params(StrEnum):
