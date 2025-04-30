@@ -1,4 +1,5 @@
 import time
+from timeit import default_timer as timer
 
 from hamilton.function_modifiers import config
 
@@ -349,14 +350,25 @@ def after_bucket_state_action__recycleoff(
     target_pressure_hyd_home = control.read_hmi_hregister_by_name(
         Params.PARAM_TARGET_PRESSURE_HYD_HOME.value
     )
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
+    start = timer()
     control.apply_pressure_state(PressureState.ON)
+    is_timeout = False
     while (
         control.read_iolink_hregister_by_name(
             Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
         ).value
         != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME.value).value
     ):
-        continue
+        control.apply_tower_state(TowerState.PRE_VACUUM)
+        is_timeout = (timer() - start) > recycle_time
+        if is_timeout:
+            break
+    # pump reaches target pressure
+    if is_timeout:
+        pass
+
+    control.apply_pressure_state(PressureState.OFF)
 
 
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
