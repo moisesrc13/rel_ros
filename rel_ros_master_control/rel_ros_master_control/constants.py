@@ -152,6 +152,7 @@ class Params(StrEnum):
     PARAM_TARGET_PRESSURE_HYD_HOME = "param_target_pressure_hyd_home"
     PARAM_RECYCLE_TIME_INTERVAL = "param_recycle_time_interval"
     PARAM_RECYCLE_TIME = "param_recycle_time"
+    PARAM_PRESSURE_BARES_LIMIT = "param_pressure_bares_limit"
 
 
 class Constants:

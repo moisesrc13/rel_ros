@@ -387,6 +387,13 @@ def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control
     )
 
 
+@config.when(after_bucket_state_action=BucketStateAction.RECYCLE_CYCLE_OK)
+def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control: RelControl):
+    pressure = control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE.value
+    ).value
+
+
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
 def after_bucket_state_action__continue(
     control: RelControl, bucket_state_action: BucketStateAction
