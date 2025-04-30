@@ -19,6 +19,8 @@ class BucketStateAction(IntEnum):
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
     RECYCLE_DISABLED = 3
+    RECYCLE_TIMEOUT = 4
+    RECYCLE_CYCLE_OK = 4
 
 
 class DigitalOutput(StrEnum):
@@ -165,6 +167,7 @@ class Constants:
         "redirect_from_sensor_laser_state",
         "bucket_state_action",
         "after_bucket_state_action",
+        "recycle_state",
         "bucket_change",
     ]
     laser_infinity: int = 1000

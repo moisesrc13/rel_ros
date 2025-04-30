@@ -346,11 +346,8 @@ def after_bucket_state_action__recycleon(
 @config.when(bucket_state_action=BucketStateAction.RECYCLE_DISABLED)
 def after_bucket_state_action__recycleoff(
     control: RelControl, bucket_state_action: BucketStateAction
-):
-    target_pressure_hyd_home = control.read_hmi_hregister_by_name(
-        Params.PARAM_TARGET_PRESSURE_HYD_HOME.value
-    )
-    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
+) -> BucketStateAction:
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME.value)
     start = timer()
     control.apply_pressure_state(PressureState.ON)
     is_timeout = False
@@ -364,11 +361,24 @@ def after_bucket_state_action__recycleoff(
         is_timeout = (timer() - start) > recycle_time
         if is_timeout:
             break
-    # pump reaches target pressure
     if is_timeout:
-        pass
+        logger.warning("recycle has timeout")
+        return BucketStateAction.RECYCLE_TIMEOUT
+    logger.info("recycle in time ok")
+    return BucketStateAction.RECYCLE_CYCLE_OK
 
+
+@config.when(after_bucket_state_action=BucketStateAction.RECYCLE_TIMEOUT)
+def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control: RelControl):
+    control.apply_tower_state(TowerState.VACUUM)
     control.apply_pressure_state(PressureState.OFF)
+    # TODO
+    # wait for confirmation to continue
+    # lets assume this is manual recycle
+    logger.info("waiting for manual recycle ...")
+    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL.value) != 0:
+        continue
+    logger.info("recycle manual received")
 
 
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)
