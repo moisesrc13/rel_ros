@@ -32,18 +32,6 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
-def hmi_hr_data(control: RelControl) -> dict:
-    return control.get_hmi_hr_data()
-
-
-def hmi_cr_data(control: RelControl) -> dict:
-    return control.get_hmi_cr_data()
-
-
-def iolink_hr_data(control: RelControl) -> dict:
-    return control.get_iolink_hr_data()
-
-
 def bucket_distance(control: RelControl) -> int:
     bucket_size_selection = control.read_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION)
     distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_1)
@@ -57,20 +45,23 @@ def bucket_distance(control: RelControl) -> int:
     return distance
 
 
-def sensor_distance_params(bucket_distance: int, hmi_hr_data: dict) -> SensorDistanceParams:
+def sensor_distance_params(control: RelControl, bucket_distance: int) -> SensorDistanceParams:
     return SensorDistanceParams(
         bucket_distance=bucket_distance,
-        high_pre_vacuum_limit=hmi_hr_data.get(Params.PARAM_PRE_VACUUM_LIMIT_HIGH.value),
-        high_vacuum_limit=hmi_hr_data.get(Params.PARAM_VACUUM_LIMIT_HIGH.value),
-        vacuum_distance=hmi_hr_data.get(Params.PARAM_VACUUM_DISTANCE.value),
+        high_pre_vacuum_limit=control.read_hmi_hregister_by_name(
+            Params.PARAM_PRE_VACUUM_LIMIT_HIGH
+        ),
+        high_vacuum_limit=control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_LIMIT_HIGH),
+        vacuum_distance=control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE),
     )
 
 
 def sensor_distance_state(
-    control_iolink_data: dict, hmi_hr_data: dict, sensor_distance_params: SensorDistanceParams
+    control: RelControl, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
-    sensor_distance = control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < hmi_hr_data.get(sensor_distance_params.vacuum_distance):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+
+    if sensor_distance < sensor_distance_params.vacuum_distance:
         return SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
@@ -109,11 +100,10 @@ def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
     return state
 
 
-def check_distance_sensor_for_electrovales(
-    control: RelControl, iolink_hr_data: dict, hmi_hr_data: dict
-):
-    sensor_distance = iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < hmi_hr_data.get("param_vacuum_distance"):
+def check_distance_sensor_for_electrovales(control: RelControl):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
+    if sensor_distance < vacuum_distance:
         control.eletrovalve_off()
         control.apply_tower_state(TowerState.VACUUM)
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
@@ -144,17 +134,17 @@ def sensor_laser_on__b(
     control: RelControl,
     sensor_distance_state: SensorDistanceState,
     bucket_state: TowerState,
-    iolink_hr_data: dict,
     sensor_distance_params: SensorDistanceParams,
 ) -> SensorLaserLectureState:
     not_holded_sensor_on_b(control)
     wait_for_sensor_laser()
-    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    laser_distance = control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    if sensor_distance == laser_distance:
         return SensorLaserLectureState.EMPTY_BUCKET
     while sensor_distance > sensor_distance_params.vacuum_distance:
         time.sleep(Constants.wait_read_laser)  # TBD
-        sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+        sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
 
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
@@ -187,17 +177,14 @@ def not_holded_sensor_on_c(control: RelControl):
 def sensor_laser_on__c(
     control: RelControl,
     bucket_state: TowerState,
-    iolink_hr_data: dict,
 ) -> SensorLaserLectureState:
     not_holded_sensor_on_c(control)
     wait_for_sensor_laser()
-    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
-        control.write_register_by_address_name(
-            name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
-            enum_value=1,
-            stype=SlaveType.HMI,
-            rtype=RegisterType.COIL,
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    if sensor_distance == laser_distance:
+        control.write_hmi_coil_by_address_name(
+            HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
         )
         return SensorLaserLectureState.PREVACUUM_BUCKET_ON
     return SensorLaserLectureState.NOT_HOLD_TO_B
@@ -205,12 +192,14 @@ def sensor_laser_on__c(
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(
-    control: RelControl, sensor_distance_state: SensorDistanceState, iolink_hr_data: dict
+    control: RelControl,
+    sensor_distance_state: SensorDistanceState,
 ) -> SensorLaserLectureState:
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
-    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    if sensor_distance == laser_distance:
         return SensorLaserLectureState.BUCKET_ON
     return SensorLaserLectureState.NOT_HOLD_TO_C
 
