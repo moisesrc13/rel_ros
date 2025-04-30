@@ -280,7 +280,7 @@ class RelControl:
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
             stype=SlaveType.IOLINK,
             rtype=RegisterType.HOLDING,
-            value=state.value,
+            enum_value=state,
         )
 
     def apply_pwm_state(self):
@@ -300,10 +300,18 @@ class RelControl:
         pulse_value = self.read_hmi_register(register.address)
         self.pwm.run(time_seconds=10, duty=pulse_value)  # TODO define time
 
+    def write_hmi_coil_by_address_name(self, enum_name: Enum, enum_value: Enum):
+        self.write_register_by_address_name(
+            name=enum_name.value,
+            enum_value=enum_value,
+            stype=SlaveType.HMI,
+            rtype=RegisterType.COIL,
+        )
+
     def write_register_by_address_name(
         self,
         name: str,
-        value: int,
+        enum_value: Enum,
         stype: SlaveType = SlaveType.IOLINK,
         rtype: RegisterType = RegisterType.HOLDING,
     ) -> ModbusStatus:
@@ -313,7 +321,9 @@ class RelControl:
         elif stype == SlaveType.HMI and rtype == RegisterType.COIL:
             registers = self.hmi_cr
         register = get_register_by_name(registers, name)
-        return self.write_register(register=register.address, value=value, rtype=rtype, stype=stype)
+        return self.write_register(
+            register=register.address, value=enum_value.value, rtype=rtype, stype=stype
+        )
 
     def write_register(
         self,

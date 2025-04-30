@@ -5,6 +5,7 @@ from hamilton.function_modifiers import config
 
 from rel_ros_master_control.constants import (
     BucketStateAction,
+    CoilState,
     Constants,
     HMIWriteAction,
     ManifoldActions,
@@ -130,15 +131,10 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 
 def not_holded_sensor_on_b(control: RelControl):
-    control.write_register_by_address_name(
-        name=HMIWriteAction.STATUS_VACUUM_ALARM.value,
-        value=1,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
-    )
+    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        value=1,
+        enum_value=1,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
@@ -164,7 +160,7 @@ def sensor_laser_on__b(
 
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        value=0,
+        enum_value=0,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
@@ -176,13 +172,13 @@ def not_holded_sensor_on_c(control: RelControl):
     control.apply_tower_state(bucket_state)
     control.write_register_by_address_name(
         name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
-        value=1,
+        enum_value=1,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        value=1,
+        enum_value=1,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
@@ -201,7 +197,7 @@ def sensor_laser_on__c(
     if sensor_distance == iolink_hr_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
         control.write_register_by_address_name(
             name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
-            value=1,
+            enum_value=1,
             stype=SlaveType.HMI,
             rtype=RegisterType.COIL,
         )
@@ -280,7 +276,7 @@ def bucket_state_action__prevacuum(
 ) -> BucketStateAction:
     control.write_register_by_address_name(
         name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
-        value=1,
+        enum_value=1,
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )

@@ -15,6 +15,11 @@ class SensorLaserLectureState(IntEnum):
     BUCKET_ON = 8
 
 
+class CoilState(IntEnum):
+    ON = 1
+    OFF = 0
+
+
 class BucketStateAction(IntEnum):
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
