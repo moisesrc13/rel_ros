@@ -44,7 +44,8 @@ def iolink_hr_data(control: RelControl) -> dict:
     return control.get_iolink_hr_data()
 
 
-def bucket_distance(param_bucket_size_selection: int, hmi_hr_data: dict) -> int:
+def bucket_distance(control: RelControl) -> int:
+    param_bucket_size_selection = control.read_hmi_hregister_by_name()
     distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
     match param_bucket_size_selection:
         case 1:
@@ -132,11 +133,8 @@ def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelC
 
 def not_holded_sensor_on_b(control: RelControl):
     control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
-    control.write_register_by_address_name(
-        name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        enum_value=1,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
     )
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
 
