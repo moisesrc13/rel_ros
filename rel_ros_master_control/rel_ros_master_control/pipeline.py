@@ -206,14 +206,16 @@ def sensor_laser_on__d(
 
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
-    control: RelControl, sensor_distance_state: SensorDistanceState, hmi_hr_data: dict
+    control: RelControl,
+    sensor_distance_state: SensorDistanceState,
 ) -> SensorLaserLectureState:
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
-    sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    security_distance = hmi_hr_data.get(Params.PARAM_SECURITY_DISTANCE.value)
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    security_distance = laser_distance
     while sensor_distance < security_distance:
         time.sleep(Constants.wait_read_laser)
-        sensor_distance = control.get_iolink_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
+        sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
@@ -258,7 +260,6 @@ def bucket_state_action__empty(
 def bucket_state_action__prevacuum(
     control: RelControl,
     pwm: RelPWM,
-    hmi_hr_data: dict,
     redirect_from_sensor_laser_state: SensorDistanceState,
 ) -> BucketStateAction:
     control.write_register_by_address_name(
@@ -267,7 +268,7 @@ def bucket_state_action__prevacuum(
         stype=SlaveType.HMI,
         rtype=RegisterType.COIL,
     )
-    target_pressure = hmi_hr_data.get(Params.PARAM_REGULATOR_PRESSURE_SET.value)
+    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
     pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
     if pressure != target_pressure:
         control.apply_pressure_state(PressureState.ON)
@@ -277,7 +278,7 @@ def bucket_state_action__prevacuum(
         )
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
-    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE).value > 0:
+    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
         return BucketStateAction.RECYCLE_ENABLED
     return BucketStateAction.RECYCLE_DISABLED
 
@@ -314,7 +315,7 @@ def after_bucket_state_action__recycleon(
     time.sleep(recycle_time_ms)
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     if (
-        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE.value).value > 0
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0
     ):  # repeat cycle if recycle is activated
         after_bucket_state_action__recycleon(
             control=control, bucket_state_action=BucketStateAction.RECYCLE_ENABLED

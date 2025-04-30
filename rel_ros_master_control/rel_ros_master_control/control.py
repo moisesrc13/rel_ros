@@ -267,11 +267,11 @@ class RelControl:
         status.status = "read hr ok"
         return status
 
-    def read_hmi_cregister_by_name(self, name: str) -> ModbusStatus:
-        register = get_register_by_name(self.hmi_cr, name)
-        return self.read_hmi_cregister(register.address)
+    def read_hmi_cregister_by_name(self, enum_name: Enum) -> int:
+        register = get_register_by_name(self.hmi_cr, enum_name.value)
+        return self.read_hmi_cregister(register.address).value
 
-    def read_hmi_hregister_by_name(self, enum_name: Enum) -> ModbusStatus:
+    def read_hmi_hregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.hmi_hr, enum_name.value)
         return self.read_hmi_hregister(register.address).value
 
@@ -356,7 +356,7 @@ class RelControl:
     def read_iolink_hregister(self, register: int) -> ModbusStatus:
         return self.read_hregister(register, SlaveType.IOLINK)
 
-    def read_iolink_hregister_by_name(self, enum_name: Enum) -> ModbusStatus:
+    def read_iolink_hregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.iolink_hr, enum_name.value)
         return self.read_hregister(register.address, SlaveType.IOLINK).value
 
