@@ -45,15 +45,15 @@ def iolink_hr_data(control: RelControl) -> dict:
 
 
 def bucket_distance(control: RelControl) -> int:
-    param_bucket_size_selection = control.read_hmi_hregister_by_name()
-    distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
-    match param_bucket_size_selection:
+    bucket_size_selection = control.read_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION)
+    distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_1)
+    match bucket_size_selection:
         case 1:
             return distance
         case 2:
-            distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_2.value)
+            distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2)
         case 3:
-            distance = hmi_hr_data.get(Params.PARAM_DISTANCE_BUCKET_3.value)
+            distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_3)
     return distance
 
 
@@ -279,15 +279,13 @@ def bucket_state_action__prevacuum(
         rtype=RegisterType.COIL,
     )
     target_pressure = hmi_hr_data.get(Params.PARAM_REGULATOR_PRESSURE_SET.value)
-    pressure = control.read_iolink_hregister_by_name(
-        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
-    ).value
+    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
     if pressure != target_pressure:
         control.apply_pressure_state(PressureState.ON)
     while pressure != target_pressure:
         pressure = control.read_iolink_hregister_by_name(
-            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
-        ).value
+            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+        )
     control.apply_pressure_state(PressureState.OFF)
     control.apply_pwm_state()
     if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE).value > 0:
@@ -310,23 +308,20 @@ def after_bucket_state_action__recycleon(
     while (
         control.read_hmi_hregister_by_name(
             HMIWriteAction.ACTION_RECYCLE,
-        ).value
+        )
         != 1
     ):
         continue
     control.apply_pressure_state(PressureState.ON)
-    while (
-        control.read_iolink_hregister_by_name(
-            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
-        ).value
-        != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME.value).value
-    ):
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
         continue
     control.apply_pressure_state(PressureState.OFF)
     control.apply_manifold_state(ManifoldActions.RECYCLE)
     recycle_time_ms = control.read_hmi_hregister_by_name(
-        Params.PARAM_RECYCLE_TIME_CYCLE.value
-    ).value  # assume ms
+        Params.PARAM_RECYCLE_TIME_CYCLE
+    )  # assume ms
     time.sleep(recycle_time_ms)
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     if (
@@ -341,16 +336,13 @@ def after_bucket_state_action__recycleon(
 def after_bucket_state_action__recycleoff(
     control: RelControl, bucket_state_action: BucketStateAction
 ) -> BucketStateAction:
-    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME.value).value
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
     start = timer()
     control.apply_pressure_state(PressureState.ON)
     is_timeout = False
-    while (
-        control.read_iolink_hregister_by_name(
-            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL.value
-        ).value
-        != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME.value).value
-    ):
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
         control.apply_tower_state(TowerState.PRE_VACUUM)
         is_timeout = (timer() - start) > recycle_time
         if is_timeout:
@@ -370,12 +362,10 @@ def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control
     # wait for confirmation to continue
     # lets assume this is manual recycle
     logger.info("waiting for manual recycle, STANDBY ⏲ ...")
-    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL.value).value != 0:
+    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL) != 0:
         continue
     logger.info("recycle manual received")
-    recycle_manual_count = control.read_hmi_hregister_by_name(
-        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value
-    ).value
+    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
     control.write_hmi_hregister_by_name(
         Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value, recycle_manual_count + 1
     )
@@ -384,8 +374,8 @@ def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control
 @config.when(after_bucket_state_action=BucketStateAction.RECYCLE_CYCLE_OK)
 def recycle_state__timeout(after_bucket_state_action: BucketStateAction, control: RelControl):
     pressure = control.read_iolink_hregister_by_name(
-        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE.value
-    ).value
+        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
+    )
 
 
 @config.when(bucket_state_action=BucketStateAction.CONTINUE_BUCKET_CHANGE)

@@ -271,9 +271,9 @@ class RelControl:
         register = get_register_by_name(self.hmi_cr, name)
         return self.read_hmi_cregister(register.address)
 
-    def read_hmi_hregister_by_name(self, name: str) -> ModbusStatus:
-        register = get_register_by_name(self.hmi_hr, name)
-        return self.read_hmi_hregister(register.address)
+    def read_hmi_hregister_by_name(self, enum_name: Enum) -> ModbusStatus:
+        register = get_register_by_name(self.hmi_hr, enum_name.value)
+        return self.read_hmi_hregister(register.address).value
 
     def apply_pressure_state(self, state: PressureState):
         self.write_register_by_address_name(
@@ -356,9 +356,9 @@ class RelControl:
     def read_iolink_hregister(self, register: int) -> ModbusStatus:
         return self.read_hregister(register, SlaveType.IOLINK)
 
-    def read_iolink_hregister_by_name(self, name: str) -> ModbusStatus:
-        register = get_register_by_name(self.iolink_hr, name)
-        return self.read_hregister(register.address, SlaveType.IOLINK)
+    def read_iolink_hregister_by_name(self, enum_name: Enum) -> ModbusStatus:
+        register = get_register_by_name(self.iolink_hr, enum_name.value)
+        return self.read_hregister(register.address, SlaveType.IOLINK).value
 
     def read_hmi_register(
         self, register: int, rtype: RegisterType = RegisterType.HOLDING
