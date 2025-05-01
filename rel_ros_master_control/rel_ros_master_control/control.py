@@ -120,6 +120,7 @@ class RelControl:
         self.master_hmi.do_connect()
         logger.info("master_HMI connected ✨")
         logger.info("creating PWM")
+        self.pwm_started = False
         try:
             self.pwm = RelPWM(PWMConfig())
             logger.info("PWM set ✨")
@@ -284,6 +285,8 @@ class RelControl:
         )
 
     def apply_pwm_state(self):
+        if self.pwm_started:
+            return
         option_register = get_register_by_name(
             self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
         )
@@ -299,9 +302,11 @@ class RelControl:
         register = get_register_by_name(self.hmi_hr, register_name.value)
         pulse_value = self.read_hmi_register(register.address)
         self.pwm.start_duty(duty=pulse_value)
+        self.pwm_started = True
 
     def stop_pwm(self):
         self.pwm.stop_duty()
+        self.pwm_started = False
 
     def write_hmi_coil_by_address_name(self, enum_name: Enum, enum_value: Enum):
         self.write_register_by_address_name(
