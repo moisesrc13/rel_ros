@@ -207,6 +207,9 @@ def sensor_laser_on__c(
     return FlowStateAction.RETURN_TO_STATE_B
 
 
+#  --------------------------
+#  D
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(
     control: RelControl,
@@ -221,22 +224,23 @@ def sensor_laser_on__d(
     return FlowStateAction.RETURN_TO_STATE_C
 
 
+#  --------------------------
+#  E
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
     control: RelControl,
     sensor_distance_state: SensorDistanceStateName,
-) -> SensorLaserLectureState:
+) -> FlowStateAction:
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
-    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    security_distance = laser_distance
-    while sensor_distance < security_distance:
+    security_distance = control.read_hmi_hregister_by_name(Params.PARAM_SECURITY_DISTANCE)
+    while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < security_distance:
         time.sleep(Constants.wait_read_laser)
-        sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
-    return SensorLaserLectureState.WAITING_FOR_BUCKET
+    return FlowStateAction.WAITING_FOR_BUCKET
 
 
 def redirect_from_sensor_laser_state(
