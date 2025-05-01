@@ -21,7 +21,9 @@ class RelPWM:
         except Exception as err:
             logger.error("error setting up PWM - %s", err)
 
-    def run(self, time_seconds: int = 0, duty: int = 100):  # provide duty cycle in the range 0-100
+    def run_duty(
+        self, time_seconds: int = 0, duty: int = 100
+    ):  # provide duty cycle in the range 0-100
         t_end = time.time() + time_seconds
         try:
             logger.info("start running pwm with duty %s", duty)
@@ -39,8 +41,21 @@ class RelPWM:
         except Exception as err:
             logger.error("error running PWM - %s", err)
 
+    def start_duty(self, duty: int = 100):  # provide duty cycle in the range 0-100
+        try:
+            self.pi_pwm.start(0)
+            self.pi_pwm.ChangeDutyCycle(duty)
+        except Exception as err:
+            logger.error("error starting PWM duty %s - %s", duty, err)
+
+    def stop_duty(self):
+        try:
+            self.pi_pwm.stop()
+        except Exception as err:
+            logger.error("error stopping PWM - %s", err)
+
 
 if __name__ == "__main__":
     logger.info("running pwm for 5 secs...")
     my_pwm = RelPWM(PWMConfig())
-    my_pwm.run(5)
+    my_pwm.run_duty(5)

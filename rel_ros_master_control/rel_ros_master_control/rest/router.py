@@ -71,6 +71,6 @@ async def run_pwm(
 ):
     r_pwm = RelPWM(PWMConfig(frequency=pwm_request.frequency))
     background_tasks.add_task(
-        r_pwm.run, time_seconds=pwm_request.time_seconds, duty=pwm_request.duty
+        r_pwm.run_duty, time_seconds=pwm_request.time_seconds, duty=pwm_request.duty
     )
     return {"message": "pwm running..."}

@@ -378,6 +378,7 @@ def recycle_state__ok(
     ):
         continue
     logger.info("turn off PWM")
+    control.stop_pwm()
 
 
 @config.when(bucket_state_action=FlowStateAction.CONTINUE_BUCKET_CHANGE)

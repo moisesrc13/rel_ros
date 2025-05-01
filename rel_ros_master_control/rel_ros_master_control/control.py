@@ -298,7 +298,10 @@ class RelControl:
                 register_name = Params.PARAM_PULSE_TRAIN_LOW
         register = get_register_by_name(self.hmi_hr, register_name.value)
         pulse_value = self.read_hmi_register(register.address)
-        self.pwm.run(time_seconds=10, duty=pulse_value)  # TODO define time
+        self.pwm.start_duty(duty=pulse_value)
+
+    def stop_pwm(self):
+        self.pwm.stop_duty()
 
     def write_hmi_coil_by_address_name(self, enum_name: Enum, enum_value: Enum):
         self.write_register_by_address_name(
