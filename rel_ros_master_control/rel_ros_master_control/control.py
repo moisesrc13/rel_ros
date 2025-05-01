@@ -99,6 +99,7 @@ class RelControl:
         hmi_hr: list[HRegister],
         hmi_cr: list[CRegister],
     ) -> None:
+        self.pwm_started = False
         self.iolink_hr = iolink_hr
         self.hmi_hr = hmi_hr
         self.hmi_cr = hmi_cr
@@ -120,7 +121,6 @@ class RelControl:
         self.master_hmi.do_connect()
         logger.info("master_HMI connected ✨")
         logger.info("creating PWM")
-        self.pwm_started = False
         try:
             self.pwm = RelPWM(PWMConfig())
             logger.info("PWM set ✨")
@@ -301,8 +301,11 @@ class RelControl:
                 register_name = Params.PARAM_PULSE_TRAIN_LOW
         register = get_register_by_name(self.hmi_hr, register_name.value)
         pulse_value = self.read_hmi_register(register.address)
-        self.pwm.start_duty(duty=pulse_value)
-        self.pwm_started = True
+        if not self.pwm_started:
+            self.pwm.start_duty(duty=pulse_value)
+            self.pwm_started = True
+        else:
+            self.pwm.change_duty(duty=pulse_value)
 
     def stop_pwm(self):
         self.pwm.stop_duty()

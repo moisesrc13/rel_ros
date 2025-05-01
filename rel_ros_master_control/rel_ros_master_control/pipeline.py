@@ -379,6 +379,7 @@ def recycle_state__ok(
         continue
     logger.info("turn off PWM")
     control.stop_pwm()
+    return FlowStateAction.CONTINUE_BUCKET_CHANGE
 
 
 @config.when(bucket_state_action=FlowStateAction.CONTINUE_BUCKET_CHANGE)
@@ -388,6 +389,8 @@ def after_bucket_state_action__continue(
     return bucket_state_action
 
 
-@config.when(after_bucket_state_action=FlowStateAction.CONTINUE_BUCKET_CHANGE)
-def bucket_change(after_bucket_state_action: FlowStateAction):
+def bucket_change(control: RelControl, state: FlowStateAction):
+    """
+    this node runs after first flow is completed
+    """
     pass

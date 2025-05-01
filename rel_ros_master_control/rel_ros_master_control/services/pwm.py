@@ -48,6 +48,12 @@ class RelPWM:
         except Exception as err:
             logger.error("error starting PWM duty %s - %s", duty, err)
 
+    def change_duty(self, duty: int = 100):
+        try:
+            self.pi_pwm.ChangeDutyCycle(duty)
+        except Exception as err:
+            logger.error("error changing PWM duty %s - %s", duty, err)
+
     def stop_duty(self):
         try:
             self.pi_pwm.stop()
