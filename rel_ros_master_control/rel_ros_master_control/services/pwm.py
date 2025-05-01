@@ -37,7 +37,7 @@ class RelPWM:
                 sleep(0.25)
             logger.info("end running pwm with duty %s", duty)
         except Exception as err:
-            logger.error("error running PWN - %s", err)
+            logger.error("error running PWM - %s", err)
 
 
 if __name__ == "__main__":
