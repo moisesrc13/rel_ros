@@ -178,10 +178,6 @@ class Constants:
         "sensor_distance_params",
         "sensor_distance_state",
         "sensor_laser_on",
-        "redirect_from_sensor_laser_state",
-        "bucket_state_action",
-        "after_bucket_state_action",
-        "recycle_state",
         "init_flow_state",
     ]
     flow_tasks_bucket_change: list[str] = ["bucket_change"]

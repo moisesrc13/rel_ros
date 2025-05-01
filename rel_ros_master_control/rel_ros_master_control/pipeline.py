@@ -243,35 +243,6 @@ def sensor_laser_on__e(
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
-def redirect_from_sensor_laser_state(
-    control: RelControl, sensor_laser_on: SensorLaserLectureState
-) -> SensorLaserLectureState:
-    next_state = SensorLaserLectureState.DO_NOTHING
-    match sensor_laser_on:
-        case SensorLaserLectureState.HOLD:
-            next_state = SensorLaserLectureState.HOLD  # do nothing
-        case SensorLaserLectureState.NOT_HOLD_TO_A:
-            not_holded_sensor_on_a(control)
-            next_state = SensorLaserLectureState.DO_NOTHING
-        case SensorLaserLectureState.NOT_HOLD_TO_B:
-            not_holded_sensor_on_b(control)
-            next_state = SensorLaserLectureState.DO_NOTHING
-        case SensorLaserLectureState.NOT_HOLD_TO_C:
-            not_holded_sensor_on_c(control)
-            next_state = SensorLaserLectureState.DO_NOTHING
-        case _:
-            next_state = sensor_laser_on
-    return next_state
-
-
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.EMPTY_BUCKET)
-def bucket_state_action__empty(
-    control: RelControl, redirect_from_sensor_laser_state: SensorDistanceState
-) -> FlowStateAction:
-    control.apply_tower_state(TowerState.BUCKET_CHANGE)
-    return FlowStateAction.CONTINUE_BUCKET_CHANGE
-
-
 @config.when_in(
     redirect_from_sensor_laser_state=[
         SensorLaserLectureState.BUCKET_ON,
@@ -415,7 +386,7 @@ def after_bucket_state_action__continue(
 
 
 def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
-    pass
+    return sensor_laser_on
 
 
 def bucket_change(control: RelControl):
