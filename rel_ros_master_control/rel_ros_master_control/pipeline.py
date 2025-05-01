@@ -78,18 +78,23 @@ def sensor_distance_state(
     return SensorDistanceStateName.E
 
 
-def set_visual_alarm_for_bucket_state(bucket_distance: int, control: RelControl):
+def set_visual_alarm_for_bucket_state(control: RelControl):
+    """_summary_
+
+    calculate the alarm distance which depends on the bucket distance (size) selected
+    """
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     state = TowerState.BUCKET_CHANGE
-    if bucket_distance >= 80 and TowerState <= 100:
+    if laser_distance >= 80 and laser_distance <= 100:
         state = TowerState.FULL
-    elif bucket_distance >= 50 and TowerState <= 79:
+    elif laser_distance >= 50 and laser_distance <= 79:
         state = TowerState.MEDIUM_HIGH
-    elif bucket_distance >= 30 and TowerState <= 49:
+    elif laser_distance >= 30 and laser_distance <= 49:
         state = TowerState.MEDIUM_HIGH
-    elif bucket_distance >= 10 and TowerState <= 20:
+    elif laser_distance >= 10 and laser_distance <= 20:
         state = TowerState.PRE_VACUUM
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-    elif bucket_distance >= 2 and TowerState <= 5:
+    elif laser_distance >= 2 and laser_distance <= 5:
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
@@ -120,7 +125,7 @@ def sensor_laser_on__a(
     sensor_distance_params: SensorDistanceParams,
     control: RelControl,
 ) -> FlowStateAction:
-    set_visual_alarm_for_bucket_state(sensor_distance_params.bucket_distance, control)
+    set_visual_alarm_for_bucket_state(control)
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
@@ -136,9 +141,9 @@ def not_holded_sensor_on_b(control: RelControl):
 def sensor_laser_on__b(
     control: RelControl,
     sensor_distance_state: SensorDistanceState,
-    bucket_state: TowerState,
     sensor_distance_params: SensorDistanceParams,
 ) -> FlowStateAction:
+    set_visual_alarm_for_bucket_state(control)
     control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
     control.write_hmi_coil_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
@@ -149,6 +154,7 @@ def sensor_laser_on__b(
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
     if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        logger.info("bucket in place")
         control.apply_tower_state(TowerState.BUCKET_CHANGE)
         return FlowStateAction.WAITING_FOR_BUCKET
 
@@ -168,7 +174,6 @@ def sensor_laser_on__b(
 
 
 def not_holded_sensor_on_c(control: RelControl):
-    control.apply_tower_state(set_visual_alarm_for_bucket_state)
     control.write_register_by_address_name(
         name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
         enum_value=1,
