@@ -28,6 +28,15 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
+def check_distance_sensor_for_electrovales(control: RelControl):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
+    if sensor_distance < vacuum_distance:
+        control.eletrovalve_off()
+        control.apply_tower_state(TowerState.VACUUM)
+        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+
+
 def bucket_distance(control: RelControl) -> int:
     bucket_size_selection = control.read_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION)
     distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_1)
@@ -100,15 +109,6 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
     control.apply_tower_state(state)
 
 
-def check_distance_sensor_for_electrovales(control: RelControl):
-    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
-    if sensor_distance < vacuum_distance:
-        control.eletrovalve_off()
-        control.apply_tower_state(TowerState.VACUUM)
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-
-
 def not_holded_sensor_on_a(control: RelControl):
     control.apply_tower_state(TowerState.VACUUM)
     control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
@@ -163,7 +163,7 @@ def sensor_laser_on__b(
         control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
         >= sensor_distance_params.vacuum_distance
     ):
-        sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        continue
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.write_hmi_coil_by_address_name(

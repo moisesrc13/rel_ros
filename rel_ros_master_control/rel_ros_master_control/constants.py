@@ -168,10 +168,10 @@ class Params(StrEnum):
 
 class Constants:
     flow_tasks_init_state: list[str] = [
+        "check_distance_sensor_for_electrovales",
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
-        "check_distance_sensor_for_electrovales",
         "sensor_laser_on",
         "redirect_from_sensor_laser_state",
         "bucket_state_action",
