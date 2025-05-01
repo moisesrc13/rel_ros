@@ -164,7 +164,7 @@ class Params(StrEnum):
 
 
 class Constants:
-    flow_tasks: list[str] = [
+    flow_tasks_init_state: list[str] = [
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
@@ -175,8 +175,9 @@ class Constants:
         "bucket_state_action",
         "after_bucket_state_action",
         "recycle_state",
-        "bucket_change",
+        "init_flow_state",
     ]
+    flow_tasks_bucket_change: list[str] = ["bucket_change"]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
     wait_read_laser: float = 0.20

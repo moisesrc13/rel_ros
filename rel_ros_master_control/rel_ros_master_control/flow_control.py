@@ -1,5 +1,4 @@
 import importlib
-from dataclasses import dataclass
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
@@ -72,11 +71,13 @@ def run(control: RelControl, visualize: bool = False):
     if visualize:
         dr.display_all_functions()
         return
+    # init_result = -1
     try:
-        logger.info("running control flow")
-        dr.execute(Constants.flow_tasks)
+        logger.info("running control flow for init state ✨")
+        r = dr.execute(Constants.flow_tasks_init_state)
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
+        return
 
 
 if __name__ == "__main__":

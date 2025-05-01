@@ -389,7 +389,11 @@ def after_bucket_state_action__continue(
     return bucket_state_action
 
 
-def bucket_change(control: RelControl, state: FlowStateAction):
+def init_flow_state() -> FlowStateAction:
+    pass
+
+
+def bucket_change(control: RelControl):
     """
     this node runs after first flow is completed
     """
