@@ -163,9 +163,6 @@ class Params(StrEnum):
 
 class Constants:
     flow_tasks: list[str] = [
-        "hmi_hr_data",
-        "hmi_cr_data",
-        "iolink_hr_data",
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
