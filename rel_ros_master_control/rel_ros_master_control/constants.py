@@ -28,6 +28,8 @@ class FlowStateAction(IntEnum):
     RECYCLE_CYCLE_OK = 5
     STANDBY_EXIT_BY_MANUAL = 6
     PRESSURE_NOT_ON_TARGET = 7
+    WAITING_FOR_BUCKET = 8
+    RETURN_TO_STATE_A = 9
 
 
 class DigitalOutput(StrEnum):
@@ -62,6 +64,7 @@ class PressureState(IntEnum):
 
 class ManifoldActions(IntEnum):
     DEACTIVATE: int = int("0000_0000_0000_0000", 2)
+    ACTIVATE: int = int("0000_0000_0000_0001", 2)
     EXTRA: int = int("0000_0001_0000_0000", 2)
     RECYCLE: int = int("0000_0100_0000_0000", 2)
     VENTING_RETRACTIL_UP: int = int("0001_0000_0000_0000", 2)
@@ -168,7 +171,6 @@ class Constants:
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
-        "bucket_state",
         "check_distance_sensor_for_electrovales",
         "sensor_laser_on",
         "redirect_from_sensor_laser_state",

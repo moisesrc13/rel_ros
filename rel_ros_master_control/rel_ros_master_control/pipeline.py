@@ -78,7 +78,7 @@ def sensor_distance_state(
     return SensorDistanceStateName.E
 
 
-def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
+def set_visual_alarm_for_bucket_state(bucket_distance: int, control: RelControl):
     state = TowerState.BUCKET_CHANGE
     if bucket_distance >= 80 and TowerState <= 100:
         state = TowerState.FULL
@@ -93,7 +93,6 @@ def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
-    return state
 
 
 def check_distance_sensor_for_electrovales(control: RelControl):
@@ -111,10 +110,18 @@ def not_holded_sensor_on_a(control: RelControl):
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
 
 
+#  ---------------------------------------------------------
+#  SensorDistanceStateName
+#  These are the 5 main paths from the laser distance state
+#  ---------------------------------------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
-def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
-    not_holded_sensor_on_a(control)
-    return SensorLaserLectureState.WAITING_FOR_BUCKET
+def sensor_laser_on__a(
+    sensor_distance_state: SensorDistanceState,
+    sensor_distance_params: SensorDistanceParams,
+    control: RelControl,
+) -> FlowStateAction:
+    set_visual_alarm_for_bucket_state(sensor_distance_params.bucket_distance, control)
+    return FlowStateAction.WAITING_FOR_BUCKET
 
 
 def not_holded_sensor_on_b(control: RelControl):
@@ -131,29 +138,37 @@ def sensor_laser_on__b(
     sensor_distance_state: SensorDistanceState,
     bucket_state: TowerState,
     sensor_distance_params: SensorDistanceParams,
-) -> SensorLaserLectureState:
-    not_holded_sensor_on_b(control)
-    wait_for_sensor_laser()
+) -> FlowStateAction:
+    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
+    )
+    logger.info("moving pistons down")
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    laser_distance = control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    if sensor_distance == laser_distance:
-        return SensorLaserLectureState.EMPTY_BUCKET
-    while sensor_distance > sensor_distance_params.vacuum_distance:
-        time.sleep(Constants.wait_read_laser)  # TBD
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    wait_for_sensor_laser()
+    if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        control.apply_tower_state(TowerState.BUCKET_CHANGE)
+        return FlowStateAction.WAITING_FOR_BUCKET
+
+    logger.info("turn off pistons down till laser distance < vacuum_distance")
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        >= sensor_distance_params.vacuum_distance
+    ):
         sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
 
-    control.write_register_by_address_name(
-        name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        enum_value=0,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
-    )
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
-    return SensorLaserLectureState.NOT_HOLD_TO_A
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.OFF
+    )
+    logger.info("returning to state A")
+    return FlowStateAction.RETURN_TO_STATE_A
 
 
 def not_holded_sensor_on_c(control: RelControl):
-    control.apply_tower_state(bucket_state)
+    control.apply_tower_state(set_visual_alarm_for_bucket_state)
     control.write_register_by_address_name(
         name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
         enum_value=1,
