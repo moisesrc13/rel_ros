@@ -20,12 +20,14 @@ class CoilState(IntEnum):
     OFF = 0
 
 
-class BucketStateAction(IntEnum):
+class FlowStateAction(IntEnum):
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
     RECYCLE_DISABLED = 3
     RECYCLE_TIMEOUT = 4
-    RECYCLE_CYCLE_OK = 4
+    RECYCLE_CYCLE_OK = 5
+    STANDBY_EXIT_BY_MANUAL = 6
+    PRESSURE_NOT_ON_TARGET = 7
 
 
 class DigitalOutput(StrEnum):

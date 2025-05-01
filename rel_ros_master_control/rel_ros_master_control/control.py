@@ -129,7 +129,7 @@ class RelControl:
     def inital_state(self):
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
         self.apply_manifold_state(ManifoldActions.DEACTIVATE)
-        self.apply_pressure_state(PressureState.OFF)
+        self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
 
     def apply_state(self, hr: HRegister, state_value: int):
@@ -275,7 +275,7 @@ class RelControl:
         register = get_register_by_name(self.hmi_hr, enum_name.value)
         return self.read_hmi_hregister(register.address).value
 
-    def apply_pressure_state(self, state: PressureState):
+    def apply_pressure_regulator_state(self, state: PressureState):
         self.write_register_by_address_name(
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
             stype=SlaveType.IOLINK,
