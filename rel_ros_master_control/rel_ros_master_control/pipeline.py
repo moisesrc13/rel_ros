@@ -109,39 +109,31 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
     control.apply_tower_state(state)
 
 
-def not_holded_sensor_on_a(control: RelControl):
-    control.apply_tower_state(TowerState.VACUUM)
-    control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-    control.apply_tower_state(TowerState.BUCKET_CHANGE)
-
-
 #  ---------------------------------------------------------
 #  SensorDistanceStateName
 #  These are the 5 main paths from the laser distance state
 #  ---------------------------------------------------------
+
+#  --------------------------
+#  A
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(
-    sensor_distance_state: SensorDistanceState,
-    sensor_distance_params: SensorDistanceParams,
+    sensor_distance_state: SensorDistanceStateName,
     control: RelControl,
 ) -> FlowStateAction:
+    logger.info("no bucket in place - State A")
     set_visual_alarm_for_bucket_state(control)
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
-def not_holded_sensor_on_b(control: RelControl):
-    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
-    control.write_hmi_coil_by_address_name(
-        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
-    )
-    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
-
-
+#  --------------------------
+#  B
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
     control: RelControl,
-    sensor_distance_state: SensorDistanceState,
-    sensor_distance_params: SensorDistanceParams,
+    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
     control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
@@ -154,7 +146,7 @@ def sensor_laser_on__b(
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
     if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
-        logger.info("bucket in place")
+        logger.info("bucket in place vacuum - State B")
         control.apply_tower_state(TowerState.BUCKET_CHANGE)
         return FlowStateAction.WAITING_FOR_BUCKET
 
@@ -173,57 +165,66 @@ def sensor_laser_on__b(
     return FlowStateAction.RETURN_TO_STATE_A
 
 
-def not_holded_sensor_on_c(control: RelControl):
-    control.write_register_by_address_name(
-        name=HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value,
-        enum_value=1,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
+def prepare_for_recycle_process(control: RelControl):
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
-    control.write_register_by_address_name(
-        name=HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value,
-        enum_value=1,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
-    )
-    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
+    logger.info("chekcing target pressure on")
+    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    if pressure != target_pressure:
+        control.apply_pressure_regulator_state(PressureState.ON)
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+        != target_pressure
+    ):
+        continue
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    return FlowStateAction.START_PWM
 
 
+#  --------------------------
+#  C
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(
     control: RelControl,
-    bucket_state: TowerState,
-) -> SensorLaserLectureState:
-    not_holded_sensor_on_c(control)
-    wait_for_sensor_laser()
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    set_visual_alarm_for_bucket_state(control)
+    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON)
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
+    )
+    control.apply_tower_state(TowerState.PRE_VACUUM)
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    if sensor_distance == laser_distance:
-        control.write_hmi_coil_by_address_name(
-            HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
-        )
-        return SensorLaserLectureState.PREVACUUM_BUCKET_ON
-    return SensorLaserLectureState.NOT_HOLD_TO_B
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    wait_for_sensor_laser()
+    if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        logger.info("bucket in place for pre-vacuum - State C")
+        return FlowStateAction.PREPARE_FOR_RECYCLE_PROCESS
+    return FlowStateAction.RETURN_TO_STATE_B
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(
     control: RelControl,
-    sensor_distance_state: SensorDistanceState,
-) -> SensorLaserLectureState:
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
-    wait_for_sensor_laser()
-    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-    if sensor_distance == laser_distance:
-        return SensorLaserLectureState.BUCKET_ON
-    return SensorLaserLectureState.NOT_HOLD_TO_C
+    wait_for_sensor_laser()
+    if laser_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        return FlowStateAction.PREPARE_FOR_RECYCLE_PROCESS
+    return FlowStateAction.RETURN_TO_STATE_C
 
 
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
     control: RelControl,
-    sensor_distance_state: SensorDistanceState,
+    sensor_distance_state: SensorDistanceStateName,
 ) -> SensorLaserLectureState:
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
@@ -409,7 +410,7 @@ def after_bucket_state_action__continue(
     return bucket_state_action
 
 
-def init_flow_state() -> FlowStateAction:
+def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
     pass
 
 

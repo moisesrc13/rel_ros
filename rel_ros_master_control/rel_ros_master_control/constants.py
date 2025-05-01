@@ -30,6 +30,11 @@ class FlowStateAction(IntEnum):
     PRESSURE_NOT_ON_TARGET = 7
     WAITING_FOR_BUCKET = 8
     RETURN_TO_STATE_A = 9
+    RETURN_TO_STATE_B = 10
+    RETURN_TO_STATE_C = 11
+    PREPARE_FOR_RECYCLE_PROCESS = 12
+    START_PWM = 13
+    TO_RECYCLE_PROCESS = 14
 
 
 class DigitalOutput(StrEnum):
