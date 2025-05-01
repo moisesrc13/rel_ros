@@ -22,10 +22,6 @@ from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
 
 logger = new_logger(__name__)
-try:
-    from rel_ros_master_control.services.pwm import RelPWM
-except Exception as err:
-    logger.warning("expected error if not running on RPi - %s", err)
 
 
 def wait_for_sensor_laser():
@@ -259,7 +255,6 @@ def bucket_state_action__empty(
 )
 def bucket_state_action__prevacuum(
     control: RelControl,
-    pwm: RelPWM,
     redirect_from_sensor_laser_state: SensorDistanceState,
 ) -> FlowStateAction:
     control.write_register_by_address_name(
