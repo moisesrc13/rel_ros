@@ -73,7 +73,7 @@ def run(control: RelControl, tasks: list[str], visualize: bool = False):
         return
     init_flow_state = FlowStateAction.UNKNOWN
     try:
-        logger.info("running control flow for init state ✨")
+        logger.info("✨ running control flow with tasks %s", tasks)
         r = dr.execute(tasks)
         init_flow_state = FlowStateAction(int(r["init_flow_state"].iloc[-1]))
     except Exception as err:
