@@ -97,7 +97,7 @@ python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 40010
 python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
-### IOLink test slave
+### IOLink test slave with HMI too
 
 ```bash
 
@@ -107,7 +107,18 @@ cd ~/ros2_ws/src
 python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
 
 # read all
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0
+# iolink
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
+
+# hmi read all hr
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
+
+# hmi read all cr
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
+
+# hmi coil
+python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1
+python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 ```
 
 ## Build interfaces package

@@ -77,7 +77,7 @@
     # ------------------- STATUS
     - name: "status_alarm_pre_vacuum"
       address: 34
-    - name: "status_alarm"
+    - name: "status_vacuum_alarm"
       address: 35
     - name: "status_no_air_pressure"
       address: 36
@@ -152,7 +152,7 @@
     - name: "param_recycle_time"
       address: 40026
       data_type: "uint16"
-    - name: "param_recycle_time_interval"
+    - name: "param_recycle_time_interval"  # time between recycle and recycle loop
       address: 40027
       data_type: "uint16"
     - name: "param_distance_bucket_1"
@@ -173,22 +173,28 @@
     - name: "param_bucket_size_selection"
       address: 40033
       data_type: "uint16"
-    # --------------------------------------- SENSORS START
-    - name: "sensor_material_pressure"
+    - name: "param_pressure_bares_limit"
       address: 40034
       data_type: "uint16"
-    - name: "sensor_material_temperature"
+    # --------------------------------------- SENSORS START
+    - name: "sensor_manual_recycle_count"
       address: 40035
       data_type: "uint16"
-    - name: "sensor_laser_distance"
+    - name: "sensor_material_pressure"
       address: 40036
       data_type: "uint16"
-    - name: "sensor_pressure_regulator_read_set"
+    - name: "sensor_material_temperature"
       address: 40037
       data_type: "uint16"
-    - name: "sensor_pressure_regulator_read_real"
+    - name: "sensor_laser_distance"
       address: 40038
       data_type: "uint16"
-    - name: "sensor_pressure_regulator_valve_read_state"
+    - name: "sensor_pressure_regulator_read_set"
       address: 40039
+      data_type: "uint16"
+    - name: "sensor_pressure_regulator_read_real"
+      address: 40040
+      data_type: "uint16"
+    - name: "sensor_pressure_regulator_valve_read_state"
+      address: 40041
       data_type: "uint16"

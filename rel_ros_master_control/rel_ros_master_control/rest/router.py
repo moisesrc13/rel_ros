@@ -39,7 +39,7 @@ async def read_register(
 ):
     logger.debug("getting register %s data", register)
     control: RelControl = request.app.state.control
-    control_status = control.read_holding_register(register)
+    control_status = control.read_iolink_hregister(register)
     if control_status.error:
         raise HTTPException(
             status_code=control_status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -55,7 +55,7 @@ async def write_register(
 ):
     logger.debug("write register %s with value %s", write_request.register, write_request.value)
     control: RelControl = request.app.state.control
-    control_status = control.write_holding_register(write_request.register, write_request.value)
+    control_status = control.write_iolink_hregister(write_request.register, write_request.value)
     if control_status.error:
         raise HTTPException(
             status_code=control_status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -71,6 +71,6 @@ async def run_pwm(
 ):
     r_pwm = RelPWM(PWMConfig(frequency=pwm_request.frequency))
     background_tasks.add_task(
-        r_pwm.run, time_seconds=pwm_request.time_seconds, duty=pwm_request.duty
+        r_pwm.run_duty, time_seconds=pwm_request.time_seconds, duty=pwm_request.duty
     )
     return {"message": "pwm running..."}

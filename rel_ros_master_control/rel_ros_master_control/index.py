@@ -1,72 +1,58 @@
 import functools
 import os
-from typing import Optional
 
 import rclpy
-from pydantic import BaseModel
 from rclpy.node import Node
-from rospy_message_converter.message_converter import convert_ros_message_to_dictionary
 
-from rel_interfaces.msg import HMI, HMIAction, IOLinkData
-from rel_ros_master_control.config import load_hmi_config, load_modbus_config
+from rel_interfaces.msg import IOLinkData
+from rel_ros_master_control.config import load_hmi_config, load_iolink_config
+from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
-from rel_ros_master_control.flow_control import FlowControlInputs
 from rel_ros_master_control.flow_control import run as run_control
-
-
-class ControlHMIData(BaseModel):
-    hmi_id: int = 0
-    data: Optional[HMI] = None
-
-
-class ControlIOLinkData(BaseModel):
-    hmi_id: int = 0
-    data: Optional[IOLinkData] = None
-
-
-class ControlNode(BaseModel):
-    hmi_data: ControlHMIData
-    iolink_data: ControlIOLinkData
-
-
-def create_control_cluster(size: int) -> list[ControlNode]:
-    """
-    used to get data from sensors and user input in the HMI.
-    This data will be used for the control logic
-    """
-    cluster = []
-    for n in range(size):
-        control_node = ControlNode(
-            hmi_data=ControlHMIData(hmi_id=n), iolink_data=ControlIOLinkData(hmi_id=n)
-        )
-        cluster.append(control_node)
-    return cluster
-
-
-def get_control_node_with_id(cluster: list[ControlNode], hmi_id: int) -> Optional[ControlNode]:
-    return next((node for node in cluster if node.hmi_data.hmi_id == hmi_id), None)
 
 
 class RelROSNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.is_control_running = False
-        self.config = load_modbus_config()
+        self.iolink_config = load_iolink_config()
+        self.hmi_config = load_hmi_config()
         self.get_logger().info("creating Relant master control 🚀...")
         self.masters = run_masters_to_iolinks(
-            iolink_slaves=self.config.iolinks, hr=self.config.holding_registers
+            iolink_slaves=self.iolink_config.iolinks,
+            hr=self.iolink_config.holding_registers,
+            hmi_slaves=self.hmi_config.hmis,
+            hmi_hr=self.hmi_config.holding_registers,
+            hmi_cr=self.hmi_config.coil_registers,
         )
         self.create_timers_for_iolink_masters()
-        self.control_cluster = create_control_cluster(size=len(self.masters))
-        self.get_logger().info("creating subscriber for rel/hmi topics 📨 ...")
-        self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
-        self.get_logger().info("creating publisher for rel/hmiaction topic 📨 ...")
-        self.hmi_action_publisher = self.create_publisher(HMIAction, "rel/hmiaction", 10)
-
         self.get_logger().info("======= creating MAIN CONTROL timers 🤖 =======")
         self.create_timers_for_main_control()
+        self.get_logger().info("======= creating timers for control actions 🤖 =======")
+        self.create_timers_for_control_actions()
+
+    def create_timers_for_control_actions(self):
+        if not self.masters:
+            self.get_logger().error("no iolink masters available")
+            return
+        self.get_logger().info("creating control action timers ⏱ ...")
+        for master in self.masters:
+            if isinstance(master, RelControl):
+                self.get_logger().info(
+                    f"creating control action timer for hmi id {master.master_io_link.hmi_id}"
+                )
+                self.create_timer(
+                    0.25,
+                    functools.partial(
+                        self.timer_callback_main_control, hmi_id=master.master_io_link.hmi_id
+                    ),
+                )
+
+    def timer_callback_control_actions(self, hmi_id: int = 0):
+        control: RelControl = self.masters[hmi_id]
+        control.check_actions()
 
     def create_timers_for_main_control(self):
         if not self.masters:
@@ -94,28 +80,10 @@ class RelROSNode(Node):
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
-        node: ControlNode = get_control_node_with_id(self.control_cluster, hmi_id)
-        control_iolink_data = convert_ros_message_to_dictionary(node.iolink_data.data)
-        control_hmi_data = convert_ros_message_to_dictionary(node.iolink_data.data)
-        master_control: RelControl = self.masters[hmi_id]
-        flow_inputs = FlowControlInputs(
-            master_control=master_control,
-            control_hmi_data=control_hmi_data,
-            control_iolink_data=control_iolink_data,
-            hmi_action_publisher=self.hmi_action_publisher,
-        )
+        control: RelControl = self.masters[hmi_id]
         self.is_control_running = True
-        run_control(flow_inputs=flow_inputs)
+        run_control(control, Constants.flow_tasks_init_state)
         self.is_control_running = False
-
-    def create_hmi_subscribers(self, count: int = 1):
-        for s in range(count):
-            topic = f"rel/hmi_{s}"
-            self.get_logger().info(f"creating hmi subscriber for {topic} topic 📨")
-            self.create_subscription(
-                HMI, topic, functools.partial(self.listener_hmi_callback, hmi_id=s), 10
-            )
-        self.get_logger().info("creating hmi consumers is done ...")
 
     def create_timers_for_iolink_masters(self):
         if not self.masters:
@@ -135,24 +103,14 @@ class RelROSNode(Node):
                     ),
                 )
 
-    def listener_hmi_callback(self, msg: HMI, hmi_id: int = 0):
-        self.get_logger().info(f"📨 I got an HMI {hmi_id} data message 📺 {msg}")
-        node: ControlNode = get_control_node_with_id(self.control_cluster, msg.hmi_id)
-        node.hmi_data.data = msg
-        # self.control_cluster[msg.hmi_id] = node  # may not be required
-
     def get_io_link_data(self, hmi_id: int = 0):
         master: RelControl = self.masters[hmi_id]
         msg = IOLinkData()
         msg.hmi_name = master.master_io_link.slave.hmi_name
         msg.hmi_id = master.master_io_link.slave.hmi_id
-        registers = master.get_data()
+        registers = master.get_iolink_hr_data()
         for reg in registers:
             setattr(msg, reg.name, reg.value)
-
-        node: ControlNode = get_control_node_with_id(self.control_cluster, msg.hmi_id)
-        node.iolink_data = msg
-        # self.control_cluster[msg.hmi_id] = node  # may not be required
         self.get_logger().info(f"📨 Publishing IOLinkData message: {msg}")
         self.iolink_publisher.publish(msg)
 
@@ -173,7 +131,7 @@ def main():
         rclpy.shutdown()
 
     except Exception as err:
-        print(f"terminating program {err}")
+        print(f"terminating ROS node {err}")
 
 
 if __name__ == "__main__":

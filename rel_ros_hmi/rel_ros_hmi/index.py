@@ -1,9 +1,7 @@
-import time
-
 import rclpy
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMI, HMIAction, IOLinkData
+from rel_interfaces.msg import HMIAction, IOLinkData
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
@@ -22,22 +20,11 @@ class RelROSNode(Node):
         )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
-        run_modbus_slaves(
-            config.hmis, config.holding_registers, self.create_hmi_publishers(len(config.hmis))
-        )
-        time.sleep(1)
+        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
         self.masters = create_masters_for_hmis(
             config.hmis, config.holding_registers, config.coil_registers
         )
-
-    def create_hmi_publishers(self, count: int = 1) -> dict:
-        publishers = {}
-        for p in range(count):
-            topic = f"rel/hmi_{p}"
-            self.get_logger().info(f"creating publisher for {topic} topic 📨")
-            publishers[p] = self.create_publisher(HMI, topic, 10)
-        return publishers
 
     def listener_iolink_data(self, msg: IOLinkData, id: int = 0):
         self.get_logger().info(f"📨 I got an IOLinkData {id} message {msg}")
@@ -87,7 +74,7 @@ def main():
         rclpy.shutdown()
 
     except Exception as err:
-        print(f"terminating program {err}")
+        print(f"terminating ROS node {err}")
 
 
 if __name__ == "__main__":

@@ -1,20 +1,23 @@
 import time
-from typing import Any
+from timeit import default_timer as timer
 
 from hamilton.function_modifiers import config
 
-from rel_interfaces.msg import HMIAction
 from rel_ros_master_control.constants import (
+    CoilState,
     Constants,
+    FlowStateAction,
     HMIWriteAction,
     ManifoldActions,
     Params,
+    PressureState,
     SensorDistanceParams,
     SensorDistanceState,
     SensorDistanceStateName,
+    SensorLaserLectureState,
     Sensors,
 )
-from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
 
@@ -25,32 +28,45 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
-def bucket_distance(param_bucket_size_selection: int, control_hmi_data: dict) -> int:
-    distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_1.value)  # default
-    match param_bucket_size_selection:
+def check_distance_sensor_for_electrovales(control: RelControl):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
+    if sensor_distance < vacuum_distance:
+        control.eletrovalve_off()
+        control.apply_tower_state(TowerState.VACUUM)
+        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+
+
+def bucket_distance(control: RelControl) -> int:
+    bucket_size_selection = control.read_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION)
+    distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_1)
+    match bucket_size_selection:
         case 1:
             return distance
         case 2:
-            distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_2.value)
+            distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2)
         case 3:
-            distance = control_hmi_data.get(Params.PARAM_DISTANCE_BUCKET_3.value)
+            distance = control.read_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_3)
     return distance
 
 
-def sensor_distance_params(bucket_distance: int, control_hmi_data: dict) -> SensorDistanceParams:
+def sensor_distance_params(control: RelControl, bucket_distance: int) -> SensorDistanceParams:
     return SensorDistanceParams(
         bucket_distance=bucket_distance,
-        high_pre_vacuum_limit=control_hmi_data.get(Params.PARAM_PRE_VACUUM_LIMIT_HIGH.value),
-        high_vacuum_limit=control_hmi_data.get(Params.PARAM_VACUUM_LIMIT_HIGH.value),
-        vacuum_distance=control_hmi_data.get(Params.PARAM_VACUUM_DISTANCE.value),
+        high_pre_vacuum_limit=control.read_hmi_hregister_by_name(
+            Params.PARAM_PRE_VACUUM_LIMIT_HIGH
+        ),
+        high_vacuum_limit=control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_LIMIT_HIGH),
+        vacuum_distance=control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE),
     )
 
 
 def sensor_distance_state(
-    control_iolink_data: dict, control_hmi_data: dict, sensor_distance_params: SensorDistanceParams
+    control: RelControl, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
-    sensor_distance = control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < control_hmi_data.get(sensor_distance_params.vacuum_distance):
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+
+    if sensor_distance < sensor_distance_params.vacuum_distance:
         return SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
@@ -71,95 +87,283 @@ def sensor_distance_state(
     return SensorDistanceStateName.E
 
 
-def bucket_state(bucket_distance: int, control: RelControl) -> TowerState:
+def set_visual_alarm_for_bucket_state(control: RelControl):
+    """_summary_
+
+    calculate the alarm distance which depends on the bucket distance (size) selected
+    """
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     state = TowerState.BUCKET_CHANGE
-    if bucket_distance >= 80 and TowerState <= 100:
+    if laser_distance >= 80 and laser_distance <= 100:
         state = TowerState.FULL
-    elif bucket_distance >= 50 and TowerState <= 79:
+    elif laser_distance >= 50 and laser_distance <= 79:
         state = TowerState.MEDIUM_HIGH
-    elif bucket_distance >= 30 and TowerState <= 49:
+    elif laser_distance >= 30 and laser_distance <= 49:
         state = TowerState.MEDIUM_HIGH
-    elif bucket_distance >= 10 and TowerState <= 20:
+    elif laser_distance >= 10 and laser_distance <= 20:
         state = TowerState.PRE_VACUUM
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-    elif bucket_distance >= 2 and TowerState <= 5:
+    elif laser_distance >= 2 and laser_distance <= 5:
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
-    return state
 
 
-def check_distance_sensor_for_electrovales(
-    control: RelControl, control_iolink_data: dict, control_hmi_data: dict
-):
-    sensor_distance = control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value)
-    if sensor_distance < control_hmi_data.get("param_vacuum_distance"):
-        control.eletrovalve_off()
-        control.apply_tower_state(TowerState.VACUUM)
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+#  ---------------------------------------------------------
+#  SensorDistanceStateName
+#  These are the 5 main paths from the laser distance state
+#  ---------------------------------------------------------
 
-
+#  --------------------------
+#  A
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
-def sensor_laser_on__a(sensor_distance_state: SensorDistanceState, control: RelControl):
-    control.apply_tower_state(TowerState.VACUUM)
-    control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
-    control.apply_tower_state(TowerState.BUCKET_CHANGE)
+def sensor_laser_on__a(
+    sensor_distance_state: SensorDistanceStateName,
+    control: RelControl,
+) -> FlowStateAction:
+    logger.info("no bucket in place - State A")
+    set_visual_alarm_for_bucket_state(control)
+    return FlowStateAction.WAITING_FOR_BUCKET
 
 
+#  --------------------------
+#  B
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
-    hmi_action_publisher: Any,
     control: RelControl,
-    sensor_distance_state: SensorDistanceState,
-    bucket_state: TowerState,
-    control_iolink_data: dict,
-):
-    msg = HMIAction()
-    msg.hmi_id = control.hmi_id
-    msg.action_value = 1
-    msg.action_name = HMIWriteAction.STATUS_ALARM.value  # vacuum alarm
-    hmi_action_publisher.publish(msg)
-    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET.value
-    hmi_action_publisher.publish(msg)
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    set_visual_alarm_for_bucket_state(control)
+    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
+    )
+    logger.info("moving pistons down")
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
-    data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
+    if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        logger.info("bucket in place vacuum - State B")
         control.apply_tower_state(TowerState.BUCKET_CHANGE)
-        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
-        hmi_action_publisher.publish(msg)
-        # else will pass to A state next iteration
+        return FlowStateAction.WAITING_FOR_BUCKET
+
+    logger.info("turn off pistons down till laser distance < vacuum_distance")
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        >= sensor_distance_params.vacuum_distance
+    ):
+        continue
+
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.OFF
+    )
+    logger.info("returning to state A")
+    return FlowStateAction.RETURN_TO_STATE_A
 
 
+#  --------------------------
+#  C
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(
-    hmi_action_publisher: Any,
     control: RelControl,
-    bucket_state: TowerState,
-    control_iolink_data: dict,
-):
-    control.apply_tower_state(bucket_state)
-    msg = HMIAction()
-    msg.hmi_id = control.hmi_id
-    msg.action_name = HMIWriteAction.STATUS_ALARM_PRE_VACUUM.value
-    msg.action_value = 1
-    hmi_action_publisher.publish(msg)
-    msg.action_name = HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET
-    hmi_action_publisher.publish(msg)
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    set_visual_alarm_for_bucket_state(control)
+    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON)
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
+    )
+    control.apply_tower_state(TowerState.PRE_VACUUM)
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     wait_for_sensor_laser()
-    data = control.get_data_by_hr_name(Sensors.SENSOR_LASER_DISTANCE.value)
-    if data == control_iolink_data.get(Sensors.SENSOR_LASER_DISTANCE.value):
-        msg.action_name = HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS
-        hmi_action_publisher.publish(msg)
-        # continue....
+    if sensor_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        logger.info("bucket in place for pre-vacuum - State C")
+        return FlowStateAction.PREPARE_FOR_RECYCLE_PROCESS
+    return FlowStateAction.RETURN_TO_STATE_B
 
 
+#  --------------------------
+#  D
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
-def sensor_laser_on__d(sensor_distance_state: SensorDistanceState):
-    pass
+def sensor_laser_on__d(
+    control: RelControl,
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    logger.info("verify laser state after move - State D")
+    wait_for_sensor_laser()
+    if laser_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
+        return FlowStateAction.PREPARE_FOR_RECYCLE_PROCESS
+    return FlowStateAction.RETURN_TO_STATE_C
 
 
+#  --------------------------
+#  E
+#  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
-def sensor_laser_on__e(sensor_distance_state: SensorDistanceState):
+def sensor_laser_on__e(
+    control: RelControl,
+    sensor_distance_state: SensorDistanceStateName,
+) -> FlowStateAction:
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+    security_distance = control.read_hmi_hregister_by_name(Params.PARAM_SECURITY_DISTANCE)
+    logger.info("reaching security distance for laser sensor - State E")
+    while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < security_distance:
+        time.sleep(Constants.wait_read_laser)
+
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    return FlowStateAction.WAITING_FOR_BUCKET
+
+
+def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
+    return sensor_laser_on
+
+
+def prepare_for_recycle_process(control: RelControl):
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
+    )
+    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
+    logger.info("chekcing target pressure on")
+    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    if pressure != target_pressure:
+        control.apply_pressure_regulator_state(PressureState.ON)
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+        != target_pressure
+    ):
+        continue
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    return FlowStateAction.START_PWM
+
+
+def start_pwm(prepare_for_recycle_process: FlowStateAction, control: RelControl) -> FlowStateAction:
+    logger.info("starting pwm")
+    control.apply_pwm_state()
+    return FlowStateAction.PWM_STARTED
+
+
+def validate_recycle(start_pwm: FlowStateAction, control: RelControl):
+    logger.info("validate if recycle is needed")
+    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
+        logger.info("recycle enabled")
+        return FlowStateAction.RECYCLE_ENABLED
+    logger.info("recycle disabled")
+    return FlowStateAction.RECYCLE_DISABLED
+
+
+@config.when(validate_recycle=FlowStateAction.RECYCLE_DISABLED)
+def recycle__disabled(control: RelControl, validate_recycle: FlowStateAction) -> FlowStateAction:
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
+    start = timer()
+    control.apply_pressure_regulator_state(PressureState.ON)
+    is_timeout = False
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
+        control.apply_tower_state(TowerState.PRE_VACUUM)
+        is_timeout = (timer() - start) > recycle_time
+        if is_timeout:
+            break
+    if is_timeout:
+        logger.warning("recycle has timeout")
+        return FlowStateAction.RECYCLE_TIMEOUT
+    logger.info("recycle in time ok")
+    return FlowStateAction.RECYCLE_CYCLE_OK
+
+
+@config.when(validate_recycle=FlowStateAction.RECYCLE_ENABLED)
+def recycle__enabled(
+    control: RelControl,
+    validate_recycle: FlowStateAction,
+):
+    while (
+        control.read_hmi_hregister_by_name(
+            HMIWriteAction.ACTION_RECYCLE,
+        )
+        != 1
+    ):
+        continue
+    logger.info("apply pressure after recycle enabled")
+    control.apply_pressure_regulator_state(PressureState.ON)
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
+        continue
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    logger.info("turn on recycle")
+    control.apply_manifold_state(ManifoldActions.RECYCLE)
+    recycle_time_ms = control.read_hmi_hregister_by_name(
+        Params.PARAM_RECYCLE_TIME_CYCLE
+    )  # assume milliseconds
+    logger.info("waiting for recycle time")
+    time.sleep(recycle_time_ms)
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.TO_PWM
+
+
+@config.when(recycle=FlowStateAction.RECYCLE_CYCLE_OK)
+def recycle_flow_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+    logger.info("stop pump on pressure target")
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    current_pressure = control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
+    )
+    logger.info("waiting for pump to reach target pressure")
+    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_BARES_LIMIT)
+    if current_pressure < pressure_bares_limit:
+        return FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES
+
+    logger.info("waiting to turn off pump process from HMI ⏲ ...")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS)
+        != CoilState.OFF.value
+    ):
+        continue
+    logger.info("turn off PWM")
+    control.stop_pwm()
+    return FlowStateAction.WAITING_FOR_BUCKET
+
+
+@config.when(recycle=FlowStateAction.RECYCLE_TIMEOUT)
+def recycle_flow_state__timeout(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+    control.apply_tower_state(TowerState.VACUUM)
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    # TODO
+    # wait for confirmation to continue
+    # lets assume this is manual recycle
+    logger.info("waiting for manual recycle, STANDBY ⏲ ...")
+    while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE_RETRACTIL) == 0:
+        continue
+    logger.info("recycle retractil received")
+    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
+    count = recycle_manual_count + 1
+    logger.info("new count for manual retractil action %s", count)
+    control.write_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT, count)
+    return FlowStateAction.TO_INIT_FLOW
+
+
+@config.when(recycle=FlowStateAction.TO_PWM)
+def recycle_flow_state__pwm(recycle: FlowStateAction) -> FlowStateAction:
+    return recycle
+
+
+def bucket_change(control: RelControl):
+    """
+    this node runs after first flow is completed
+    """
     pass

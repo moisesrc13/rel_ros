@@ -1,25 +1,16 @@
 import importlib
-from dataclasses import dataclass
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
-from rel_ros_master_control.config import load_modbus_config
-from rel_ros_master_control.constants import Constants
+from rel_ros_master_control.config import load_hmi_config, load_iolink_config
+from rel_ros_master_control.constants import Constants, FlowStateAction
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
 
 telemetry.disable_telemetry()
-
-
-@dataclass
-class FlowControlInputs:
-    hmi_action_publisher: Any
-    master_control: RelControl
-    control_iolink_data: dict
-    control_hmi_data: dict
 
 
 class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
@@ -60,14 +51,11 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(flow_inputs: FlowControlInputs, visualize: bool = False):
+def run(control: RelControl, tasks: list[str]):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
-        "hmi_action_publisher": flow_inputs.hmi_action_publisher,
-        "control_hmi_data": flow_inputs.control_hmi_data,
-        "control_iolink_data": flow_inputs.control_iolink_data,
-        "control": flow_inputs.master_control,
+        "control": control,
     }
     dr = (
         driver.Builder()
@@ -80,36 +68,37 @@ def run(flow_inputs: FlowControlInputs, visualize: bool = False):
         )
         .build()
     )
-    if visualize:
-        dr.display_all_functions()
-        return
+    init_flow_state = FlowStateAction.UNKNOWN
+    node_to_validate = tasks[-1]
     try:
-        logger.info("running control flow")
-        dr.execute(Constants.flow_tasks)
+        logger.info("✨ running control flow with tasks %s", tasks)
+        r = dr.execute(tasks)
+        init_flow_state = FlowStateAction(int(r[node_to_validate].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
 
+    match init_flow_state:
+        case FlowStateAction.TO_RECYCLE_PROCESS:
+            run(control, Constants.flow_tasks_recycle)
+        case FlowStateAction.TO_PWM:
+            run(control, Constants.flow_tasks_pwm)
+        case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
+            run(control, Constants.flow_tasks_pwm)
+        case FlowStateAction.WAITING_FOR_BUCKET:
+            run(control, Constants.flow_tasks_bucket_change)
+        case _:
+            logger.info("completing flow ...")
+
 
 if __name__ == "__main__":
-    """this method is for manual testing"""
-
-    class TestPubliser:
-        def publish(self, msg: str):
-            print(f"publish {msg}")
-
-    config = load_modbus_config()
-    control = RelControl(iolink_slave=config.iolinks[0], iolink_hr=config.holding_registers)
-    logger.info("visualize ...")
-    flow_inputs = FlowControlInputs(
-        control_hmi_data={
-            "param_vacuum_limit_high": 100,
-            "param_pre_vacuum_limit_high": 80,
-            "param_vacuum_distance": 10,
-        },
-        control_iolink_data={
-            "sensor_laser_distance": 100,
-        },
-        hmi_action_publisher=TestPubliser(),
-        master_control=control,
+    #  this method is for manual testing
+    iolink_config = load_iolink_config()
+    hmi_config = load_hmi_config()
+    control = RelControl(
+        iolink_slave=iolink_config.iolinks[0],
+        iolink_hr=iolink_config.holding_registers,
+        hmi_slave=hmi_config.hmis[0],
+        hmi_hr=hmi_config.holding_registers,
+        hmi_cr=hmi_config.coil_registers,
     )
-    run(flow_inputs=flow_inputs, visualize=True)
+    run(control, Constants.flow_tasks_init_state)
