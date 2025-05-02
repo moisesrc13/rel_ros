@@ -3,18 +3,6 @@ from enum import IntEnum, StrEnum
 from pydantic import BaseModel
 
 
-class SensorLaserLectureState(IntEnum):
-    DO_NOTHING = 0
-    HOLD = 1
-    NOT_HOLD_TO_A = 2
-    NOT_HOLD_TO_B = 3
-    NOT_HOLD_TO_C = 4
-    WAITING_FOR_BUCKET = 5
-    EMPTY_BUCKET = 6
-    PREVACUUM_BUCKET_ON = 7
-    BUCKET_ON = 8
-
-
 class CoilState(IntEnum):
     ON = 1
     OFF = 0
@@ -138,6 +126,7 @@ class HMIWriteAction(StrEnum):
     STATUS_ERROR_CHANGE_BUCKET = "status_error_change_bucket"
     STATUS_PUMP_NO_PRESSURE = "status_pump_no_pressure"
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
+    ENTER_SCREEN_3_0 = "enter_screen_3_0"
 
 
 class Sensors(StrEnum):

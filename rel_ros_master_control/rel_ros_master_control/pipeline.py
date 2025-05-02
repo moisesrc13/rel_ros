@@ -14,10 +14,9 @@ from rel_ros_master_control.constants import (
     SensorDistanceParams,
     SensorDistanceState,
     SensorDistanceStateName,
-    SensorLaserLectureState,
     Sensors,
 )
-from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
+from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
 
@@ -136,8 +135,8 @@ def sensor_laser_on__b(
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
-    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
     )
     logger.info("moving pistons down")
@@ -158,7 +157,7 @@ def sensor_laser_on__b(
         continue
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.OFF
     )
     logger.info("returning to state A")
@@ -174,8 +173,10 @@ def sensor_laser_on__c(
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
-    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
+        HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON
+    )
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
     )
     control.apply_tower_state(TowerState.PRE_VACUUM)
@@ -232,7 +233,7 @@ def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
 
 
 def prepare_for_recycle_process(control: RelControl):
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
     target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
@@ -366,4 +367,17 @@ def bucket_change(control: RelControl):
     """
     this node runs after first flow is completed
     """
-    pass
+    logger.info("🪣 start bucket change")
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_3_0, CoilState.ON)
+    control.stop_pwm()
+    control.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    logger.info("evaluate sensor laser position")
+    # TODO
+    logger.info("waiting for bucket change action step 1")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_1) == 0
+    ):
+        continue
+    logger.info("activate electro-valves retractil")
+    control.apply_manifold_state(ManifoldActions.VENTING_RETRACTIL_UP)

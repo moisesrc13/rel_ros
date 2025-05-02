@@ -315,7 +315,7 @@ class RelControl:
         self.pwm.stop_duty()
         self.pwm_started = False
 
-    def write_hmi_coil_by_address_name(self, enum_name: Enum, enum_value: Enum):
+    def write_hmi_cregister_by_address_name(self, enum_name: Enum, enum_value: Enum):
         self.write_register_by_address_name(
             name=enum_name.value,
             enum_value=enum_value,
