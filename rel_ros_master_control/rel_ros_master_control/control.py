@@ -133,6 +133,10 @@ class RelControl:
         self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
 
+    def check_actions(self):
+        # TODO emergency stop here and others
+        pass
+
     def apply_state(self, hr: HRegister, state_value: int):
         try:
             self.master_io_link.slave_conn.write_register(

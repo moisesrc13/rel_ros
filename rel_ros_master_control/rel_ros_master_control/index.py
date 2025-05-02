@@ -26,11 +26,33 @@ class RelROSNode(Node):
             hmi_cr=self.hmi_config.coil_registers,
         )
         self.create_timers_for_iolink_masters()
-        self.create_hmi_subscribers(len(self.masters))
         self.get_logger().info("creating publisher for rel/iolink topic 📨 ...")
         self.iolink_publisher = self.create_publisher(IOLinkData, "rel/iolink", 10)
         self.get_logger().info("======= creating MAIN CONTROL timers 🤖 =======")
         self.create_timers_for_main_control()
+        self.get_logger().info("======= creating timers for control actions 🤖 =======")
+        self.create_timers_for_control_actions()
+
+    def create_timers_for_control_actions(self):
+        if not self.masters:
+            self.get_logger().error("no iolink masters available")
+            return
+        self.get_logger().info("creating control action timers ⏱ ...")
+        for master in self.masters:
+            if isinstance(master, RelControl):
+                self.get_logger().info(
+                    f"creating control action timer for hmi id {master.master_io_link.hmi_id}"
+                )
+                self.create_timer(
+                    0.25,
+                    functools.partial(
+                        self.timer_callback_main_control, hmi_id=master.master_io_link.hmi_id
+                    ),
+                )
+
+    def timer_callback_control_actions(self, hmi_id: int = 0):
+        control: RelControl = self.masters[hmi_id]
+        control.check_actions()
 
     def create_timers_for_main_control(self):
         if not self.masters:
