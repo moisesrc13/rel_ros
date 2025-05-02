@@ -6,8 +6,9 @@ from rclpy.node import Node
 
 from rel_interfaces.msg import IOLinkData
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
+from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import RelControl, run_masters_to_iolinks
-from rel_ros_master_control.flow_control import run_init_state as run_control
+from rel_ros_master_control.flow_control import run as run_control
 
 
 class RelROSNode(Node):
@@ -59,7 +60,7 @@ class RelROSNode(Node):
         self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
         control: RelControl = self.masters[hmi_id]
         self.is_control_running = True
-        run_control(control)
+        run_control(control, Constants.flow_tasks_init_state)
         self.is_control_running = False
 
     def create_timers_for_iolink_masters(self):

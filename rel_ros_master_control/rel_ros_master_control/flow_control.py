@@ -4,7 +4,7 @@ from typing import Any, Optional
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
-from rel_ros_master_control.constants import Constants
+from rel_ros_master_control.constants import Constants, FlowStateAction
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -51,7 +51,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run_init_state(control: RelControl, visualize: bool = False):
+def run(control: RelControl, tasks: list[str], visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -71,14 +71,19 @@ def run_init_state(control: RelControl, visualize: bool = False):
     if visualize:
         dr.display_all_functions()
         return
-    init_flow_state = -1
+    init_flow_state = FlowStateAction.UNKNOWN
     try:
         logger.info("running control flow for init state ✨")
-        r = dr.execute(Constants.flow_tasks_init_state)
-        init_flow_state = int(r["report"].iloc[-1])
+        r = dr.execute(tasks)
+        init_flow_state = FlowStateAction(int(r["report"].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
-        return
+
+    match init_flow_state:
+        case FlowStateAction.TO_RECYCLE_PROCESS:
+            run(control, Constants.flow_tasks_recycle)
+        case _:
+            logger.info("completing flow ...")
 
 
 if __name__ == "__main__":
@@ -93,4 +98,4 @@ if __name__ == "__main__":
         hmi_cr=hmi_config.coil_registers,
     )
     logger.info("visualize ...")
-    run_init_state(control, visualize=True)
+    run(control, Constants.flow_tasks_init_state, visualize=True)

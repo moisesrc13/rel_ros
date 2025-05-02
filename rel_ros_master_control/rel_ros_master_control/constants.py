@@ -21,6 +21,7 @@ class CoilState(IntEnum):
 
 
 class FlowStateAction(IntEnum):
+    UNKNOWN = -1
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
     RECYCLE_DISABLED = 3
