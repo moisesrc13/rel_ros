@@ -265,81 +265,6 @@ def bucket_state_action__setbucket(
     return FlowStateAction.CONTINUE_BUCKET_CHANGE
 
 
-@config.when(bucket_state_action=FlowStateAction.RECYCLE_ENABLED)
-def after_bucket_state_action__recycleon(
-    control: RelControl,
-    bucket_state_action: FlowStateAction,
-):
-    while (
-        control.read_hmi_hregister_by_name(
-            HMIWriteAction.ACTION_RECYCLE,
-        )
-        != 1
-    ):
-        continue
-    control.apply_pressure_regulator_state(PressureState.ON)
-    while control.read_iolink_hregister_by_name(
-        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
-    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
-        continue
-    control.apply_pressure_regulator_state(PressureState.OFF)
-    control.apply_manifold_state(ManifoldActions.RECYCLE)
-    recycle_time_ms = control.read_hmi_hregister_by_name(
-        Params.PARAM_RECYCLE_TIME_CYCLE
-    )  # assume ms
-    time.sleep(recycle_time_ms)
-    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
-    if (
-        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0
-    ):  # repeat cycle if recycle is activated
-        after_bucket_state_action__recycleon(
-            control=control, bucket_state_action=FlowStateAction.RECYCLE_ENABLED
-        )
-
-
-@config.when(after_bucket_state_action=FlowStateAction.RECYCLE_TIMEOUT)
-def recycle_state__timeout(
-    after_bucket_state_action: FlowStateAction, control: RelControl
-) -> FlowStateAction:
-    control.apply_tower_state(TowerState.VACUUM)
-    control.apply_pressure_regulator_state(PressureState.OFF)
-    # TODO
-    # wait for confirmation to continue
-    # lets assume this is manual recycle
-    logger.info("waiting for manual recycle, STANDBY ⏲ ...")
-    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL) != 0:
-        continue
-    logger.info("recycle manual received")
-    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
-    control.write_hmi_hregister_by_name(
-        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value, recycle_manual_count + 1
-    )
-    return FlowStateAction.STANDBY_EXIT_BY_MANUAL
-
-
-@config.when(after_bucket_state_action=FlowStateAction.RECYCLE_CYCLE_OK)
-def recycle_state__ok(
-    after_bucket_state_action: FlowStateAction, control: RelControl
-) -> FlowStateAction:
-    control.apply_pressure_regulator_state(PressureState.OFF)
-    current_pressure = control.read_iolink_hregister_by_name(
-        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
-    )
-    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_BARES_LIMIT)
-    if current_pressure < pressure_bares_limit:
-        return FlowStateAction.PRESSURE_NOT_ON_TARGET
-
-    logger.info("waiting to turn on pump process ⏲ ...")
-    while (
-        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS)
-        != CoilState.OFF.value
-    ):
-        continue
-    logger.info("turn off PWM")
-    control.stop_pwm()
-    return FlowStateAction.CONTINUE_BUCKET_CHANGE
-
-
 @config.when(bucket_state_action=FlowStateAction.CONTINUE_BUCKET_CHANGE)
 def after_bucket_state_action__continue(
     control: RelControl, bucket_state_action: FlowStateAction
@@ -402,6 +327,77 @@ def recycle__disabled(control: RelControl, validate_recycle: FlowStateAction) ->
         return FlowStateAction.RECYCLE_TIMEOUT
     logger.info("recycle in time ok")
     return FlowStateAction.RECYCLE_CYCLE_OK
+
+
+@config.when(validate_recycle=FlowStateAction.RECYCLE_ENABLED)
+def recycle__enabled(
+    control: RelControl,
+    validate_recycle: FlowStateAction,
+):
+    while (
+        control.read_hmi_hregister_by_name(
+            HMIWriteAction.ACTION_RECYCLE,
+        )
+        != 1
+    ):
+        continue
+    logger.info("apply pressure after recycle enabled")
+    control.apply_pressure_regulator_state(PressureState.ON)
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
+        continue
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    logger.info("turn on recycle")
+    control.apply_manifold_state(ManifoldActions.RECYCLE)
+    recycle_time_ms = control.read_hmi_hregister_by_name(
+        Params.PARAM_RECYCLE_TIME_CYCLE
+    )  # assume milliseconds
+    time.sleep(recycle_time_ms)
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.TO_PWM
+
+
+@config.when(recycle=FlowStateAction.RECYCLE_CYCLE_OK)
+def recycle_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+    logger.info("stop pump on pressure target")
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    current_pressure = control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
+    )
+    logger.info("waiting for pump to reach target pressure")
+    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_BARES_LIMIT)
+    if current_pressure < pressure_bares_limit:
+        return FlowStateAction.PRESSURE_NOT_ON_TARGET
+
+    logger.info("waiting to turn off pump process from HMI ⏲ ...")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS)
+        != CoilState.OFF.value
+    ):
+        continue
+    logger.info("turn off PWM")
+    control.stop_pwm()
+    return FlowStateAction.WAITING_FOR_BUCKET
+
+
+@config.when(recycle=FlowStateAction.RECYCLE_TIMEOUT)
+def recycle_state__timeout(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+    control.apply_tower_state(TowerState.VACUUM)
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    # TODO
+    # wait for confirmation to continue
+    # lets assume this is manual recycle
+    logger.info("waiting for manual recycle, STANDBY ⏲ ...")
+    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL) != 0:
+        continue
+    logger.info("recycle manual received")
+    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
+    control.write_hmi_hregister_by_name(
+        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value, recycle_manual_count + 1
+    )
+    return FlowStateAction.STANDBY_EXIT_BY_MANUAL
 
 
 def bucket_change(control: RelControl):
