@@ -114,7 +114,7 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
 #  ---------------------------------------------------------
 
 #  --------------------------
-#  A
+#  A) Sensor laser d<Z
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(
@@ -127,7 +127,7 @@ def sensor_laser_on__a(
 
 
 #  --------------------------
-#  B
+#  B) Sensor laser d>Z && d<=Y
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
@@ -165,7 +165,7 @@ def sensor_laser_on__b(
 
 
 #  --------------------------
-#  C
+#  C) Sénsor laser d>Y && d<=X
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(
@@ -191,7 +191,7 @@ def sensor_laser_on__c(
 
 
 #  --------------------------
-#  D
+#  D) Sensor laser d>X && d<W
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(
@@ -209,7 +209,7 @@ def sensor_laser_on__d(
 
 
 #  --------------------------
-#  E
+#  E) Sensor laser d>W && d<= ∞
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
