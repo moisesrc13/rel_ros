@@ -51,7 +51,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, visualize: bool = False):
+def run_init_state(control: RelControl, visualize: bool = False):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -71,10 +71,11 @@ def run(control: RelControl, visualize: bool = False):
     if visualize:
         dr.display_all_functions()
         return
-    # init_result = -1
+    init_flow_state = -1
     try:
         logger.info("running control flow for init state ✨")
         r = dr.execute(Constants.flow_tasks_init_state)
+        init_flow_state = int(r["report"].iloc[-1])
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
         return
@@ -92,4 +93,4 @@ if __name__ == "__main__":
         hmi_cr=hmi_config.coil_registers,
     )
     logger.info("visualize ...")
-    run(control, visualize=True)
+    run_init_state(control, visualize=True)

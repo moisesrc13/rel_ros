@@ -218,6 +218,7 @@ def sensor_laser_on__d(
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     laser_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    logger.info("verify laser state after move - State D")
     wait_for_sensor_laser()
     if laser_distance == control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE):
         return FlowStateAction.PREPARE_FOR_RECYCLE_PROCESS
@@ -235,6 +236,7 @@ def sensor_laser_on__e(
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
     security_distance = control.read_hmi_hregister_by_name(Params.PARAM_SECURITY_DISTANCE)
+    logger.info("reaching security distance for laser sensor - State E")
     while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < security_distance:
         time.sleep(Constants.wait_read_laser)
 
