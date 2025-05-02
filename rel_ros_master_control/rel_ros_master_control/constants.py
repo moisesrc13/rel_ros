@@ -188,7 +188,7 @@ class Constants:
         "start_pwm",
         "validate_recycle",
         "recycle",
-        "recycle_state",
+        "recycle_flow_state",
     ]
     flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
     flow_tasks_bucket_change: list[str] = ["bucket_change"]

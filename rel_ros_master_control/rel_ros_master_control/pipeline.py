@@ -227,51 +227,6 @@ def sensor_laser_on__e(
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
-@config.when_in(
-    redirect_from_sensor_laser_state=[
-        SensorLaserLectureState.BUCKET_ON,
-        SensorLaserLectureState.PREVACUUM_BUCKET_ON,
-    ]
-)
-def bucket_state_action__prevacuum(
-    control: RelControl,
-    redirect_from_sensor_laser_state: SensorDistanceState,
-) -> FlowStateAction:
-    control.write_register_by_address_name(
-        name=HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS.value,
-        enum_value=1,
-        stype=SlaveType.HMI,
-        rtype=RegisterType.COIL,
-    )
-    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
-    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
-    if pressure != target_pressure:
-        control.apply_pressure_regulator_state(PressureState.ON)
-    while pressure != target_pressure:
-        pressure = control.read_iolink_hregister_by_name(
-            Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
-        )
-    control.apply_pressure_regulator_state(PressureState.OFF)
-    control.apply_pwm_state()
-    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
-        return FlowStateAction.RECYCLE_ENABLED
-    return FlowStateAction.RECYCLE_DISABLED
-
-
-@config.when(redirect_from_sensor_laser_state=SensorLaserLectureState.WAITING_FOR_BUCKET)
-def bucket_state_action__setbucket(
-    redirect_from_sensor_laser_state: SensorDistanceState,
-) -> FlowStateAction:
-    return FlowStateAction.CONTINUE_BUCKET_CHANGE
-
-
-@config.when(bucket_state_action=FlowStateAction.CONTINUE_BUCKET_CHANGE)
-def after_bucket_state_action__continue(
-    control: RelControl, bucket_state_action: FlowStateAction
-) -> FlowStateAction:
-    return bucket_state_action
-
-
 def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
     return sensor_laser_on
 
@@ -361,7 +316,7 @@ def recycle__enabled(
 
 
 @config.when(recycle=FlowStateAction.RECYCLE_CYCLE_OK)
-def recycle_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+def recycle_flow_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
     logger.info("stop pump on pressure target")
     control.apply_pressure_regulator_state(PressureState.OFF)
     current_pressure = control.read_iolink_hregister_by_name(
@@ -384,7 +339,7 @@ def recycle_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStat
 
 
 @config.when(recycle=FlowStateAction.RECYCLE_TIMEOUT)
-def recycle_state__timeout(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
+def recycle_flow_state__timeout(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
     control.apply_tower_state(TowerState.VACUUM)
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.apply_pressure_regulator_state(PressureState.OFF)
@@ -403,7 +358,7 @@ def recycle_state__timeout(recycle: FlowStateAction, control: RelControl) -> Flo
 
 
 @config.when(recycle=FlowStateAction.TO_PWM)
-def recycle_state__pwm(recycle: FlowStateAction) -> FlowStateAction:
+def recycle_flow_state__pwm(recycle: FlowStateAction) -> FlowStateAction:
     return recycle
 
 
