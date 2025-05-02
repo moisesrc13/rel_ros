@@ -80,6 +80,12 @@ def run(control: RelControl, tasks: list[str]):
     match init_flow_state:
         case FlowStateAction.TO_RECYCLE_PROCESS:
             run(control, Constants.flow_tasks_recycle)
+        case FlowStateAction.TO_PWM:
+            run(control, Constants.flow_tasks_pwm)
+        case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
+            run(control, Constants.flow_tasks_pwm)
+        case FlowStateAction.WAITING_FOR_BUCKET:
+            run(control, Constants.flow_tasks_bucket_change)
         case _:
             logger.info("completing flow ...")
 

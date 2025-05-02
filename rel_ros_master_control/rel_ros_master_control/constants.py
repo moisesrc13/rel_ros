@@ -27,7 +27,7 @@ class FlowStateAction(IntEnum):
     RECYCLE_DISABLED = 3
     RECYCLE_TIMEOUT = 4
     RECYCLE_CYCLE_OK = 5
-    PRESSURE_NOT_ON_TARGET = 6
+    PRESSURE_NOT_ON_TARGET_BARES = 6
     WAITING_FOR_BUCKET = 7
     RETURN_TO_STATE_A = 8
     RETURN_TO_STATE_B = 9
@@ -190,6 +190,7 @@ class Constants:
         "recycle",
         "recycle_state",
     ]
+    flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
     flow_tasks_bucket_change: list[str] = ["bucket_change"]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
