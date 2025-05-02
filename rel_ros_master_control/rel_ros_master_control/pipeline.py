@@ -354,6 +354,7 @@ def recycle__enabled(
     recycle_time_ms = control.read_hmi_hregister_by_name(
         Params.PARAM_RECYCLE_TIME_CYCLE
     )  # assume milliseconds
+    logger.info("waiting for recycle time")
     time.sleep(recycle_time_ms)
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     return FlowStateAction.TO_PWM
@@ -385,19 +386,20 @@ def recycle_state__ok(recycle: FlowStateAction, control: RelControl) -> FlowStat
 @config.when(recycle=FlowStateAction.RECYCLE_TIMEOUT)
 def recycle_state__timeout(recycle: FlowStateAction, control: RelControl) -> FlowStateAction:
     control.apply_tower_state(TowerState.VACUUM)
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     control.apply_pressure_regulator_state(PressureState.OFF)
     # TODO
     # wait for confirmation to continue
     # lets assume this is manual recycle
     logger.info("waiting for manual recycle, STANDBY ⏲ ...")
-    while control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME_MANUAL) != 0:
+    while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE_RETRACTIL) == 0:
         continue
-    logger.info("recycle manual received")
+    logger.info("recycle retractil received")
     recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
-    control.write_hmi_hregister_by_name(
-        Sensors.SENSOR_MANUAL_RECYCLE_COUNT.value, recycle_manual_count + 1
-    )
-    return FlowStateAction.STANDBY_EXIT_BY_MANUAL
+    count = recycle_manual_count + 1
+    logger.info("new count for manual retractil action %s", count)
+    control.write_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT, count)
+    return FlowStateAction.TO_INIT_FLOW
 
 
 def bucket_change(control: RelControl):

@@ -95,5 +95,4 @@ if __name__ == "__main__":
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
-    logger.info("visualize ...")
     run(control, Constants.flow_tasks_init_state)
