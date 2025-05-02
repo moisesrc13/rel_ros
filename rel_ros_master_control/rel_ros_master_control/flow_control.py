@@ -51,7 +51,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, tasks: list[str], node_to_validate: str = "init_flow_state"):
+def run(control: RelControl, tasks: list[str]):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -69,6 +69,7 @@ def run(control: RelControl, tasks: list[str], node_to_validate: str = "init_flo
         .build()
     )
     init_flow_state = FlowStateAction.UNKNOWN
+    node_to_validate = tasks[-1]
     try:
         logger.info("✨ running control flow with tasks %s", tasks)
         r = dr.execute(tasks)
@@ -78,7 +79,7 @@ def run(control: RelControl, tasks: list[str], node_to_validate: str = "init_flo
 
     match init_flow_state:
         case FlowStateAction.TO_RECYCLE_PROCESS:
-            run(control, Constants.flow_tasks_recycle, "validate_recycle")
+            run(control, Constants.flow_tasks_recycle)
         case _:
             logger.info("completing flow ...")
 

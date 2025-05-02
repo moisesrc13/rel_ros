@@ -165,24 +165,6 @@ def sensor_laser_on__b(
     return FlowStateAction.RETURN_TO_STATE_A
 
 
-def prepare_for_recycle_process(control: RelControl):
-    control.write_hmi_coil_by_address_name(
-        HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
-    )
-    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
-    logger.info("chekcing target pressure on")
-    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
-    if pressure != target_pressure:
-        control.apply_pressure_regulator_state(PressureState.ON)
-    while (
-        control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
-        != target_pressure
-    ):
-        continue
-    control.apply_pressure_regulator_state(PressureState.OFF)
-    return FlowStateAction.START_PWM
-
-
 #  --------------------------
 #  C
 #  --------------------------
@@ -315,28 +297,6 @@ def after_bucket_state_action__recycleon(
         )
 
 
-@config.when(bucket_state_action=FlowStateAction.RECYCLE_DISABLED)
-def after_bucket_state_action__recycleoff(
-    control: RelControl, bucket_state_action: FlowStateAction
-) -> FlowStateAction:
-    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
-    start = timer()
-    control.apply_pressure_regulator_state(PressureState.ON)
-    is_timeout = False
-    while control.read_iolink_hregister_by_name(
-        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
-    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
-        control.apply_tower_state(TowerState.PRE_VACUUM)
-        is_timeout = (timer() - start) > recycle_time
-        if is_timeout:
-            break
-    if is_timeout:
-        logger.warning("recycle has timeout")
-        return FlowStateAction.RECYCLE_TIMEOUT
-    logger.info("recycle in time ok")
-    return FlowStateAction.RECYCLE_CYCLE_OK
-
-
 @config.when(after_bucket_state_action=FlowStateAction.RECYCLE_TIMEOUT)
 def recycle_state__timeout(
     after_bucket_state_action: FlowStateAction, control: RelControl
@@ -389,6 +349,59 @@ def after_bucket_state_action__continue(
 
 def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
     return sensor_laser_on
+
+
+def prepare_for_recycle_process(control: RelControl):
+    control.write_hmi_coil_by_address_name(
+        HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
+    )
+    target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
+    logger.info("chekcing target pressure on")
+    pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+    if pressure != target_pressure:
+        control.apply_pressure_regulator_state(PressureState.ON)
+    while (
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
+        != target_pressure
+    ):
+        continue
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    return FlowStateAction.START_PWM
+
+
+def start_pwm(prepare_for_recycle_process: FlowStateAction, control: RelControl) -> FlowStateAction:
+    logger.info("starting pwm")
+    control.apply_pwm_state()
+    return FlowStateAction.PWM_STARTED
+
+
+def validate_recycle(start_pwm: FlowStateAction, control: RelControl):
+    logger.info("validate if recycle is needed")
+    if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
+        logger.info("recycle enabled")
+        return FlowStateAction.RECYCLE_ENABLED
+    logger.info("recycle disabled")
+    return FlowStateAction.RECYCLE_DISABLED
+
+
+@config.when(validate_recycle=FlowStateAction.RECYCLE_DISABLED)
+def recycle__disabled(control: RelControl, validate_recycle: FlowStateAction) -> FlowStateAction:
+    recycle_time = control.read_hmi_hregister_by_name(Params.PARAM_RECYCLE_TIME)
+    start = timer()
+    control.apply_pressure_regulator_state(PressureState.ON)
+    is_timeout = False
+    while control.read_iolink_hregister_by_name(
+        Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL
+    ) != control.read_hmi_hregister_by_name(Params.PARAM_TARGET_PRESSURE_HYD_HOME):
+        control.apply_tower_state(TowerState.PRE_VACUUM)
+        is_timeout = (timer() - start) > recycle_time
+        if is_timeout:
+            break
+    if is_timeout:
+        logger.warning("recycle has timeout")
+        return FlowStateAction.RECYCLE_TIMEOUT
+    logger.info("recycle in time ok")
+    return FlowStateAction.RECYCLE_CYCLE_OK
 
 
 def bucket_change(control: RelControl):

@@ -35,7 +35,8 @@ class FlowStateAction(IntEnum):
     RETURN_TO_STATE_C = 11
     PREPARE_FOR_RECYCLE_PROCESS = 12
     START_PWM = 13
-    TO_RECYCLE_PROCESS = 14
+    PWM_STARTED = 14
+    TO_RECYCLE_PROCESS = 15
 
 
 class DigitalOutput(StrEnum):
@@ -181,11 +182,7 @@ class Constants:
         "sensor_laser_on",
         "init_flow_state",
     ]
-    flow_tasks_recycle = [
-        "prepare_for_recycle_process",
-        "start_pwm",
-        "validate_recycle",
-    ]
+    flow_tasks_recycle = ["prepare_for_recycle_process", "start_pwm", "validate_recycle", "recycle"]
     flow_tasks_bucket_change: list[str] = ["bucket_change"]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
