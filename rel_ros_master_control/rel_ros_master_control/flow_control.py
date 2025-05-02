@@ -51,7 +51,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, tasks: list[str], visualize: bool = False):
+def run(control: RelControl, tasks: list[str], node_to_validate: str = "init_flow_state"):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -68,20 +68,17 @@ def run(control: RelControl, tasks: list[str], visualize: bool = False):
         )
         .build()
     )
-    if visualize:
-        dr.display_all_functions()
-        return
     init_flow_state = FlowStateAction.UNKNOWN
     try:
         logger.info("✨ running control flow with tasks %s", tasks)
         r = dr.execute(tasks)
-        init_flow_state = FlowStateAction(int(r["init_flow_state"].iloc[-1]))
+        init_flow_state = FlowStateAction(int(r[node_to_validate].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
 
     match init_flow_state:
         case FlowStateAction.TO_RECYCLE_PROCESS:
-            run(control, Constants.flow_tasks_recycle)
+            run(control, Constants.flow_tasks_recycle, "validate_recycle")
         case _:
             logger.info("completing flow ...")
 
@@ -98,4 +95,4 @@ if __name__ == "__main__":
         hmi_cr=hmi_config.coil_registers,
     )
     logger.info("visualize ...")
-    run(control, Constants.flow_tasks_init_state, visualize=True)
+    run(control, Constants.flow_tasks_init_state)
