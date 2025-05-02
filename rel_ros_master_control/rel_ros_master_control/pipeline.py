@@ -132,6 +132,7 @@ def sensor_laser_on__a(
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
     control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
@@ -214,7 +215,7 @@ def sensor_laser_on__d(
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
+    sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
@@ -363,7 +364,9 @@ def recycle_flow_state__pwm(recycle: FlowStateAction) -> FlowStateAction:
     return recycle
 
 
-def bucket_change(control: RelControl):
+def bucket_change(
+    control: RelControl, sensor_distance_params: SensorDistanceParams
+) -> FlowStateAction:
     """
     this node runs after first flow is completed
     """
@@ -381,3 +384,28 @@ def bucket_change(control: RelControl):
         continue
     logger.info("activate electro-valves retractil")
     control.apply_manifold_state(ManifoldActions.VENTING_RETRACTIL_UP)
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    if sensor_distance < sensor_distance_params.bucket_distance:
+        return FlowStateAction.BUCKET_CHANGE_UNDER_W
+    # TODO what if is equal?
+    return FlowStateAction.BUCKET_CHANGE_OVER_W
+
+
+@config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_UNDER_W)
+def bucket_change_frame__underw(control: RelControl, bucket_change: FlowStateAction):
+    logger.info("wait for bucket change confirmation ...")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_2) == 0
+    ):
+        control.apply_manifold_state(ManifoldActions.ACTIVATE)
+        control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+        continue
+    control.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+    logger.info("when laser distance > W turn off vacuum electro-vale")
+
+
+@config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_OVER_W)
+def bucket_change_frame__overw(control: RelControl, bucket_change: FlowStateAction):
+    pass

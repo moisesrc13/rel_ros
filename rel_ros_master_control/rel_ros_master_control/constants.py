@@ -26,6 +26,8 @@ class FlowStateAction(IntEnum):
     TO_RECYCLE_PROCESS = 14
     TO_PWM = 15
     TO_INIT_FLOW = 16
+    BUCKET_CHANGE_UNDER_W = 17
+    BUCKET_CHANGE_OVER_W = 18
 
 
 class DigitalOutput(StrEnum):
@@ -67,6 +69,7 @@ class ManifoldActions(IntEnum):
     VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
     PISTONS_UP: int = int("0100_0000_0000_0000", 2)
     PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
+    AIR_FOR_VACUUM: int = int("0000_0000_1000_0000", 2)  # TODO confirm
 
 
 class SensorDistanceParams(BaseModel):
@@ -180,7 +183,12 @@ class Constants:
         "recycle_flow_state",
     ]
     flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
-    flow_tasks_bucket_change: list[str] = ["bucket_change"]
+    flow_tasks_bucket_change: list[str] = [
+        "check_distance_sensor_for_electrovales",
+        "bucket_distance",
+        "sensor_distance_params",
+        "bucket_change",
+    ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
     wait_read_laser: float = 0.20
