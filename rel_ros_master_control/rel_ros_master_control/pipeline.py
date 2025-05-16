@@ -238,7 +238,7 @@ def prepare_for_recycle_process(control: RelControl):
         HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
     target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
-    logger.info("chekcing target pressure on")
+    logger.info("checking target pressure on")
     pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
     if pressure != target_pressure:
         control.apply_pressure_regulator_state(PressureState.ON)
@@ -440,5 +440,18 @@ def bucket_change_frame__overw(
     return FlowStateAction.BUCKET_CHANGE_STEP_2
 
 
-def bucket_change_step_2():
-    pass
+def bucket_change_step_2(control: RelControl):
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    logger.info("enter to screen 1-0")
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_1_0, CoilState.ON)
+    logger.info("wait for action bucket change stop 3")
+    while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_CHANGE_BUCKET_3) == 0:
+        continue
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    control.apply_manifold_state(ManifoldActions.VENTING_RETRACTIL_DOWN)
+
+    # TODO check distance to deactivate electrovalves
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
