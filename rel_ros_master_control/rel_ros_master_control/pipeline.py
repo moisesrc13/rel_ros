@@ -376,7 +376,7 @@ def bucket_change(
     control.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
     logger.info("evaluate sensor laser position")
-    # TODO
+    # TODO verify
     logger.info("waiting for bucket change action step 1")
     while (
         control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_1) == 0
@@ -392,20 +392,43 @@ def bucket_change(
 
 
 @config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_UNDER_W)
-def bucket_change_frame__underw(control: RelControl, bucket_change: FlowStateAction):
+def bucket_change_frame__underw(
+    control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
+    bucket_change: FlowStateAction,
+):
     logger.info("wait for bucket change confirmation ...")
     while (
         control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_2) == 0
     ):
         control.apply_manifold_state(ManifoldActions.ACTIVATE)
         control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+        if (
+            control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+            > sensor_distance_params.bucket_distance
+        ):
+            control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+            break
         continue
     control.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
     logger.info("when laser distance > W turn off vacuum electro-vale")
+    while (
+        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        < sensor_distance_params.bucket_distance
+    ):
+        continue
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
 
 
 @config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_OVER_W)
 def bucket_change_frame__overw(control: RelControl, bucket_change: FlowStateAction):
-    pass
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    while (
+        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        < sensor_distance_params.bucket_distance
+    ):
+        continue
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
