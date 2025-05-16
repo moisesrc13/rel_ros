@@ -396,7 +396,7 @@ def bucket_change_frame__underw(
     control: RelControl,
     sensor_distance_params: SensorDistanceParams,
     bucket_change: FlowStateAction,
-):
+) -> FlowStateAction:
     logger.info("wait for bucket change confirmation ...")
     while (
         control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_2) == 0
@@ -420,10 +420,15 @@ def bucket_change_frame__underw(
     ):
         continue
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.BUCKET_CHANGE_STEP_2
 
 
 @config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_OVER_W)
-def bucket_change_frame__overw(control: RelControl, bucket_change: FlowStateAction):
+def bucket_change_frame__overw(
+    control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
+    bucket_change: FlowStateAction,
+) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     while (
@@ -432,3 +437,8 @@ def bucket_change_frame__overw(control: RelControl, bucket_change: FlowStateActi
     ):
         continue
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.BUCKET_CHANGE_STEP_2
+
+
+def bucket_change_step_2():
+    pass

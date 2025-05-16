@@ -28,6 +28,7 @@ class FlowStateAction(IntEnum):
     TO_INIT_FLOW = 16
     BUCKET_CHANGE_UNDER_W = 17
     BUCKET_CHANGE_OVER_W = 18
+    BUCKET_CHANGE_STEP_2 = 19
 
 
 class DigitalOutput(StrEnum):
@@ -187,7 +188,8 @@ class Constants:
         "check_distance_sensor_for_electrovales",
         "bucket_distance",
         "sensor_distance_params",
-        "bucket_change",
+        "bucket_change" "bucket_change_frame",
+        "bucket_change_step_2",
     ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
