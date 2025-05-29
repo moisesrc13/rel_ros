@@ -129,8 +129,7 @@ class RelModbusMaster:
         def _write():
             if reg_type == RegisterModbusType.HR:
                 return self.slave_conn.write_register(address=address, value=value)
-            else:
-                return self.slave_conn.write_coil(address=address, value=value)
+            return self.slave_conn.write_coil(address=address, value=value)
 
         logger.info("writing %s to register %s value %s", reg_type, address, value)
         respose = _write()
