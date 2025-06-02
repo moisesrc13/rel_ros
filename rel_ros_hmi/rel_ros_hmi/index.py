@@ -41,11 +41,13 @@ class RelROSNode(Node):
                 return HMIActionName(msg.action)
             except Exception as ex:
                 self.get_logger().error(f"error getting hmi action for message {msg} - {ex}")
+                return None
 
         try:
             master = self.masters[master_id]
             action_name = get_action_name()
             if not action_name:
+                self.get_logger().info(f"No valid action from HMI action message {msg}")
                 return
 
             match action_name:
