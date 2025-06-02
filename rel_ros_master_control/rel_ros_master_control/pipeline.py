@@ -14,10 +14,9 @@ from rel_ros_master_control.constants import (
     SensorDistanceParams,
     SensorDistanceState,
     SensorDistanceStateName,
-    SensorLaserLectureState,
     Sensors,
 )
-from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
+from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.models.status_device_m import TowerState
 
@@ -115,7 +114,7 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
 #  ---------------------------------------------------------
 
 #  --------------------------
-#  A
+#  A) Sensor laser d<Z
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on__a(
@@ -128,16 +127,17 @@ def sensor_laser_on__a(
 
 
 #  --------------------------
-#  B
+#  B) Sensor laser d>Z && d<=Y
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
 def sensor_laser_on__b(
     control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
-    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
     )
     logger.info("moving pistons down")
@@ -158,7 +158,7 @@ def sensor_laser_on__b(
         continue
 
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.OFF
     )
     logger.info("returning to state A")
@@ -166,7 +166,7 @@ def sensor_laser_on__b(
 
 
 #  --------------------------
-#  C
+#  C) Sénsor laser d>Y && d<=X
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on__c(
@@ -174,8 +174,10 @@ def sensor_laser_on__c(
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
-    control.write_hmi_coil_by_address_name(HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON)
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
+        HMIWriteAction.STATUS_ALARM_PRE_VACUUM, CoilState.ON
+    )
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_PULL_DOWN_PISTONS_BUCKET, CoilState.ON
     )
     control.apply_tower_state(TowerState.PRE_VACUUM)
@@ -190,7 +192,7 @@ def sensor_laser_on__c(
 
 
 #  --------------------------
-#  D
+#  D) Sensor laser d>X && d<W
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on__d(
@@ -208,12 +210,12 @@ def sensor_laser_on__d(
 
 
 #  --------------------------
-#  E
+#  E) Sensor laser d>W && d<= ∞
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on__e(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
+    sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
@@ -232,11 +234,11 @@ def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
 
 
 def prepare_for_recycle_process(control: RelControl):
-    control.write_hmi_coil_by_address_name(
+    control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
     target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
-    logger.info("chekcing target pressure on")
+    logger.info("checking target pressure on")
     pressure = control.read_iolink_hregister_by_name(Sensors.SENSOR_PRESSURE_REGULATOR_READ_REAL)
     if pressure != target_pressure:
         control.apply_pressure_regulator_state(PressureState.ON)
@@ -362,8 +364,94 @@ def recycle_flow_state__pwm(recycle: FlowStateAction) -> FlowStateAction:
     return recycle
 
 
-def bucket_change(control: RelControl):
+def bucket_change(
+    control: RelControl, sensor_distance_params: SensorDistanceParams
+) -> FlowStateAction:
     """
     this node runs after first flow is completed
     """
-    pass
+    logger.info("🪣 start bucket change")
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_3_0, CoilState.ON)
+    control.stop_pwm()
+    control.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    logger.info("evaluate sensor laser position")
+    # TODO verify
+    logger.info("waiting for bucket change action step 1")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_1) == 0
+    ):
+        continue
+    logger.info("activate electro-valves retractil")
+    control.apply_manifold_state(ManifoldActions.VENTING_RETRACTIL_UP)
+    sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+    if sensor_distance < sensor_distance_params.bucket_distance:
+        return FlowStateAction.BUCKET_CHANGE_UNDER_W
+    # TODO what if is equal?
+    return FlowStateAction.BUCKET_CHANGE_OVER_W
+
+
+@config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_UNDER_W)
+def bucket_change_frame__underw(
+    control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
+    bucket_change: FlowStateAction,
+) -> FlowStateAction:
+    logger.info("wait for bucket change confirmation ...")
+    while (
+        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_START_BUCKET_CHANGE_2) == 0
+    ):
+        control.apply_manifold_state(ManifoldActions.ACTIVATE)
+        control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+        if (
+            control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+            > sensor_distance_params.bucket_distance
+        ):
+            control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+            break
+        continue
+    control.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_UP)
+    logger.info("when laser distance > W turn off vacuum electro-vale")
+    while (
+        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        < sensor_distance_params.bucket_distance
+    ):
+        continue
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.BUCKET_CHANGE_STEP_2
+
+
+@config.when(bucket_change=FlowStateAction.BUCKET_CHANGE_OVER_W)
+def bucket_change_frame__overw(
+    control: RelControl,
+    sensor_distance_params: SensorDistanceParams,
+    bucket_change: FlowStateAction,
+) -> FlowStateAction:
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    while (
+        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        < sensor_distance_params.bucket_distance
+    ):
+        continue
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    return FlowStateAction.BUCKET_CHANGE_STEP_2
+
+
+def bucket_change_step_2(control: RelControl):
+    control.apply_manifold_state(ManifoldActions.DEACTIVATE)
+    logger.info("enter to screen 1-0")
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_1_0, CoilState.ON)
+    logger.info("wait for action bucket change stop 3")
+    while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_CHANGE_BUCKET_3) == 0:
+        continue
+    control.apply_manifold_state(ManifoldActions.ACTIVATE)
+    control.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
+    control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
+    control.apply_pressure_regulator_state(PressureState.OFF)
+    control.apply_manifold_state(ManifoldActions.VENTING_RETRACTIL_DOWN)
+
+    # TODO check distance to deactivate electrovalves
+    control.apply_tower_state(TowerState.BUCKET_CHANGE)

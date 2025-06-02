@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import Optional
+
 import rclpy
 from rclpy.node import Node
 
@@ -6,6 +9,12 @@ from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
 from rel_ros_hmi.models.modbus_m import get_register_by_name
+
+
+class HMIActionName(Enum):
+    WRITE = "write"
+    READ = "read"
+    NONE = "none"
 
 
 class RelROSNode(Node):
@@ -36,11 +45,24 @@ class RelROSNode(Node):
 
     def listener_hmi_action_callback(self, msg: HMIAction):
         self.get_logger().info(f"📨 I got an HMIAction message {msg}")
-        self.write_hmi_action(msg.hmi_id, msg)
+        self.do_hmi_action(msg.hmi_id, msg)
 
-    def write_hmi_action(self, master_id: int, msg: HMIAction):
+    def do_hmi_action(self, master_id: int, msg: HMIAction):
+        def get_action_name() -> Optional[HMIActionName]:
+            try:
+                return HMIActionName(msg.action)
+            except Exception as ex:
+                self.get_logger().error(f"error getting hmi action for message {msg} - {ex}")
+
         try:
             master = self.masters[master_id]
+            action_name = get_action_name()
+            if not action_name:
+                return
+
+            match action_name:
+                case HMIActionName.READ:
+                    master.do_write(msg.register_address, msg.value)
             if register := get_register_by_name(
                 master.coils, msg.action_name
             ):  # holding action on coils only for now

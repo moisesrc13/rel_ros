@@ -3,18 +3,6 @@ from enum import IntEnum, StrEnum
 from pydantic import BaseModel
 
 
-class SensorLaserLectureState(IntEnum):
-    DO_NOTHING = 0
-    HOLD = 1
-    NOT_HOLD_TO_A = 2
-    NOT_HOLD_TO_B = 3
-    NOT_HOLD_TO_C = 4
-    WAITING_FOR_BUCKET = 5
-    EMPTY_BUCKET = 6
-    PREVACUUM_BUCKET_ON = 7
-    BUCKET_ON = 8
-
-
 class CoilState(IntEnum):
     ON = 1
     OFF = 0
@@ -38,6 +26,9 @@ class FlowStateAction(IntEnum):
     TO_RECYCLE_PROCESS = 14
     TO_PWM = 15
     TO_INIT_FLOW = 16
+    BUCKET_CHANGE_UNDER_W = 17
+    BUCKET_CHANGE_OVER_W = 18
+    BUCKET_CHANGE_STEP_2 = 19
 
 
 class DigitalOutput(StrEnum):
@@ -79,6 +70,7 @@ class ManifoldActions(IntEnum):
     VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
     PISTONS_UP: int = int("0100_0000_0000_0000", 2)
     PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
+    AIR_FOR_VACUUM: int = int("0000_0000_1000_0000", 2)  # TODO confirm
 
 
 class SensorDistanceParams(BaseModel):
@@ -138,6 +130,8 @@ class HMIWriteAction(StrEnum):
     STATUS_ERROR_CHANGE_BUCKET = "status_error_change_bucket"
     STATUS_PUMP_NO_PRESSURE = "status_pump_no_pressure"
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
+    ENTER_SCREEN_3_0 = "enter_screen_3_0"
+    ENTER_SCREEN_1_0 = "enter_screen_1_0"
 
 
 class Sensors(StrEnum):
@@ -191,7 +185,13 @@ class Constants:
         "recycle_flow_state",
     ]
     flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
-    flow_tasks_bucket_change: list[str] = ["bucket_change"]
+    flow_tasks_bucket_change: list[str] = [
+        "check_distance_sensor_for_electrovales",
+        "bucket_distance",
+        "sensor_distance_params",
+        "bucket_change" "bucket_change_frame",
+        "bucket_change_step_2",
+    ]
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
     wait_read_laser: float = 0.20
