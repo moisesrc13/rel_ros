@@ -173,10 +173,10 @@
     - name: "param_bucket_size_selection"
       address: 40033
       data_type: "uint16"
-    - name: "param_pressure_bares_limit"
+    - name: "param_pressure_guard_limit"
       address: 40034
       data_type: "uint16"
-    # -------------------------------------- MORE STATUS
+    # -------------------------------------- EXTRA
     - name: "status_manual_recycle_count"
       address: 40035
       data_type: "uint16"

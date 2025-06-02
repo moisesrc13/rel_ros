@@ -325,7 +325,7 @@ def recycle_flow_state__ok(recycle: FlowStateAction, control: RelControl) -> Flo
         Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
     )
     logger.info("waiting for pump to reach target pressure")
-    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_BARES_LIMIT)
+    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_GUARD_LIMIT)
     if current_pressure < pressure_bares_limit:
         return FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES
 
