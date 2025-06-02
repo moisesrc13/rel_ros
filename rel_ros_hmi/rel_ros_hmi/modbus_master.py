@@ -1,6 +1,6 @@
 import argparse
 import os
-from typing import Union
+from typing import Optional, Union
 
 import pymodbus.client as modbusClient
 from pymodbus.constants import Endian
@@ -125,7 +125,15 @@ class RelModbusMaster:
             logger.error("❌ Error closing connection to modbus server - %s", err)
             self.connection_state = "❌ error closing"
 
-    def do_write(self, address: int, value: int, reg_type=RegisterModbusType.HR):
+    def get_record_type(self, address: int) -> RegisterModbusType:
+        if address in self.hr:
+            return RegisterModbusType.HR
+        return RegisterModbusType.CR
+
+    def do_write(self, address: int, value: int, reg_type=None):
+        if not reg_type:
+            reg_type = self.get_record_type(address)
+
         def _write():
             if reg_type == RegisterModbusType.HR:
                 return self.slave_conn.write_register(address=address, value=value)
@@ -138,15 +146,31 @@ class RelModbusMaster:
         else:
             logger.info("register written ok ✨")
 
-    def do_read(self, register: int) -> int:
-        logger.info("reading register %s", register)
-        rr = self.slave_conn.read_holding_registers(address=register, count=1)
-        if rr.isError():
-            logger.error("error reading register")
-            return
-        logger.info("reading ok ✨ %s", rr.registers)
-        decoder = get_decoder(rr)
-        return get_value(decoder, RegisterDataType.uint16)
+    def do_read(self, address: int, reg_type=None) -> Optional[int]:
+        logger.info("reading register %s", address)
+        if not reg_type:
+            reg_type = self.get_record_type(address)
+
+        def _read() -> Optional[int]:
+            match reg_type:
+                case RegisterModbusType.HR:
+                    rr = self.slave_conn.read_holding_registers(address=address, count=1)
+                    if rr.isError():
+                        logger.error("error reading holding register")
+                        return None
+                    logger.info("reading ok ✨ %s", rr.registers)
+                    decoder = get_decoder(rr)
+                    return get_value(decoder, RegisterDataType.uint16)
+                case RegisterModbusType.CR:
+                    rr = self.slave_conn.read_coils(address=address, count=1)
+                    if rr.isError():
+                        logger.error("error reading coil register")
+                        return None
+                    return int(rr.bits[0])
+                case _:
+                    return None
+
+        return _read()
 
     def get_holding_registers_data(self) -> list[HRegister]:
         addresses = get_hr_addresses(self.hr)

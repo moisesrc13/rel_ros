@@ -52,15 +52,14 @@ class RelROSNode(Node):
 
             match action_name:
                 case HMIActionName.READ:
+                    self.get_logger().info("read HMI action")
+                    master.do_read(msg.register_address)
+                case HMIActionName.WRITE:
+                    self.get_logger().info("write HMI action")
                     master.do_write(msg.register_address, msg.value)
-            if register := get_register_by_name(
-                master.coils, msg.action_name
-            ):  # holding action on coils only for now
-                self.get_logger().info(
-                    f"📺 write HMI {master_id} coil {register.address} value: {msg.action_value}"
-                )
-                master.do_write(register.address, msg.action_value)
-                self.get_logger().info(f"complete write status into hmi master id {master_id}")
+                case _:
+                    self.get_logger().info("do nothing HMI action")
+                    return
         except Exception as err:
             self.get_logger().error(f"error saving hmi status {err}")
 
