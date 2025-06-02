@@ -180,21 +180,3 @@
     - name: "sensor_manual_recycle_count"
       address: 40035
       data_type: "uint16"
-    - name: "sensor_material_pressure"
-      address: 40036
-      data_type: "uint16"
-    - name: "sensor_material_temperature"
-      address: 40037
-      data_type: "uint16"
-    - name: "sensor_laser_distance"
-      address: 40038
-      data_type: "uint16"
-    - name: "sensor_pressure_regulator_read_set"
-      address: 40039
-      data_type: "uint16"
-    - name: "sensor_pressure_regulator_read_real"
-      address: 40040
-      data_type: "uint16"
-    - name: "sensor_pressure_regulator_valve_read_state"
-      address: 40041
-      data_type: "uint16"
