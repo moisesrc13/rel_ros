@@ -176,7 +176,7 @@
     - name: "param_pressure_bares_limit"
       address: 40034
       data_type: "uint16"
-    # --------------------------------------- SENSORS START
-    - name: "sensor_manual_recycle_count"
+    # -------------------------------------- MORE STATUS
+    - name: "status_manual_recycle_count"
       address: 40035
       data_type: "uint16"

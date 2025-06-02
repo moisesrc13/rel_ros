@@ -132,6 +132,7 @@ class HMIWriteAction(StrEnum):
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
     ENTER_SCREEN_3_0 = "enter_screen_3_0"
     ENTER_SCREEN_1_0 = "enter_screen_1_0"
+    STATUS_MANUAL_RECYCLE_COUNT = "status_manual_recycle_count"
 
 
 class Sensors(StrEnum):
@@ -141,7 +142,6 @@ class Sensors(StrEnum):
     SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
     SENSOR_PRESSURE_REGULATOR_READ_REAL = "sensor_pressure_regulator_read_real"
     SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
-    SENSOR_MANUAL_RECYCLE_COUNT = "sensor_manual_recycle_count"
 
 
 class Params(StrEnum):

@@ -352,10 +352,12 @@ def recycle_flow_state__timeout(recycle: FlowStateAction, control: RelControl) -
     while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE_RETRACTIL) == 0:
         continue
     logger.info("recycle retractil received")
-    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
+    recycle_manual_count = control.read_hmi_hregister_by_name(
+        HMIWriteAction.STATUS_MANUAL_RECYCLE_COUNT
+    )
     count = recycle_manual_count + 1
     logger.info("new count for manual retractil action %s", count)
-    control.write_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT, count)
+    control.write_hmi_hregister_by_name(HMIWriteAction.STATUS_MANUAL_RECYCLE_COUNT, count)
     return FlowStateAction.TO_INIT_FLOW
 
 
