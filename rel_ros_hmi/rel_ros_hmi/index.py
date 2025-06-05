@@ -4,11 +4,10 @@ from typing import Optional
 import rclpy
 from rclpy.node import Node
 
-from rel_interfaces.msg import HMIAction
+from rel_interfaces.msg import HMIAction, HMIUserTask
 from rel_ros_hmi.config import load_modbus_config
 from rel_ros_hmi.modbus_master import create_masters_for_hmis
 from rel_ros_hmi.modbus_slave import run_modbus_slaves
-from rel_ros_hmi.models.modbus_m import get_register_by_name
 
 
 class HMIActionName(Enum):
@@ -25,11 +24,24 @@ class RelROSNode(Node):
         )
         self.get_logger().info("running modbus slaves 🤖 ...")
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
+        run_modbus_slaves(
+            config.hmis,
+            config.holding_registers,
+            config.coil_registers,
+            self.create_hmi_user_task_publishers(len(config.hmis)),
+        )
         self.get_logger().info("creating modbus hmi master connections 👾 ...")
         self.masters = create_masters_for_hmis(
             config.hmis, config.holding_registers, config.coil_registers
         )
+
+    def create_hmi_user_task_publishers(self, count: int = 1) -> dict:
+        publishers = {}
+        for p in range(count):
+            topic = f"rel/hmi_user_task_{p}"
+            self.get_logger().info(f"creating publisher for {topic} topic 📨")
+            publishers[p] = self.create_publisher(HMIUserTask, topic, 10)
+        return publishers
 
     def listener_hmi_action_callback(self, msg: HMIAction):
         self.get_logger().info(f"📨 I got an HMIAction message {msg}")
