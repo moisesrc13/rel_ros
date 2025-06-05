@@ -218,9 +218,13 @@ class ModbusSlaveThread(Thread):
             logger.error("Error %s running slave thread %s", ex, self.hmi_id)
 
 
-def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister], cr: list[CRegister]):
+def run_modbus_slaves(
+    slaves: list[SlaveHMI], hr: list[HRegister], cr: list[CRegister], publishers: dict
+):
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, cr=cr)
+        slave_thread = ModbusSlaveThread(
+            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.id)
+        )
         slave_thread.daemon = True
         slave_thread.start()
     try:
@@ -234,7 +238,7 @@ if __name__ == "__main__":
     # this main method is basically for local test
     try:
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
+        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers, {})
         logger.info("slaves launched ...")
         while True:
             pass
