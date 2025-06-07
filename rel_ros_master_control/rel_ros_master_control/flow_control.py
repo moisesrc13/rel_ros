@@ -33,7 +33,7 @@ class LoggingPostNodeExecute(lifecycle.api.BasePostNodeExecute):
         if not success:
             logger.error("❌ error %s, running task %s", error, node_._name)
         else:
-            logger.info("✅ task %s completed ✔️", node_._name)
+            logger.info("✅ task %s completed ✨", node_._name)
 
 
 class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
