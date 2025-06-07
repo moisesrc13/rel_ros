@@ -36,7 +36,7 @@ USER root
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant
 # install VS Code (code-server)
-# RUN curl -fsSL https://code-server.dev/install.sh | sh
+RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # create ROS packages
 USER relant
