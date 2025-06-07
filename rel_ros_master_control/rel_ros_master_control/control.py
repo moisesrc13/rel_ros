@@ -125,7 +125,7 @@ class RelControl:
             self.pwm = RelPWM(PWMConfig())
             logger.info("PWM set ✨")
         except Exception as err:
-            logger.warning("error creating pwm service - %s", err)
+            logger.warning("pwm service not created - %s", err)
 
     def apply_initial_state(self):
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
