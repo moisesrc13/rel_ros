@@ -46,9 +46,7 @@ class RelROSNode(Node):
 
     def listener_hmi_user_task_callback(self, msg: HMIUserTask, hmi_id: int = 0):
         self.get_logger().info(f"📨 I got an HMI {hmi_id} user task message 📺 {msg}")
-        hmiData = get_hmi_from_cluster_with_id(self.hmi_cluster, msg.hmi_id)
-        hmiData.hmi = msg
-        self.hmi_cluster[msg.hmi_id] = hmiData
+        self.masters[hmi_id].run_user_actions(msg.coil_address, msg.value)
 
     def create_timers_for_control_actions(self):
         if not self.masters:
@@ -66,10 +64,6 @@ class RelROSNode(Node):
                         self.timer_callback_main_control, hmi_id=master.master_io_link.hmi_id
                     ),
                 )
-
-    def timer_callback_control_actions(self, hmi_id: int = 0):
-        control: RelControl = self.masters[hmi_id]
-        control.check_actions()
 
     def create_timers_for_main_control(self):
         if not self.masters:

@@ -133,7 +133,7 @@ class RelControl:
         self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
 
-    def check_actions(self):
+    def run_user_actions(self, coil_address: int, value: int):
         # TODO emergency stop here and others
         pass
 
