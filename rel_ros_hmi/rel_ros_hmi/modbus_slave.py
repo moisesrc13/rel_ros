@@ -223,7 +223,7 @@ def run_modbus_slaves(
 ):
     for slave in slaves:
         slave_thread = ModbusSlaveThread(
-            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.id)
+            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.hmi_id)
         )
         slave_thread.daemon = True
         slave_thread.start()
