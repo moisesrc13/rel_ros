@@ -22,6 +22,18 @@ docker run --rm --name rel-ros -it \
  rel-ros:0.1.0 /bin/bash
 ```
 
+## Environment Config
+
+Testing with DEVICE_PORTS=5,8
+
+Master IOLink
+
+```bash
+export MASTER_IO_LINK_IP=0.0.0.0
+export MASTER_IO_LINK_PORT=8844
+```
+
+
 ## Run on local
 
 > my local all
@@ -182,3 +194,19 @@ sudo chown root:gpio /dev/gpiomem
 sudo chmod g+rw /dev/gpiomem
 
 sudo reboot
+
+## Static IP config in Ubuntu for RPi
+
+`nano /etc/netplan/99_config.yaml`
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 192.168.0.10/24
+```
+
+Then run
+`sudo netplan apply`
