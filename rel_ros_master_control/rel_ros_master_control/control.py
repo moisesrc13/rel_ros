@@ -134,8 +134,8 @@ class RelControl:
         self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
 
     def run_user_actions(self, coil_address: int, value: int):
-        # TODO emergency stop here and others
-        pass
+        register, _ = get_register_by_address(self.cr, coil_address)
+        user_action = HMIWriteAction(register.name)
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
