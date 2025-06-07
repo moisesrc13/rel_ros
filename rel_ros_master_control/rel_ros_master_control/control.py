@@ -134,35 +134,33 @@ class RelControl:
         self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
 
     def run_user_actions(self, coil_address: int, value: int):
+        """
+        This are all manifold actions
+
+        Args:
+            coil_address (int): _description_
+            value (int): _description_
+        """
         register, _ = get_register_by_address(self.hmi_cr, coil_address)
+        logger.info("running user task on %s - value %s", register.name, value)
         user_action = HMIWriteAction(register.name)
+        if value == 0:
+            self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+            return
+        self.apply_manifold_state(ManifoldActions.ACTIVATE)
         match user_action:
             case HMIWriteAction.ACTION_PULL_DOWN_PISTONS_MANUAL:
-                if value == 1:
-                    self.apply_manifold_state(ManifoldActions.ACTIVATE)
-                    self.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
-                else:
-                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+                self.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
             case HMIWriteAction.ACTION_PULL_UP_PISTONS_MANUAL:
-                if value == 1:
-                    self.apply_manifold_state(ManifoldActions.ACTIVATE)
-                    self.apply_manifold_state(ManifoldActions.PISTONS_UP)
-                else:
-                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+                self.apply_manifold_state(ManifoldActions.PISTONS_UP)
             case HMIWriteAction.ACTION_DEPRESSURIZE:
-                if value == 1:
-                    self.apply_manifold_state(ManifoldActions.ACTIVATE)
-                    self.apply_manifold_state(
-                        ManifoldActions.VENTING_RETRACTIL_UP
-                    )  # need to check if is up or down
-                else:
-                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+                self.apply_manifold_state(
+                    ManifoldActions.VENTING_RETRACTIL_UP
+                )  # need to check if is up or down
             case HMIWriteAction.ACTION_VACUUM_AIR:
-                if value == 1:
-                    self.apply_manifold_state(ManifoldActions.ACTIVATE)
-                    self.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
-                else:
-                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+                self.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
+            case HMIWriteAction.ACTION_RECYCLE:
+                self.apply_manifold_state(ManifoldActions.RECYCLE)
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
