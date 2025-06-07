@@ -186,10 +186,11 @@ class Constants:
     ]
     flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
     flow_tasks_bucket_change: list[str] = [
-        "check_distance_sensor_for_electrovales",
+        "check_distance_sensor_for_electrovalves",
         "bucket_distance",
         "sensor_distance_params",
-        "bucket_change" "bucket_change_frame",
+        "bucket_change",
+        "bucket_change_frame",
         "bucket_change_step_2",
     ]
     laser_infinity: int = 1000
