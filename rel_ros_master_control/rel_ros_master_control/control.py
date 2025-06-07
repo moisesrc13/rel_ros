@@ -127,7 +127,7 @@ class RelControl:
         except Exception as err:
             logger.warning("error creating pwm service - %s", err)
 
-    def inital_state(self):
+    def apply_initial_state(self):
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
         self.apply_manifold_state(ManifoldActions.DEACTIVATE)
         self.apply_pressure_regulator_state(PressureState.OFF)

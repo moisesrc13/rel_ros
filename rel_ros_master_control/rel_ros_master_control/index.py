@@ -31,6 +31,12 @@ class RelROSNode(Node):
         self.create_timers_for_main_control()
         self.get_logger().info("======= creating timers for control actions 🤖 =======")
         self.create_timers_for_control_actions()
+        self.get_logger().info("apply initial state")
+        self.apply_initial_state()
+
+    def apply_initial_state(self):
+        for m in self.masters:
+            m.apply_initial_state()
 
     def create_hmi_user_task_subscribers(self, count: int = 1):
         for s in range(count):
