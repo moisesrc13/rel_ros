@@ -70,7 +70,7 @@ class ManifoldActions(IntEnum):
     VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
     PISTONS_UP: int = int("0100_0000_0000_0000", 2)
     PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
-    AIR_FOR_VACUUM: int = int("0000_0000_1000_0000", 2)  # TODO confirm
+    AIR_FOR_VACUUM: int = int("0000_0010_0000_0000", 2)
 
 
 class SensorDistanceParams(BaseModel):
