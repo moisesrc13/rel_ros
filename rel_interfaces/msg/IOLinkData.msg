@@ -1,8 +1,0 @@
-string hmi_name
-int32 hmi_id
-int32 sensor_material_pressure
-int32 sensor_material_temperature
-int32 sensor_laser_distance
-int32 sensor_pressure_regulator_read_set
-int32 sensor_pressure_regulator_read_real
-int32 sensor_pressure_regulator_valve_read_state

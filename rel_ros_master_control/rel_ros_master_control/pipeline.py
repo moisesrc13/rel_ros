@@ -325,7 +325,7 @@ def recycle_flow_state__ok(recycle: FlowStateAction, control: RelControl) -> Flo
         Sensors.SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE
     )
     logger.info("waiting for pump to reach target pressure")
-    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_BARES_LIMIT)
+    pressure_bares_limit = control.read_hmi_hregister_by_name(Params.PARAM_PRESSURE_GUARD_LIMIT)
     if current_pressure < pressure_bares_limit:
         return FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES
 
@@ -352,10 +352,12 @@ def recycle_flow_state__timeout(recycle: FlowStateAction, control: RelControl) -
     while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE_RETRACTIL) == 0:
         continue
     logger.info("recycle retractil received")
-    recycle_manual_count = control.read_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT)
+    recycle_manual_count = control.read_hmi_hregister_by_name(
+        HMIWriteAction.STATUS_MANUAL_RECYCLE_COUNT
+    )
     count = recycle_manual_count + 1
     logger.info("new count for manual retractil action %s", count)
-    control.write_hmi_hregister_by_name(Sensors.SENSOR_MANUAL_RECYCLE_COUNT, count)
+    control.write_hmi_hregister_by_name(HMIWriteAction.STATUS_MANUAL_RECYCLE_COUNT, count)
     return FlowStateAction.TO_INIT_FLOW
 
 

@@ -24,12 +24,38 @@ from rel_ros_hmi.models.modbus_m import (
 logger = new_logger(__name__)
 
 
+class PublishHMIUserTask:
+    def __init__(self) -> None:
+        self.msg = None
+
+    def __enter__(self):
+        try:
+            from rel_interfaces.msg import HMIUserTask
+
+            return HMIUserTask()
+        except Exception as ex:
+            logger.error("error getting user task message interface %s", ex)
+            return None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.msg = None
+
+
 class ModbusServerBlock(ModbusSequentialDataBlock):
-    def __init__(self, addr, values, slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]):
+    def __init__(
+        self,
+        addr,
+        values,
+        slave: SlaveHMI,
+        hr: list[HRegister],
+        cr: list[CRegister],
+        user_task_publisher=None,
+    ):
         """Initialize."""
         self.hr = hr
         self.cr = cr
         self.slave = slave
+        self.user_task_publisher = user_task_publisher
         logger.info("initializing modbus 👾 slave on port %s", self.slave.slave_tcp.port)
         super().__init__(addr, values)
 
@@ -54,6 +80,17 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 logger.debug("Not getting a valid register for address %s", address)
                 return
             rtype = RegisterModbusType.CR
+            logger.info("raising a UserTask 🤠 ...")
+            with PublishHMIUserTask() as msg:
+                if msg:
+                    setattr(msg, "coil_address", register)
+                    setattr(msg, "value", value)
+                    logger.info(
+                        "📨 publishing message on HMIUserTask for slave id %s - %s",
+                        self.slave.id,
+                        msg,
+                    )
+                    self.user_task_publisher.publish(msg)
 
         logger.debug("write register %s with value %s", register, value)
         register.value = value
@@ -112,10 +149,12 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         return result
 
 
-def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]):
+def run_sync_modbus_server(
+    slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister], user_task_publisher=None
+):
     try:
         nreg = 50_000  # number of registers
-        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, cr)
+        block = ModbusServerBlock(0x00, [0] * nreg, slave, hr, cr, user_task_publisher)
         # creating two slaves 0 & 1
         store = ModbusSlaveContext(
             di=block, co=block, hr=block, ir=block
@@ -153,26 +192,38 @@ def run_sync_modbus_server(slave: SlaveHMI, hr: list[HRegister], cr: list[CRegis
 class ModbusSlaveThread(Thread):
     """main workflow thread"""
 
-    def __init__(self, slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister]) -> None:
+    def __init__(
+        self, slave: SlaveHMI, hr: list[HRegister], cr: list[CRegister], user_task_publisher=None
+    ) -> None:
         Thread.__init__(self)
         self.slave = slave
         self.hr = hr
         self.cr = cr
         self.hmi_id = slave.hmi_id
+        self.user_task_publisher = user_task_publisher
 
     def run(self):
         logger.info("running slave thread %s", self.hmi_id)
         try:
-            server = run_sync_modbus_server(slave=self.slave, hr=self.hr, cr=self.cr)
+            server = run_sync_modbus_server(
+                slave=self.slave,
+                hr=self.hr,
+                cr=self.cr,
+                user_task_publisher=self.user_task_publisher,
+            )
             if server:
                 server.shutdown()
         except Exception as ex:
             logger.error("Error %s running slave thread %s", ex, self.hmi_id)
 
 
-def run_modbus_slaves(slaves: list[SlaveHMI], hr: list[HRegister], cr: list[CRegister]):
+def run_modbus_slaves(
+    slaves: list[SlaveHMI], hr: list[HRegister], cr: list[CRegister], publishers: dict
+):
     for slave in slaves:
-        slave_thread = ModbusSlaveThread(slave=slave, hr=hr, cr=cr)
+        slave_thread = ModbusSlaveThread(
+            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.hmi_id)
+        )
         slave_thread.daemon = True
         slave_thread.start()
     try:
@@ -186,7 +237,7 @@ if __name__ == "__main__":
     # this main method is basically for local test
     try:
         config = load_modbus_config()
-        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers)
+        run_modbus_slaves(config.hmis, config.holding_registers, config.coil_registers, {})
         logger.info("slaves launched ...")
         while True:
             pass

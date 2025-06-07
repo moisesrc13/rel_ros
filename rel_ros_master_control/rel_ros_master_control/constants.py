@@ -70,7 +70,7 @@ class ManifoldActions(IntEnum):
     VENTING_RETRACTIL_DOWN: int = int("0010_0000_0000_0000", 2)
     PISTONS_UP: int = int("0100_0000_0000_0000", 2)
     PISTONS_DOWN: int = int("1000_0000_0000_0000", 2)
-    AIR_FOR_VACUUM: int = int("0000_0000_1000_0000", 2)  # TODO confirm
+    AIR_FOR_VACUUM: int = int("0000_0010_0000_0000", 2)
 
 
 class SensorDistanceParams(BaseModel):
@@ -132,6 +132,7 @@ class HMIWriteAction(StrEnum):
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
     ENTER_SCREEN_3_0 = "enter_screen_3_0"
     ENTER_SCREEN_1_0 = "enter_screen_1_0"
+    STATUS_MANUAL_RECYCLE_COUNT = "status_manual_recycle_count"
 
 
 class Sensors(StrEnum):
@@ -141,7 +142,6 @@ class Sensors(StrEnum):
     SENSOR_PRESSURE_REGULATOR_READ_SET = "sensor_pressure_regulator_read_set"
     SENSOR_PRESSURE_REGULATOR_READ_REAL = "sensor_pressure_regulator_read_real"
     SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
-    SENSOR_MANUAL_RECYCLE_COUNT = "sensor_manual_recycle_count"
 
 
 class Params(StrEnum):
@@ -164,8 +164,8 @@ class Params(StrEnum):
     PARAM_TARGET_PRESSURE_HYD_HOME = "param_target_pressure_hyd_home"
     PARAM_RECYCLE_TIME_INTERVAL = "param_recycle_time_interval"
     PARAM_RECYCLE_TIME = "param_recycle_time"
-    PARAM_PRESSURE_BARES_LIMIT = "param_pressure_bares_limit"
     PARAM_BUCKET_SIZE_SELECTION = "param_bucket_size_selection"
+    PARAM_PRESSURE_GUARD_LIMIT = "param_pressure_guard_limit"
 
 
 class Constants:
@@ -186,10 +186,11 @@ class Constants:
     ]
     flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
     flow_tasks_bucket_change: list[str] = [
-        "check_distance_sensor_for_electrovales",
+        "check_distance_sensor_for_electrovalves",
         "bucket_distance",
         "sensor_distance_params",
-        "bucket_change" "bucket_change_frame",
+        "bucket_change",
+        "bucket_change_frame",
         "bucket_change_step_2",
     ]
     laser_infinity: int = 1000
