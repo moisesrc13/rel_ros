@@ -87,7 +87,7 @@ def run(control: RelControl, tasks: list[str]):
         case FlowStateAction.WAITING_FOR_BUCKET:
             run(control, Constants.flow_tasks_bucket_change)
         case _:
-            logger.info("completing flow ...")
+            logger.info("🤘 🎮 completing flow with state %s ...", init_flow_state)
 
 
 if __name__ == "__main__":

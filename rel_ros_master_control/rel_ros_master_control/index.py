@@ -96,7 +96,7 @@ class RelROSNode(Node):
             return
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
-        self.get_logger().info(f"🎮 starting main control for node id {hmi_id}")
+        self.get_logger().info(f"🚀 🎮 starting main control for node id {hmi_id}")
         control: RelControl = self.masters[hmi_id]
         self.is_control_running = True
         run_control(control, Constants.flow_tasks_init_state)
