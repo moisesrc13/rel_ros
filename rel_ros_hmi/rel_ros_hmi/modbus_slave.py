@@ -25,19 +25,14 @@ logger = new_logger(__name__)
 
 
 class PublishHMIUserTask:
-    def __init__(self, slave_name: str, slave_id: str) -> None:
-        self.slave_name = slave_name
-        self.slave_id = slave_id
+    def __init__(self) -> None:
         self.msg = None
 
     def __enter__(self):
         try:
             from rel_interfaces.msg import HMIUserTask
 
-            self.msg = HMIUserTask()
-            self.msg.hmi_name = self.slave_name
-            self.msg.hmi_id = self.slave_id
-            return self.msg
+            return HMIUserTask()
         except Exception as ex:
             logger.error("error getting user task message interface %s", ex)
             return None
@@ -86,11 +81,15 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 return
             rtype = RegisterModbusType.CR
             logger.info("raising a UserTask 🤠 ...")
-            with PublishHMIUserTask(self.slave.name, self.slave.id) as msg:
+            with PublishHMIUserTask() as msg:
                 if msg:
                     setattr(msg, "coil_address", register)
                     setattr(msg, "value", value)
-                    logger.info("📨 publishing message on HMIUserTask - %s", msg)
+                    logger.info(
+                        "📨 publishing message on HMIUserTask for slave id %s - %s",
+                        self.slave.id,
+                        msg,
+                    )
                     self.user_task_publisher.publish(msg)
 
         logger.debug("write register %s with value %s", register, value)
