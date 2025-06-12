@@ -64,6 +64,16 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control
 
 export the `rel_ros_hmi` in the path is required to run the master modbus test from hmi package
 
+### ROS Interfaces
+
+The interface messages should be defined in `./rel_interfaces/CMakeLists.txt`, then compiled:
+
+```bash
+cd ~/ros2_ws
+./run-ros-build-interfaces.sh
+```
+
+
 ## Run ROS Nodes
 
 This is how we can run all nodes
