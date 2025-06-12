@@ -131,7 +131,7 @@ class RelControl:
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
         self.apply_manifold_state(ManifoldActions.DEACTIVATE)
         self.apply_pressure_regulator_state(PressureState.OFF)
-        self.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
+        self.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
 
     def run_user_actions(self, coil_address: int, value: int):
         """
@@ -201,10 +201,10 @@ class RelControl:
                 registers = self.tower_devive.tower_status.states.vacuum
             case TowerState.BUCKET_CHANGE:
                 registers = self.tower_devive.tower_status.states.bucket_change
-            case TowerState.ACOSTIC_ALARM_ON:
+            case TowerState.ACOUSTIC_ALARM_ON:
                 start_address = self.tower_devive.tower_status.alarm_address
                 registers = self.tower_devive.tower_status.states.acoustic_alarm_on
-            case TowerState.ACOSTIC_ALARM_OFF:
+            case TowerState.ACOUSTIC_ALARM_OFF:
                 start_address = self.tower_devive.tower_status.alarm_address
                 registers = self.tower_devive.tower_status.states.acoustic_alarm_off
             case _:

@@ -54,6 +54,52 @@ holding_registers:
       words: 1
       data_type: "uint16"
       mode: "w"
+    # --------------------------- Tower status registers --------------------
+    - name: "tower_status_0"
+      address: 6060
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_1"
+      address: 6061
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_2"
+      address: 6062
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_3"
+      address: 6063
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_4"
+      address: 6064
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_5"
+      address: 6065
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_6"
+      address: 6066
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_7"
+      address: 6067
+      words: 1
+      data_type: "uint16"
+      mode: "w"
+    - name: "tower_status_acoustic"
+      address: 6052
+      words: 1
+      data_type: "uint16"
+      mode: "w"
 iolinks:
   - name: "master io link 0"
     hmi_id: 0

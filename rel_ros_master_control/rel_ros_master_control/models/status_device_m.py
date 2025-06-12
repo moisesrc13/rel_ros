@@ -15,8 +15,8 @@ class TowerState(Enum):
     PRE_VACUUM = "pre_vacuum"
     VACUUM = "vacuum"
     BUCKET_CHANGE = "bucket_change"
-    ACOSTIC_ALARM_ON = "acoustic_alarm_on"
-    ACOSTIC_ALARM_OFF = "acoustic_alarm_on"
+    ACOUSTIC_ALARM_ON = "acoustic_alarm_on"
+    ACOUSTIC_ALARM_OFF = "acoustic_alarm_off"
 
 
 class BasicActions(Enum):

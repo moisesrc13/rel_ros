@@ -148,7 +148,7 @@ def test_control_instance(rel_control: RelControl):
     for _, state in enumerate(TowerState):
         state_addresses = getattr(rel_control.tower_devive.tower_status.states, state.value)
         rel_control.apply_tower_state(state)
-        if state == TowerState.ACOSTIC_ALARM_ON or state_addresses == TowerState.ACOSTIC_ALARM_OFF:
+        if state == TowerState.ACOUSTIC_ALARM_ON or state == TowerState.ACOUSTIC_ALARM_OFF:
             write_registers.assert_called_with(
                 rel_control.tower_devive.tower_status.alarm_address,
                 state_addresses,

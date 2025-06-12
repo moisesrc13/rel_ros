@@ -33,7 +33,7 @@ def check_distance_sensor_for_electrovalves(control: RelControl) -> FlowStateAct
     if sensor_distance < vacuum_distance:
         control.eletrovalve_off()
         control.apply_tower_state(TowerState.VACUUM)
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
         return FlowStateAction.ACOSTIC_ALARM_ON
     return FlowStateAction.OK_VACUUM
 
@@ -103,9 +103,9 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
         state = TowerState.MEDIUM_HIGH
     elif laser_distance >= 10 and laser_distance <= 20:
         state = TowerState.PRE_VACUUM
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
     elif laser_distance >= 2 and laser_distance <= 5:
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
     return state
@@ -378,7 +378,7 @@ def bucket_change(
     logger.info("🪣 start bucket change")
     control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_3_0, CoilState.ON)
     control.stop_pwm()
-    control.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
+    control.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
     logger.info("evaluate sensor laser position")
     # TODO verify
