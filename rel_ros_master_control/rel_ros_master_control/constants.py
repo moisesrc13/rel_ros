@@ -177,7 +177,7 @@ class Constants:
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
-        "sensor_laser_on",
+        "sensor_laser_on_state",
         "init_flow_state",
     ]
     flow_tasks_recycle = [

@@ -120,7 +120,7 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
 #  A) Sensor laser d<Z
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
-def sensor_laser_on__a(
+def sensor_laser_on_state__a(
     sensor_distance_state: SensorDistanceStateName,
     control: RelControl,
 ) -> FlowStateAction:
@@ -133,7 +133,7 @@ def sensor_laser_on__a(
 #  B) Sensor laser d>Z && d<=Y
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
-def sensor_laser_on__b(
+def sensor_laser_on_state__b(
     control: RelControl,
     sensor_distance_params: SensorDistanceParams,
     sensor_distance_state: SensorDistanceStateName,
@@ -172,7 +172,7 @@ def sensor_laser_on__b(
 #  C) Sénsor laser d>Y && d<=X
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
-def sensor_laser_on__c(
+def sensor_laser_on_state__c(
     control: RelControl,
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
@@ -198,7 +198,7 @@ def sensor_laser_on__c(
 #  D) Sensor laser d>X && d<W
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
-def sensor_laser_on__d(
+def sensor_laser_on_state__d(
     control: RelControl,
     sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
@@ -216,7 +216,7 @@ def sensor_laser_on__d(
 #  E) Sensor laser d>W && d<= ∞
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
-def sensor_laser_on__e(
+def sensor_laser_on_state__e(
     control: RelControl,
     sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
@@ -232,8 +232,8 @@ def sensor_laser_on__e(
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
-def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
-    return sensor_laser_on
+def init_flow_state(sensor_laser_on_state: FlowStateAction) -> FlowStateAction:
+    return sensor_laser_on_state
 
 
 def prepare_for_recycle_process(control: RelControl) -> FlowStateAction:
