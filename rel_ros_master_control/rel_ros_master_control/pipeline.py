@@ -260,7 +260,7 @@ def start_pwm(prepare_for_recycle_process: FlowStateAction, control: RelControl)
     return FlowStateAction.PWM_STARTED
 
 
-def validate_recycle(start_pwm: FlowStateAction, control: RelControl):
+def validate_recycle(start_pwm: FlowStateAction, control: RelControl) -> FlowStateAction:
     logger.info("validate if recycle is needed")
     if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
         logger.info("recycle enabled")
@@ -293,7 +293,7 @@ def recycle__disabled(control: RelControl, validate_recycle: FlowStateAction) ->
 def recycle__enabled(
     control: RelControl,
     validate_recycle: FlowStateAction,
-):
+) -> FlowStateAction:
     while (
         control.read_hmi_hregister_by_name(
             HMIWriteAction.ACTION_RECYCLE,
