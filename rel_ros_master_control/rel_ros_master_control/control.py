@@ -172,17 +172,20 @@ class RelControl:
             logger.error("error writing state %s - %s", state_value, err)
 
     def apply_manifold_state(self, state: ManifoldActions):
+        logger.info("apply manifold state - %s", state)
         self.apply_state(
             get_register_by_name(self.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value), state.value
         )
 
     def apply_hyd_valve_state(self, state: DigitalHydValve):
+        logger.info("apply hyd valve state - %s", state)
         self.apply_state(
             get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value),
             state.value,
         )
 
     def apply_tower_state(self, state: TowerState):
+        logger.info("apply tower status state %s", state)
         registers = []
         start_address = self.tower_devive.tower_status.start_address
         match state:
@@ -306,6 +309,7 @@ class RelControl:
         return self.read_hmi_hregister(register.address).value
 
     def apply_pressure_regulator_state(self, state: PressureState):
+        logger.info("apply pressure regulator state - %s", state)
         self.write_register_by_address_name(
             name=PressureSet.REGULATOR_ACTIVATE_VALVE.value,
             stype=SlaveType.IOLINK,

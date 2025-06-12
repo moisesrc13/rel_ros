@@ -171,7 +171,7 @@ class Params(Enum):
 
 class Constants:
     flow_tasks_init_state: list[str] = [
-        "check_distance_sensor_for_electrovales",
+        "check_distance_sensor_for_electrovalves",
         "bucket_distance",
         "sensor_distance_params",
         "sensor_distance_state",
