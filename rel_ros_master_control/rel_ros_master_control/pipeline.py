@@ -23,7 +23,7 @@ from rel_ros_master_control.models.status_device_m import TowerState
 logger = new_logger(__name__)
 
 
-def wait_for_sensor_laser():
+def wait_for_sensor_laser() -> None:
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
