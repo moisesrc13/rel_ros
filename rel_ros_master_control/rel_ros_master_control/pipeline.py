@@ -88,7 +88,7 @@ def sensor_distance_state(
     return SensorDistanceStateName.E
 
 
-def set_visual_alarm_for_bucket_state(control: RelControl):
+def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
     """_summary_
 
     calculate the alarm distance which depends on the bucket distance (size) selected
@@ -108,6 +108,7 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
+    return state
 
 
 #  ---------------------------------------------------------
