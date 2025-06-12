@@ -1,14 +1,14 @@
-from enum import IntEnum, StrEnum
+from enum import Enum
 
 from pydantic import BaseModel
 
 
-class CoilState(IntEnum):
+class CoilState(Enum):
     ON = 1
     OFF = 0
 
 
-class FlowStateAction(IntEnum):
+class FlowStateAction(Enum):
     UNKNOWN = -1
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
@@ -31,37 +31,37 @@ class FlowStateAction(IntEnum):
     BUCKET_CHANGE_STEP_2 = 19
 
 
-class DigitalOutput(StrEnum):
+class DigitalOutput(Enum):
     DIGITAL_OUT_HYD_VALVE = "digital_out_hyd_valve"
 
 
-class DigitalInput(StrEnum):
+class DigitalInput(Enum):
     DIGITAL_IN_EMERGENCY_STOP = "digital_in_emergency_stop"
 
 
-class DigitalHydValve(IntEnum):
+class DigitalHydValve(Enum):
     OUT1_OFF_OUT2_OFF: int = 1
     OUT1_ON_OUT2_OFF: int = 3
     OUT1_OFF_OUT2_ON: int = 5
     OUT1_ON_OUT2_ON: int = 7
 
 
-class PWMPulseSet(IntEnum):
+class PWMPulseSet(Enum):
     LOW = 0
     MEDIUM = 1
     HIGH = 3
 
 
-class PressureSet(StrEnum):
+class PressureSet(Enum):
     REGULATOR_ACTIVATE_VALVE = "regulator_activate_valve"
 
 
-class PressureState(IntEnum):
+class PressureState(Enum):
     ON = 257
     OFF = 256
 
 
-class ManifoldActions(IntEnum):
+class ManifoldActions(Enum):
     DEACTIVATE: int = int("0000_0000_0000_0000", 2)
     ACTIVATE: int = int("0000_0000_0000_0001", 2)
     EXTRA: int = int("0000_0001_0000_0000", 2)
@@ -80,7 +80,7 @@ class SensorDistanceParams(BaseModel):
     high_vacuum_limit: int  # Y
 
 
-class SensorDistanceState(StrEnum):
+class SensorDistanceState(Enum):
     """_summary_
 
     W = distancia de tamaño de cubeta
@@ -100,7 +100,7 @@ class SensorDistanceState(StrEnum):
     GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINITY = "gt_bucket_size_distance_and_le_infinity"
 
 
-class SensorDistanceStateName(StrEnum):
+class SensorDistanceStateName(Enum):
     A = SensorDistanceState.LT_VACUUM_DISTANCE.value
     B = SensorDistanceState.GT_VACUUM_DISTANCE_AND_LE_HIGH_VACUUM_LIMIT.value
     C = SensorDistanceState.GT_HIGH_VACUUM_LIMIT_AND_LE_HIGH_PRE_VACUUM_LIMIT.value
@@ -108,7 +108,7 @@ class SensorDistanceStateName(StrEnum):
     E = SensorDistanceState.GT_BUCKET_SIZE_DISTANCE_AND_LE_INFINITY.value
 
 
-class HMIWriteAction(StrEnum):
+class HMIWriteAction(Enum):
     ACTION_TURN_ON_PUMPING_PROCESS = "action_turn_on_pumping_process"
     ACTION_PRE_FILL_LINE = "action_pre_fill_line"
     ACTION_PULL_DOWN_PISTONS_MANUAL = "action_pull_down_pistons_manual"
@@ -135,7 +135,7 @@ class HMIWriteAction(StrEnum):
     STATUS_MANUAL_RECYCLE_COUNT = "status_manual_recycle_count"
 
 
-class Sensors(StrEnum):
+class Sensors(Enum):
     SENSOR_MATERIAL_PRESSURE = "sensor_material_pressure"
     SENSOR_MATERIAL_TEMPERATURE = "sensor_material_temperature"
     SENSOR_LASER_DISTANCE = "sensor_laser_distance"
@@ -144,7 +144,7 @@ class Sensors(StrEnum):
     SENSOR_PRESSURE_REGULATOR_VALVE_READ_STATE = "sensor_pressure_regulator_valve_read_state"
 
 
-class Params(StrEnum):
+class Params(Enum):
     PARAM_VACUUM_DISTANCE = "param_vacuum_distance"
     PARAM_DISTANCE_BUCKET_1 = "param_distance_bucket_1"
     PARAM_DISTANCE_BUCKET_2 = "param_distance_bucket_2"

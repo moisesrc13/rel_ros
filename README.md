@@ -36,7 +36,7 @@ export MASTER_IO_LINK_PORT=8844
 
 ## Run on local
 
-> my local all
+### my local all
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"
@@ -44,7 +44,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_hmi
 export CONFIG_PATH="/home/moisesrc/vs-workspace/rel_ros/config"
 ```
 
-> RPi4
+### RPi4
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_master_control"
@@ -52,7 +52,8 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 export CONFIG_PATH="/home/relant/git/rel_ros/config"
 ```
 
-> for ROS Docekr image
+### for ROS Docekr image
+
 > This is important to execute before running (only once)
 
 ```bash
@@ -80,6 +81,9 @@ ros2 run rel_ros_hmi rel_ros_hmi_node
 export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
 
+cd /home/relant/ros2_ws/src
+
+# the slave is a server, contains all register data
 python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 ```
 

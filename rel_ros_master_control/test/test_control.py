@@ -18,7 +18,6 @@ from rel_ros_master_control.control import (
     get_decoder_from_rr,
     get_value,
 )
-from rel_ros_master_control.models.hmi_m import SlaveHMI
 from rel_ros_master_control.models.modbus_m import (
     HRegister,
     RegisterDataType,
@@ -119,12 +118,12 @@ def test_manifold_actions(rel_control: RelControl):
     hr: HRegister = get_register_by_name(
         rel_control.iolink_hr, HMIWriteAction.ACTION_MANIFOLD.value
     )
-    enum_list = list(map(int, ManifoldActions))
+    enum_list = list(ManifoldActions)
     for value in enum_list:
         rel_control.apply_manifold_state(ManifoldActions(value))
         write_register.assert_called_with(
             hr.address,
-            value,
+            value.value,
         )
 
 
@@ -133,12 +132,12 @@ def test_control_hyd_valve(rel_control: RelControl):
     hr: HRegister = get_register_by_name(
         rel_control.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value
     )
-    enum_list = list(map(int, DigitalHydValve))
+    enum_list = list(DigitalHydValve)
     for value in enum_list:
         rel_control.apply_hyd_valve_state(DigitalHydValve(value))
         write_register.assert_called_with(
             hr.address,
-            value,
+            value.value,
         )
 
 
