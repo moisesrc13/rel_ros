@@ -52,7 +52,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 export CONFIG_PATH="/home/relant/git/rel_ros/config"
 ```
 
-### for ROS Docekr image
+### for ROS Docker image
 
 > This is important to execute before running (only once)
 
@@ -82,7 +82,6 @@ cd ~/ros2_ws
 ./run-ros-build-interfaces.sh
 ```
 
-
 ## Run ROS Nodes
 
 This is how we can run all nodes
@@ -111,11 +110,22 @@ export APP_MASTER_IOLINK_ID="0"
 
 `python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
 
-## Run test HMI modbus slave
+### 4. Run test HMI modbus slave
 
 `python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
 
-### HMI master commands
+### 5. Run IOLink Node
+
+```bash
+cd ~/ros2_ws
+./run-ros-master.sh
+```
+
+---
+
+### Master Commands for IOLink and HMI
+
+#### HMI master commands
 
 ```bash
 
@@ -127,7 +137,7 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
-### IOLink test slave with HMI too
+#### IOLink test slave with HMI too
 
 ```bash
 
@@ -151,9 +161,7 @@ python rel_ros_master_control/rel_ros_master_control/control.py --action write -
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 ```
 
-## Build interfaces package
-
-Make sure you install `numpy` in the virtual env
+---
 
 ## Sym links in RPi
 

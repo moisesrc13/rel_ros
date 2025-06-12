@@ -27,7 +27,7 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
-def check_distance_sensor_for_electrovales(control: RelControl):
+def check_distance_sensor_for_electrovalves(control: RelControl):
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
     if sensor_distance < vacuum_distance:
@@ -442,7 +442,7 @@ def bucket_change_frame__overw(
     return FlowStateAction.BUCKET_CHANGE_STEP_2
 
 
-def bucket_change_step_2(control: RelControl):
+def bucket_change_step_2(control: RelControl) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     logger.info("enter to screen 1-0")
     control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_1_0, CoilState.ON)
@@ -457,3 +457,4 @@ def bucket_change_step_2(control: RelControl):
 
     # TODO check distance to deactivate electrovalves
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    return FlowStateAction.COMPLETE
