@@ -235,7 +235,7 @@ def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
     return sensor_laser_on
 
 
-def prepare_for_recycle_process(control: RelControl):
+def prepare_for_recycle_process(control: RelControl) -> FlowStateAction:
     control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
