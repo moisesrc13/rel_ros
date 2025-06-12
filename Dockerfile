@@ -32,6 +32,7 @@ RUN cd /home/relant/ros2_ws && virtualenv -p python3.10 ./venv && touch ./venv/C
 # activate venv and install dependencies
 RUN source /opt/ros/humble/setup.bash && source /home/relant/ros2_ws/venv/bin/activate && pip install -r /home/relant/ros2_ws/requirements.txt
 
+
 USER root
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant

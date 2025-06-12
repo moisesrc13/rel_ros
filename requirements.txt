@@ -16,3 +16,5 @@ RPi.GPIO==0.7.1
 sf-hamilton==1.88.0
 rospy-message-converter==0.5.2
 graphviz==0.20.3
+numpy==2.2.6
+empy==3.3.4

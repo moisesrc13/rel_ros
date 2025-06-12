@@ -66,6 +66,13 @@ export the `rel_ros_hmi` in the path is required to run the master modbus test f
 
 ### ROS Interfaces
 
+#### Requirements
+
+```bash
+pip install empy==3.3.4
+pip install numpy
+```
+
 The interface messages should be defined in `./rel_interfaces/CMakeLists.txt`, then compile as:
 
 edit `run-ros-build-interfaces` to add the correct interface message
