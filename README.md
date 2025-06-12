@@ -64,7 +64,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control
 
 export the `rel_ros_hmi` in the path is required to run the master modbus test from hmi package
 
-## Run nodes
+## Run ROS Nodes
 
 This is how we can run all nodes
 
@@ -75,42 +75,37 @@ ros2 run rel_ros_master_control rel_ros_master_control_node
 ros2 run rel_ros_hmi rel_ros_hmi_node
 ```
 
-## Run test modbus master control slave
+### 1. Export env vars
 
 ```bash
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
-
-cd /home/relant/ros2_ws/src
-
-# the slave is a server, contains all register data
-python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 ```
 
-## Run rest API app
+### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
+### 3. Run rest API app (optional)
+
+`python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
+
+## Run test HMI modbus slave
+
+`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
+
+### HMI master commands
 
 ```bash
-python rel_ros_master_control/rel_ros_master_control/rest/app.py
-```
 
-## Run test HMI modbus master & slave
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
 
-### HMI
-
-```bash
-export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi" \
-export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control" \
-export USE_TEST_MODBUS="true"
-
-python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py
-
-cd ~/ros2_ws/src
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
-
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 40010
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 40010
 
 # read all
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
 ### IOLink test slave with HMI too
