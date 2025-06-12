@@ -66,7 +66,9 @@ export the `rel_ros_hmi` in the path is required to run the master modbus test f
 
 ### ROS Interfaces
 
-The interface messages should be defined in `./rel_interfaces/CMakeLists.txt`, then compiled:
+The interface messages should be defined in `./rel_interfaces/CMakeLists.txt`, then compile as:
+
+edit `run-ros-build-interfaces` to add the correct interface message
 
 ```bash
 cd ~/ros2_ws
