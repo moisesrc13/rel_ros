@@ -10,6 +10,8 @@ class CoilState(Enum):
 
 class FlowStateAction(Enum):
     UNKNOWN = -1
+    ACOSTIC_ALARM_ON = -2
+    OK_VACUUM = -3
     CONTINUE_BUCKET_CHANGE = 1
     RECYCLE_ENABLED = 2
     RECYCLE_DISABLED = 3

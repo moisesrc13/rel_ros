@@ -27,13 +27,15 @@ def wait_for_sensor_laser():
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
-def check_distance_sensor_for_electrovalves(control: RelControl):
+def check_distance_sensor_for_electrovalves(control: RelControl) -> FlowStateAction:
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
     if sensor_distance < vacuum_distance:
         control.eletrovalve_off()
         control.apply_tower_state(TowerState.VACUUM)
         control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        return FlowStateAction.ACOSTIC_ALARM_ON
+    return FlowStateAction.OK_VACUUM
 
 
 def bucket_distance(control: RelControl) -> int:
