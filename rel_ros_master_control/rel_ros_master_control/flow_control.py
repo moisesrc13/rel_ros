@@ -89,7 +89,7 @@ def run(control: RelControl, tasks: list[str]):
         case FlowStateAction.COMPLETE:
             logger.info("🤘 🎮 completing flow with state DONE")
         case _:
-            logger.info("🤘 🎮 completing flow with state %s ...", init_flow_state)
+            logger.warning("❓ completing flow with state %s ...", init_flow_state)
 
 
 if __name__ == "__main__":

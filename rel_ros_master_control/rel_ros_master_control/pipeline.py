@@ -66,26 +66,27 @@ def sensor_distance_state(
     control: RelControl, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-
+    distance_state = SensorDistanceStateName.E
     if sensor_distance < sensor_distance_params.vacuum_distance:
-        return SensorDistanceStateName.A
+        distance_state = SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
         and sensor_distance <= sensor_distance_params.high_vacuum_limit
     ):
-        return SensorDistanceStateName.B
+        distance_state = SensorDistanceStateName.B
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance <= sensor_distance_params.high_pre_vacuum_limit
     ):
-        return SensorDistanceStateName.C
+        distance_state = SensorDistanceStateName.C
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance < sensor_distance_params.bucket_distance
     ):
-        return SensorDistanceStateName.D
+        distance_state = SensorDistanceStateName.D
     # return default for now
-    return SensorDistanceStateName.E
+    logger.info("📏 sensor distance state %s", distance_state)
+    return distance_state
 
 
 def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
@@ -169,7 +170,7 @@ def sensor_laser_on_state__b(
 
 
 #  --------------------------
-#  C) Sénsor laser d>Y && d<=X
+#  C) Sensor laser d>Y && d<=X
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on_state__c(
