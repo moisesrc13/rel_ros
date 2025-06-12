@@ -212,7 +212,7 @@ class RelControl:
         if registers:
             try:
                 self.master_io_link.slave_conn.write_registers(
-                    start_address,
+                    self.get_register_with_offset(start_address),
                     registers,
                 )
             except Exception as err:
