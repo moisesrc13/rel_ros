@@ -73,6 +73,7 @@ def run_flow(control: RelControl, tasks: list[str]) -> FlowStateAction:
     try:
         logger.info("✨ running control flow with tasks %s", tasks)
         r = dr.execute(tasks)
+        logger.info("response from hamilton driver: %s", r)
         return FlowStateAction(int(r[node_to_validate].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow tasks %s - %s", tasks, err)

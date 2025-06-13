@@ -296,7 +296,8 @@ class RelControl:
             status.error = response
             return status
         logger.info("reading hmi hr ok ✨ %s", response.registers)
-        status.value = int(response.bits[0])
+        decoder = get_decoder(response)
+        status.value = get_value(decoder)
         status.status = "read hr ok"
         return status
 
