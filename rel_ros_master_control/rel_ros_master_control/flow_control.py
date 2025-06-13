@@ -1,4 +1,5 @@
 import importlib
+from queue import Queue
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
@@ -51,7 +52,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, tasks: list[str]):
+def run(control: RelControl, tasks: list[str], queue: Queue = None):
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     inputs = {
@@ -76,6 +77,8 @@ def run(control: RelControl, tasks: list[str]):
         init_flow_state = FlowStateAction(int(r[node_to_validate].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow - %s", err)
+        if queue:
+            queue.task_done()
 
     match init_flow_state:
         case FlowStateAction.TO_RECYCLE_PROCESS:
