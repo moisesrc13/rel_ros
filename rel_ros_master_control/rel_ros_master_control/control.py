@@ -253,16 +253,20 @@ class RelControl:
 
     def read_hregister(self, register: int, stype: SlaveType = SlaveType.IOLINK) -> ModbusStatus:
         status = ModbusStatus()
-        logger.info("reading register %s", register)
         master = self.get_master_connection(stype)
         response = master.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register, stype), count=1
         )
         if response.isError():
-            logger.error("error reading register on %s", stype)
+            logger.error("error reading register %s on %s", register, stype)
             status.error = response
             return status
-        logger.info("reading ok ✨ %s - %s", response.registers, stype)
+        logger.info(
+            "reading ok address %s | ✨ response: %s - | type: %s",
+            register,
+            response.registers,
+            stype,
+        )
         decoder = get_decoder(response)
         status.value = get_value(decoder)
         status.status = f"read ok {stype.value}"
