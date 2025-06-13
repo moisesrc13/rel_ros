@@ -1,4 +1,5 @@
 import importlib
+import time
 from queue import Queue
 from typing import Any, Optional
 
@@ -102,6 +103,10 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None):
                         logger.warning("❓ completing flow with state %s", final_value)
                         flow_task = Constants.flow_calculate_distance_sensor_case
                         inputs = {"control": control}
+            logger.info(
+                "😴================================================================================😴"
+            )
+            time.sleep(5)
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):
