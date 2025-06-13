@@ -32,12 +32,13 @@ class RelROSNode(Node):
         self.create_hmi_user_task_subscribers(len(self.masters))
         self.get_logger().info("apply initial state")
         self.apply_initial_state()
+        self.get_logger().info("creating alive timer ⏱")
+        self.create_timer(1.0, self.timer_callback_text)
         self.get_logger().info("======= creating MAIN CONTROL 🤖 =======")
         self.start_main_control()
-        self.create_timer(5.0, self.timer_callback_text)
 
     def timer_callback_text(self):
-        self.get_logger().info("I'm alive in ROS 👾")
+        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<<<<")
 
     def apply_initial_state(self):
         for m in self.masters:
@@ -62,16 +63,16 @@ class RelROSNode(Node):
     def start_main_control(self):
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
-        for idx, m in enumerate(self.masters):
-            self.queue.put(idx)
-            m_thread = Thread(
-                target=run_control,
-                args=(m, Constants.flow_calculate_distance_sensor_case, self.queue),
-            )
-            self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
-            m_thread.start()
         try:
-            self.queue.join()
+            for idx, m in enumerate(self.masters):
+                self.queue.put(idx)
+                m_thread = Thread(
+                    target=run_control,
+                    args=(m, Constants.flow_calculate_distance_sensor_case, self.queue),
+                )
+                self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
+                m_thread.start()
+            # self.queue.join()  # do not block
         except Exception as err:
             self.get_logger().warning(f"error waiting for main control to finish - {err}")
 
