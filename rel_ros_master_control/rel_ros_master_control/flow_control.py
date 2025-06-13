@@ -76,36 +76,32 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         raise err
 
 
-def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
+def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None):
     inputs = {"control": control}
     while True:
         try:
-            inputs = run_flow(inputs, tasks)
+            inputs = run_flow(inputs, flow_task)
             inputs["control"] = control
-            final_output_name = tasks[-1]
+            final_output_name = flow_task.tasks[-1]
             final_value = inputs[final_output_name]
             if isinstance(final_value, FlowStateAction):
                 match final_value:
                     case FlowStateAction.TO_RECYCLE_PROCESS:
-                        tasks = Constants.flow_tasks_recycle
+                        flow_task = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
-                        tasks = Constants.flow_tasks_pwm
+                        flow_task = Constants.flow_tasks_pwm
                     case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
-                        tasks = Constants.flow_tasks_pwm
+                        flow_task = Constants.flow_tasks_pwm
                     case FlowStateAction.WAITING_FOR_BUCKET:
-                        tasks = Constants.flow_tasks_bucket_change
+                        flow_task = Constants.flow_tasks_bucket_change
                     case FlowStateAction.COMPLETE:
                         logger.info("🤘 🎮 completing flow with state DONE")
-                        tasks = Constants.flow_calculate_distance_sensor_case
-                        inputs = {
-                            "control": control,
-                        }
+                        flow_task = Constants.flow_calculate_distance_sensor_case
+                        inputs = {"control": control}
                     case _:
                         logger.warning("❓ completing flow with state %s", final_value)
-                        tasks = Constants.flow_calculate_distance_sensor_case
-                        inputs = {
-                            "control": control,
-                        }
+                        flow_task = Constants.flow_calculate_distance_sensor_case
+                        inputs = {"control": control}
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):
