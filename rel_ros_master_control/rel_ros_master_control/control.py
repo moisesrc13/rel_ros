@@ -283,7 +283,7 @@ class RelControl:
             logger.error("error hmi reading hmi coil register")
             status.error = response
             return status
-        logger.info("reading coil ok ✨ %s", response.registers)
+        logger.info("reading coil ok | value: ✨ %s", response.registers)
         status.value = int(response.bits[0])
         status.status = "read coil ok"
         return status
@@ -299,7 +299,7 @@ class RelControl:
             logger.error("error reading hmi holding register")
             status.error = response
             return status
-        logger.info("reading hmi hr ok ✨ %s", response.registers)
+        logger.info("reading hmi hr ok | value: ✨ %s", response.registers)
         decoder = get_decoder(response)
         status.value = get_value(decoder)
         status.status = "read hr ok"
