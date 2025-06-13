@@ -122,7 +122,6 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
 def sensor_laser_on_state__a(
-    sensor_distance_state: SensorDistanceStateName,
     control: RelControl,
 ) -> FlowStateAction:
     logger.info("no bucket in place - State A")
@@ -137,7 +136,6 @@ def sensor_laser_on_state__a(
 def sensor_laser_on_state__b(
     control: RelControl,
     sensor_distance_params: SensorDistanceParams,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
     control.write_hmi_cregister_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
@@ -175,7 +173,6 @@ def sensor_laser_on_state__b(
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
 def sensor_laser_on_state__c(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
     control.write_hmi_cregister_by_address_name(
@@ -201,7 +198,6 @@ def sensor_laser_on_state__c(
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
 def sensor_laser_on_state__d(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
