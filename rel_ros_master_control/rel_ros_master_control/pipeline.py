@@ -112,6 +112,8 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
     return state
 
 
+# TODO calculate sensor_distance_state and pass it as an input
+
 #  ---------------------------------------------------------
 #  SensorDistanceStateName
 #  These are the 5 main paths from the laser distance state
