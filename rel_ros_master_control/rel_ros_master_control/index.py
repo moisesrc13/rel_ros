@@ -10,7 +10,7 @@ from rel_interfaces.msg import HMIUserTask
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
 from rel_ros_master_control.constants import Constants
 from rel_ros_master_control.control import run_masters_to_iolinks
-from rel_ros_master_control.flow_control import run as run_control
+from rel_ros_master_control.flow_control import run_control
 
 
 class RelROSNode(Node):
