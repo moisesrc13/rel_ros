@@ -324,7 +324,7 @@ class RelControl:
         option_register = get_register_by_name(
             self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
         )
-        option = self.read_hmi_register(option_register.address)
+        option = self.read_hmi_register(option_register.address).value
         register_name = Params.PARAM_PULSE_TRAIN_LOW
         match option:
             case PWMPulseSet.HIGH.value:
@@ -334,7 +334,7 @@ class RelControl:
             case _:
                 register_name = Params.PARAM_PULSE_TRAIN_LOW
         register = get_register_by_name(self.hmi_hr, register_name.value)
-        pulse_value = self.read_hmi_register(register.address)
+        pulse_value = self.read_hmi_register(register.address).value
         if not self.pwm_started:
             self.pwm.start_duty(duty=pulse_value)
             self.pwm_started = True
