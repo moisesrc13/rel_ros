@@ -119,7 +119,7 @@
     - name: "param_vacuum_limit_high"
       address: 40015
       data_type: "uint16"
-    - name: "param_pre_vacuum_limit_low"
+    - name: "param_pre_vacuum_limit_high"
       address: 40016
       data_type: "uint16"
     - name: "not_used"
