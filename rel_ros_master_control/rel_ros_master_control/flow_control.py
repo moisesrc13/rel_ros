@@ -67,8 +67,8 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         .build()
     )
     try:
-        logger.info("✨ running control flow with tasks %s", flow_task)
-        r = dr.execute(flow_task)
+        logger.info("✨ running control flow with tasks %s", flow_task.tasks)
+        r = dr.execute(flow_task.tasks)
         logger.info("response from hamilton driver: %s", r)
         return {key: value for key, value in r.items() if key in flow_task.outputs}
     except Exception as err:
@@ -82,8 +82,8 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
         try:
             inputs = run_flow(inputs, tasks)
             inputs["control"] = control
-            final_output = tasks[-1]
-            final_value = inputs[final_output]
+            final_output_name = tasks[-1]
+            final_value = inputs[final_output_name]
             if isinstance(final_value, FlowStateAction):
                 match final_value:
                     case FlowStateAction.TO_RECYCLE_PROCESS:
