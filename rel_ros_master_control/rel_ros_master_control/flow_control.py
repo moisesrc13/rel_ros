@@ -72,8 +72,8 @@ def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, SensorDis
         r = dr.execute(tasks)
         logger.info("response from hamilton driver: %s", r)
         if node_to_validate == "sensor_distance_state":
-            return SensorDistanceStateName(str(r[node_to_validate].iloc[-1]))
-        return FlowStateAction(int(r[node_to_validate].iloc[-1]))
+            return r[node_to_validate]
+        return r[node_to_validate]
     except Exception as err:
         logger.error("❌ error running flow tasks %s - %s", tasks, err)
         raise err
