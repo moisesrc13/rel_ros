@@ -76,7 +76,7 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         raise err
 
 
-def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, debug=True):
+def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, debug=False):
     inputs = {"control": control}
     while True:
         try:
