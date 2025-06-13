@@ -63,12 +63,12 @@ class RelROSNode(Node):
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
             return
         for idx, m in enumerate(self.masters):
-            self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
             self.queue.put(idx)
             m_thread = Thread(
                 target=run_control,
                 args=(m, Constants.flow_calculate_distance_sensor_case, self.queue),
             )
+            self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
             m_thread.start()
         try:
             self.queue.join()

@@ -12,7 +12,6 @@ from rel_ros_master_control.constants import (
     Params,
     PressureState,
     SensorDistanceParams,
-    SensorDistanceState,
     SensorDistanceStateName,
     Sensors,
 )

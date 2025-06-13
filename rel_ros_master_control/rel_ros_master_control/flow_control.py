@@ -1,11 +1,11 @@
 import importlib
 from queue import Queue
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
-from rel_ros_master_control.constants import Constants, FlowStateAction, SensorDistanceStateName
+from rel_ros_master_control.constants import Constants, FlowStateAction, FlowTask
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -52,7 +52,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, dict]:
+def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     dr = (
@@ -66,32 +66,26 @@ def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, dict]:
         )
         .build()
     )
-    node_to_validate = tasks[-1]
     try:
-        logger.info("✨ running control flow with tasks %s", tasks)
-        r = dr.execute(tasks)
+        logger.info("✨ running control flow with tasks %s", flow_task)
+        r = dr.execute(flow_task)
         logger.info("response from hamilton driver: %s", r)
-        if node_to_validate == "sensor_distance_state":
-            return r
-        return r[node_to_validate]
+        return {key: value for key, value in r.items() if key in flow_task.outputs}
     except Exception as err:
-        logger.error("❌ error running flow tasks %s - %s", tasks, err)
+        logger.error("❌ error running flow tasks %s - %s", flow_task, err)
         raise err
 
 
 def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
-    inputs = {
-        "control": control,
-    }
+    inputs = {"control": control}
     while True:
         try:
-            flow_response = run_flow(inputs, tasks)
-            if isinstance(flow_response, dict):
-                for key, value in flow_response.items():
-                    inputs[key] = value
-                    tasks = Constants.flow_tasks_init_state
-            else:
-                match flow_response:
+            flow_outputs = run_flow(inputs, tasks)
+            flow_outputs["control"] = control
+            final_output = tasks[-1]
+            final_value = flow_outputs[final_output]
+            if isinstance(final_value, FlowStateAction):
+                match flow_outputs:
                     case FlowStateAction.TO_RECYCLE_PROCESS:
                         tasks = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
@@ -107,7 +101,7 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
                             "control": control,
                         }
                     case _:
-                        logger.warning("❓ completing flow with state %s", flow_response)
+                        logger.warning("❓ completing flow with state %s", flow_outputs)
                         tasks = Constants.flow_calculate_distance_sensor_case
                         inputs = {
                             "control": control,

@@ -171,33 +171,53 @@ class Params(Enum):
     PARAM_PRESSURE_GUARD_LIMIT = "param_pressure_guard_limit"
 
 
+class FlowTask(BaseModel):
+    tasks: list[str]
+    outputs: list[str]
+
+
 class Constants:
-    flow_calculate_distance_sensor_case: list[str] = [
-        "check_distance_sensor_for_electrovalves",
-        "bucket_distance",
-        "sensor_distance_params",
-        "sensor_distance_state",
-    ]
-    flow_tasks_init_state: list[str] = [
-        "sensor_laser_on_state",
-        "init_flow_state",
-    ]
-    flow_tasks_recycle = [
-        "prepare_for_recycle_process",
-        "start_pwm",
-        "validate_recycle",
-        "recycle",
-        "recycle_flow_state",
-    ]
-    flow_tasks_pwm = ["start_pwm", "validate_recycle", "recycle", "recycle_state"]
-    flow_tasks_bucket_change: list[str] = [
-        "check_distance_sensor_for_electrovalves",
-        "bucket_distance",
-        "sensor_distance_params",
-        "bucket_change",
-        "bucket_change_frame",
-        "bucket_change_step_2",
-    ]
+    flow_calculate_distance_sensor_case = FlowTask(
+        tasks=[
+            "check_distance_sensor_for_electrovalves",
+            "bucket_distance",
+            "sensor_distance_params",
+            "sensor_distance_state",
+        ],
+        outputs=["sensor_distance_params", "sensor_distance_state"],
+    )
+    flow_tasks_init_state = FlowTask(
+        tasks=[
+            "sensor_laser_on_state",
+            "init_flow_state",
+        ],
+        outputs=["init_flow_state"],
+    )
+    flow_tasks_recycle = FlowTask(
+        tasks=[
+            "prepare_for_recycle_process",
+            "start_pwm",
+            "validate_recycle",
+            "recycle",
+            "recycle_flow_state",
+        ],
+        outputs=["recycle_flow_state"],
+    )
+    flow_tasks_pwm = FlowTask(
+        tasks=["start_pwm", "validate_recycle", "recycle", "recycle_state"],
+        outputs=["recycle_state"],
+    )
+    flow_tasks_bucket_change = FlowTask(
+        tasks=[
+            "check_distance_sensor_for_electrovalves",
+            "bucket_distance",
+            "sensor_distance_params",
+            "bucket_change",
+            "bucket_change_frame",
+            "bucket_change_step_2",
+        ],
+        outputs=["bucket_change_frame", "bucket_change_step_2"],
+    )
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 2000
     wait_read_laser: float = 0.20
