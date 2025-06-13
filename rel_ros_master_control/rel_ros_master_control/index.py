@@ -34,6 +34,10 @@ class RelROSNode(Node):
         self.apply_initial_state()
         self.get_logger().info("======= creating MAIN CONTROL 🤖 =======")
         self.start_main_control()
+        self.create_timer(5.0, self.timer_callback_text)
+
+    def timer_callback_text(self):
+        self.get_logger().info("I'm alive in ROS 👾")
 
     def apply_initial_state(self):
         for m in self.masters:
@@ -62,7 +66,8 @@ class RelROSNode(Node):
             self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
             self.queue.put(idx)
             m_thread = Thread(
-                target=run_control, args=(m, Constants.flow_tasks_init_state, self.queue)
+                target=run_control,
+                args=(m, Constants.flow_calculate_distance_sensor_case, self.queue),
             )
             m_thread.start()
         try:
