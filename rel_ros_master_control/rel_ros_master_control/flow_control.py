@@ -101,7 +101,8 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
             run_flow(control, tasks)
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
-            if queue:
+            if queue is not None and (item := queue.get()):
+                logger.warning("mark %s as done", item)
                 queue.task_done()
 
 
