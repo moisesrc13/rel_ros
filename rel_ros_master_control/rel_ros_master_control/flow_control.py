@@ -80,12 +80,12 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
     inputs = {"control": control}
     while True:
         try:
-            flow_outputs = run_flow(inputs, tasks)
-            flow_outputs["control"] = control
+            inputs = run_flow(inputs, tasks)
+            inputs["control"] = control
             final_output = tasks[-1]
-            final_value = flow_outputs[final_output]
+            final_value = inputs[final_output]
             if isinstance(final_value, FlowStateAction):
-                match flow_outputs:
+                match final_value:
                     case FlowStateAction.TO_RECYCLE_PROCESS:
                         tasks = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
@@ -101,7 +101,7 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
                             "control": control,
                         }
                     case _:
-                        logger.warning("❓ completing flow with state %s", flow_outputs)
+                        logger.warning("❓ completing flow with state %s", final_value)
                         tasks = Constants.flow_calculate_distance_sensor_case
                         inputs = {
                             "control": control,
