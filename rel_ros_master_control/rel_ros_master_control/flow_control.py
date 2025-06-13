@@ -52,7 +52,7 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, SensorDistanceStateName]:
+def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, dict]:
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
     dr = (
@@ -72,7 +72,7 @@ def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, SensorDis
         r = dr.execute(tasks)
         logger.info("response from hamilton driver: %s", r)
         if node_to_validate == "sensor_distance_state":
-            return r[node_to_validate]
+            return r
         return r[node_to_validate]
     except Exception as err:
         logger.error("❌ error running flow tasks %s - %s", tasks, err)
@@ -85,13 +85,13 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
     }
     while True:
         try:
-            flow_state = run_flow(inputs, tasks)
-            if isinstance(flow_state, SensorDistanceStateName):
-                logger.info("passing sensor_distance_state %s to next flow", flow_state)
-                inputs["sensor_distance_state"] = flow_state
-                tasks = Constants.flow_tasks_init_state
+            flow_response = run_flow(inputs, tasks)
+            if isinstance(flow_response, dict):
+                for key, value in flow_response.items():
+                    inputs[key] = value
+                    tasks = Constants.flow_tasks_init_state
             else:
-                match flow_state:
+                match flow_response:
                     case FlowStateAction.TO_RECYCLE_PROCESS:
                         tasks = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
@@ -103,9 +103,15 @@ def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
                     case FlowStateAction.COMPLETE:
                         logger.info("🤘 🎮 completing flow with state DONE")
                         tasks = Constants.flow_calculate_distance_sensor_case
+                        inputs = {
+                            "control": control,
+                        }
                     case _:
-                        logger.warning("❓ completing flow with state %s", flow_state)
+                        logger.warning("❓ completing flow with state %s", flow_response)
                         tasks = Constants.flow_calculate_distance_sensor_case
+                        inputs = {
+                            "control": control,
+                        }
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):

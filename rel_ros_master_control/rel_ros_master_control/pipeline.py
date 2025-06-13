@@ -215,7 +215,6 @@ def sensor_laser_on_state__d(
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on_state__e(
     control: RelControl,
-    sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
