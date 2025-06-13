@@ -1,11 +1,11 @@
 import importlib
 from queue import Queue
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
-from rel_ros_master_control.constants import Constants, FlowStateAction
+from rel_ros_master_control.constants import Constants, FlowStateAction, SensorDistanceStateName
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -52,12 +52,9 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run_flow(control: RelControl, tasks: list[str]) -> FlowStateAction:
+def run_flow(inputs: dict, tasks: list[str]) -> Union[FlowStateAction, SensorDistanceStateName]:
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
-    inputs = {
-        "control": control,
-    }
     dr = (
         driver.Builder()
         .with_modules(router_module)
@@ -74,6 +71,8 @@ def run_flow(control: RelControl, tasks: list[str]) -> FlowStateAction:
         logger.info("✨ running control flow with tasks %s", tasks)
         r = dr.execute(tasks)
         logger.info("response from hamilton driver: %s", r)
+        if node_to_validate == "sensor_distance_state":
+            return SensorDistanceStateName(str(r[node_to_validate].iloc[-1]))
         return FlowStateAction(int(r[node_to_validate].iloc[-1]))
     except Exception as err:
         logger.error("❌ error running flow tasks %s - %s", tasks, err)
@@ -81,25 +80,32 @@ def run_flow(control: RelControl, tasks: list[str]) -> FlowStateAction:
 
 
 def run_control(control: RelControl, tasks: list[str], queue: Queue = None):
+    inputs = {
+        "control": control,
+    }
     while True:
         try:
-            flow_state = run_flow(control, tasks)
-            match flow_state:
-                case FlowStateAction.TO_RECYCLE_PROCESS:
-                    tasks = Constants.flow_tasks_recycle
-                case FlowStateAction.TO_PWM:
-                    tasks = Constants.flow_tasks_pwm
-                case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
-                    tasks = Constants.flow_tasks_pwm
-                case FlowStateAction.WAITING_FOR_BUCKET:
-                    tasks = Constants.flow_tasks_bucket_change
-                case FlowStateAction.COMPLETE:
-                    logger.info("🤘 🎮 completing flow with state DONE")
-                    tasks = Constants.flow_tasks_init_state
-                case _:
-                    logger.warning("❓ completing flow with state %s", flow_state)
-                    tasks = Constants.flow_tasks_init_state
-            run_flow(control, tasks)
+            flow_state = run_flow(inputs, tasks)
+            if isinstance(flow_state, SensorDistanceStateName):
+                logger.info("passing sensor_distance_state %s to next flow", flow_state)
+                inputs["sensor_distance_state"] = flow_state
+                tasks = Constants.flow_tasks_init_state
+            else:
+                match flow_state:
+                    case FlowStateAction.TO_RECYCLE_PROCESS:
+                        tasks = Constants.flow_tasks_recycle
+                    case FlowStateAction.TO_PWM:
+                        tasks = Constants.flow_tasks_pwm
+                    case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
+                        tasks = Constants.flow_tasks_pwm
+                    case FlowStateAction.WAITING_FOR_BUCKET:
+                        tasks = Constants.flow_tasks_bucket_change
+                    case FlowStateAction.COMPLETE:
+                        logger.info("🤘 🎮 completing flow with state DONE")
+                        tasks = Constants.flow_calculate_distance_sensor_case
+                    case _:
+                        logger.warning("❓ completing flow with state %s", flow_state)
+                        tasks = Constants.flow_calculate_distance_sensor_case
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):
