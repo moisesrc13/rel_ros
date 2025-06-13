@@ -90,9 +90,11 @@ def run(control: RelControl, tasks: list[str], queue: Queue = None):
         case FlowStateAction.WAITING_FOR_BUCKET:
             run(control, Constants.flow_tasks_bucket_change)
         case FlowStateAction.COMPLETE:
-            logger.info("🤘 🎮 completing flow with state DONE")
+            logger.info("🤘 🎮 completing flow with state DONE, starting over ...")
+            run(control, Constants.flow_tasks_init_state)
         case _:
-            logger.warning("❓ completing flow with state %s ...", init_flow_state)
+            logger.warning("❓ completing flow with state %s, starting over ...", init_flow_state)
+            run(control, Constants.flow_tasks_init_state)
 
 
 if __name__ == "__main__":
