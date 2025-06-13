@@ -36,7 +36,7 @@ export MASTER_IO_LINK_PORT=8844
 
 ## Run on local
 
-> my local all
+### my local all
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_master_control"
@@ -44,7 +44,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/moisesrc/vs-workspace/rel_ros/rel_ros_hmi
 export CONFIG_PATH="/home/moisesrc/vs-workspace/rel_ros/config"
 ```
 
-> RPi4
+### RPi4
 
 ```bash
 export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_master_control"
@@ -52,7 +52,8 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/git/rel_ros/rel_ros_hmi"
 export CONFIG_PATH="/home/relant/git/rel_ros/config"
 ```
 
-> for ROS Docekr image
+### for ROS Docker image
+
 > This is important to execute before running (only once)
 
 ```bash
@@ -63,7 +64,25 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control
 
 export the `rel_ros_hmi` in the path is required to run the master modbus test from hmi package
 
-## Run nodes
+### ROS Interfaces
+
+#### Requirements
+
+```bash
+pip install empy==3.3.4
+pip install numpy
+```
+
+The interface messages should be defined in `./rel_interfaces/CMakeLists.txt`, then compile as:
+
+edit `run-ros-build-interfaces` to add the correct interface message
+
+```bash
+cd ~/ros2_ws
+./run-ros-build-interfaces.sh
+```
+
+## Run ROS Nodes
 
 This is how we can run all nodes
 
@@ -74,42 +93,51 @@ ros2 run rel_ros_master_control rel_ros_master_control_node
 ros2 run rel_ros_hmi rel_ros_hmi_node
 ```
 
-## Run test modbus master control slave
+### 1. Export env vars
 
 ```bash
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
-
-python rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 ```
 
-## Run rest API app
+### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
+### 3. Run rest API app (optional)
+
+`python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
+
+### 4. Run test HMI modbus slave
+
+`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
+
+### 5. Run IOLink Node
 
 ```bash
-python rel_ros_master_control/rel_ros_master_control/rest/app.py
+cd ~/ros2_ws
+./run-ros-master.sh
 ```
 
-## Run test HMI modbus master & slave
+---
 
-### HMI
+### Master Commands for IOLink and HMI
+
+#### HMI master commands
 
 ```bash
-export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi" \
-export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control" \
-export USE_TEST_MODBUS="true"
 
-python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
 
-cd ~/ros2_ws/src
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action write --register 40010 --value 1200
-
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 40010
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 40010
 
 # read all
-python rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
+python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --register 0
 ```
 
-### IOLink test slave with HMI too
+#### IOLink test slave with HMI too
 
 ```bash
 
@@ -133,9 +161,7 @@ python rel_ros_master_control/rel_ros_master_control/control.py --action write -
 python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 ```
 
-## Build interfaces package
-
-Make sure you install `numpy` in the virtual env
+---
 
 ## Sym links in RPi
 

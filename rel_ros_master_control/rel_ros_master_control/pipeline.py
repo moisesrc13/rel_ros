@@ -23,17 +23,19 @@ from rel_ros_master_control.models.status_device_m import TowerState
 logger = new_logger(__name__)
 
 
-def wait_for_sensor_laser():
+def wait_for_sensor_laser() -> None:
     time.sleep(Constants.wait_for_sensor_laser_ms / 1000)
 
 
-def check_distance_sensor_for_electrovales(control: RelControl):
+def check_distance_sensor_for_electrovalves(control: RelControl) -> FlowStateAction:
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     vacuum_distance = control.read_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE)
     if sensor_distance < vacuum_distance:
         control.eletrovalve_off()
         control.apply_tower_state(TowerState.VACUUM)
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
+        return FlowStateAction.ACOSTIC_ALARM_ON
+    return FlowStateAction.OK_VACUUM
 
 
 def bucket_distance(control: RelControl) -> int:
@@ -64,29 +66,30 @@ def sensor_distance_state(
     control: RelControl, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceState:
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
-
+    distance_state = SensorDistanceStateName.E
     if sensor_distance < sensor_distance_params.vacuum_distance:
-        return SensorDistanceStateName.A
+        distance_state = SensorDistanceStateName.A
     elif (
         sensor_distance > sensor_distance_params.vacuum_distance
         and sensor_distance <= sensor_distance_params.high_vacuum_limit
     ):
-        return SensorDistanceStateName.B
+        distance_state = SensorDistanceStateName.B
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance <= sensor_distance_params.high_pre_vacuum_limit
     ):
-        return SensorDistanceStateName.C
+        distance_state = SensorDistanceStateName.C
     if (
         sensor_distance > sensor_distance_params.high_vacuum_limit
         and sensor_distance < sensor_distance_params.bucket_distance
     ):
-        return SensorDistanceStateName.D
+        distance_state = SensorDistanceStateName.D
     # return default for now
-    return SensorDistanceStateName.E
+    logger.info("📏 sensor distance state %s", distance_state)
+    return distance_state
 
 
-def set_visual_alarm_for_bucket_state(control: RelControl):
+def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
     """_summary_
 
     calculate the alarm distance which depends on the bucket distance (size) selected
@@ -101,12 +104,15 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
         state = TowerState.MEDIUM_HIGH
     elif laser_distance >= 10 and laser_distance <= 20:
         state = TowerState.PRE_VACUUM
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
     elif laser_distance >= 2 and laser_distance <= 5:
-        control.apply_tower_state(TowerState.ACOSTIC_ALARM_ON)
+        control.apply_tower_state(TowerState.ACOUSTIC_ALARM_ON)
         state = TowerState.VACUUM
     control.apply_tower_state(state)
+    return state
 
+
+# TODO calculate sensor_distance_state and pass it as an input
 
 #  ---------------------------------------------------------
 #  SensorDistanceStateName
@@ -117,8 +123,7 @@ def set_visual_alarm_for_bucket_state(control: RelControl):
 #  A) Sensor laser d<Z
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.A)
-def sensor_laser_on__a(
-    sensor_distance_state: SensorDistanceStateName,
+def sensor_laser_on_state__a(
     control: RelControl,
 ) -> FlowStateAction:
     logger.info("no bucket in place - State A")
@@ -130,10 +135,9 @@ def sensor_laser_on__a(
 #  B) Sensor laser d>Z && d<=Y
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.B)
-def sensor_laser_on__b(
+def sensor_laser_on_state__b(
     control: RelControl,
     sensor_distance_params: SensorDistanceParams,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
     control.write_hmi_cregister_by_address_name(HMIWriteAction.STATUS_VACUUM_ALARM, CoilState.ON)
@@ -166,12 +170,11 @@ def sensor_laser_on__b(
 
 
 #  --------------------------
-#  C) Sénsor laser d>Y && d<=X
+#  C) Sensor laser d>Y && d<=X
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.C)
-def sensor_laser_on__c(
+def sensor_laser_on_state__c(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     set_visual_alarm_for_bucket_state(control)
     control.write_hmi_cregister_by_address_name(
@@ -195,9 +198,8 @@ def sensor_laser_on__c(
 #  D) Sensor laser d>X && d<W
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.D)
-def sensor_laser_on__d(
+def sensor_laser_on_state__d(
     control: RelControl,
-    sensor_distance_state: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
@@ -213,7 +215,7 @@ def sensor_laser_on__d(
 #  E) Sensor laser d>W && d<= ∞
 #  --------------------------
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
-def sensor_laser_on__e(
+def sensor_laser_on_state__e(
     control: RelControl,
     sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
@@ -229,11 +231,11 @@ def sensor_laser_on__e(
     return FlowStateAction.WAITING_FOR_BUCKET
 
 
-def init_flow_state(sensor_laser_on: FlowStateAction) -> FlowStateAction:
-    return sensor_laser_on
+def init_flow_state(sensor_laser_on_state: FlowStateAction) -> FlowStateAction:
+    return sensor_laser_on_state
 
 
-def prepare_for_recycle_process(control: RelControl):
+def prepare_for_recycle_process(control: RelControl) -> FlowStateAction:
     control.write_hmi_cregister_by_address_name(
         HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
@@ -257,7 +259,7 @@ def start_pwm(prepare_for_recycle_process: FlowStateAction, control: RelControl)
     return FlowStateAction.PWM_STARTED
 
 
-def validate_recycle(start_pwm: FlowStateAction, control: RelControl):
+def validate_recycle(start_pwm: FlowStateAction, control: RelControl) -> FlowStateAction:
     logger.info("validate if recycle is needed")
     if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE) > 0:
         logger.info("recycle enabled")
@@ -290,7 +292,7 @@ def recycle__disabled(control: RelControl, validate_recycle: FlowStateAction) ->
 def recycle__enabled(
     control: RelControl,
     validate_recycle: FlowStateAction,
-):
+) -> FlowStateAction:
     while (
         control.read_hmi_hregister_by_name(
             HMIWriteAction.ACTION_RECYCLE,
@@ -375,7 +377,7 @@ def bucket_change(
     logger.info("🪣 start bucket change")
     control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_3_0, CoilState.ON)
     control.stop_pwm()
-    control.apply_tower_state(TowerState.ACOSTIC_ALARM_OFF)
+    control.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
     logger.info("evaluate sensor laser position")
     # TODO verify
@@ -442,7 +444,7 @@ def bucket_change_frame__overw(
     return FlowStateAction.BUCKET_CHANGE_STEP_2
 
 
-def bucket_change_step_2(control: RelControl):
+def bucket_change_step_2(control: RelControl) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     logger.info("enter to screen 1-0")
     control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_1_0, CoilState.ON)
@@ -457,3 +459,4 @@ def bucket_change_step_2(control: RelControl):
 
     # TODO check distance to deactivate electrovalves
     control.apply_tower_state(TowerState.BUCKET_CHANGE)
+    return FlowStateAction.COMPLETE

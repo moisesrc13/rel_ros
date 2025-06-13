@@ -6,7 +6,6 @@ cd ~/ros2_ws
 colcon build
 source install/setup.bash
 echo "current python path $PYTHONPATH"
-cp -r src/rel_ros_hmi/rel_ros_hmi/config /home/relant/ros2_ws/install/rel_ros_hmi/lib/python3.10/site-packages/rel_ros_hmi
 rs=$(echo $PYTHONPATH | grep "ros2_ws/src/${RELANT_PACKAGE}" | wc -l)
 if [[ $rs -lt 1 ]];
 then

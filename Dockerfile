@@ -32,11 +32,12 @@ RUN cd /home/relant/ros2_ws && virtualenv -p python3.10 ./venv && touch ./venv/C
 # activate venv and install dependencies
 RUN source /opt/ros/humble/setup.bash && source /home/relant/ros2_ws/venv/bin/activate && pip install -r /home/relant/ros2_ws/requirements.txt
 
+
 USER root
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant
 # install VS Code (code-server)
-# RUN curl -fsSL https://code-server.dev/install.sh | sh
+RUN curl -fsSL https://code-server.dev/install.sh | sh
 
 # create ROS packages
 USER relant
@@ -47,6 +48,7 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/relant/ros2_ws/venv/bin/activate" >> ~/.bashrc
 RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
 RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
+RUN echo 'export APP_MASTER_IOLINK_ID=0' >> ~/.bashrc
 
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
