@@ -143,22 +143,23 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
-cd ~/ros2_ws/src
-python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
+# iolink write
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
 
 # read all
 # iolink
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
 
 # hmi read all hr
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
 
 # hmi read all cr
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
 
 # hmi coil
-python rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1
-python rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 ```
 
 ---

@@ -52,7 +52,6 @@ def get_decoder_from_rr(rr) -> BinaryPayloadDecoder:
 
 
 def get_decoder(response) -> BinaryPayloadDecoder:
-    logger.debug("calling decoder with response %s", response)
     return get_decoder_from_rr(response.registers)
 
 

@@ -1,5 +1,4 @@
 import importlib
-import time
 from queue import Queue
 from typing import Any, Optional
 
@@ -77,7 +76,7 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         raise err
 
 
-def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None):
+def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, debug=True):
     inputs = {"control": control}
     while True:
         try:
@@ -103,10 +102,11 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None):
                         logger.warning("❓ completing flow with state %s", final_value)
                         flow_task = Constants.flow_calculate_distance_sensor_case
                         inputs = {"control": control}
-            logger.info(
-                "😴================================================================================😴"
-            )
-            time.sleep(5)
+            if debug:
+                logger.info(
+                    "😴================================================================================😴"
+                )
+                input("continue? ...")
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):
