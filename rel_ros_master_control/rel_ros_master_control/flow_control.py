@@ -103,10 +103,7 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
                         flow_task = Constants.flow_calculate_distance_sensor_case
                         inputs = {"control": control}
             if debug:
-                logger.info(
-                    "😴================================================================================😴"
-                )
-                input("continue? ...")
+                input("😴 continue? ...")
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):

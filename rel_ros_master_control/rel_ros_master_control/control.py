@@ -273,17 +273,16 @@ class RelControl:
 
     def read_hmi_cregister(self, register: int) -> ModbusStatus:
         status = ModbusStatus()
-        logger.info("reading coil register %s", register)
         master = self.get_master_connection(SlaveType.HMI)
         response = master.slave_conn.read_coils(
             address=self.get_register_with_offset(register, SlaveType.HMI), count=1
         )
         if response.isError():
-            logger.error("error hmi reading hmi coil register")
+            logger.error("error hmi reading hmi coil register %s", register)
             status.error = response
             return status
-        logger.info("reading coil ok | value: ✨ %s", response.registers)
         status.value = int(response.bits[0])
+        logger.info("reading coil %s ok | value: ✨ %s", register, status.value)
         status.status = "read coil ok"
         return status
 
@@ -305,12 +304,10 @@ class RelControl:
         return status
 
     def read_hmi_cregister_by_name(self, enum_name: Enum) -> int:
-        logger.info("reading HMI coil register %s", enum_name.value)
         register = get_register_by_name(self.hmi_cr, enum_name.value)
         return self.read_hmi_cregister(register.address).value
 
     def read_hmi_hregister_by_name(self, enum_name: Enum) -> int:
-        logger.info("reading HMI hr register %s", enum_name.value)
         register = get_register_by_name(self.hmi_hr, enum_name.value)
         return self.read_hmi_hregister(register.address).value
 
