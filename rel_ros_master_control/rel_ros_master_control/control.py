@@ -239,25 +239,11 @@ class RelControl:
 
     def eletrovalve_on(self):
         register = get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value)
-        status = self.write_iolink_hregister(register.address, ElectroValveState.ON.value)
-        if not status.error:
-            logger.info(
-                "writing IOLink %s (%s) value: ✨ %s",
-                DigitalOutput.DIGITAL_OUT_HYD_VALVE.value,
-                register.address,
-                ElectroValveState.ON.value,
-            )
+        self.write_iolink_hregister(register.address, ElectroValveState.ON.value)
 
     def eletrovalve_off(self):
         register = get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value)
-        status = self.write_iolink_hregister(register.address, ElectroValveState.OFF.value)
-        if not status.error:
-            logger.info(
-                "writing IOLink %s (%s) value: ✨ %s",
-                DigitalOutput.DIGITAL_OUT_HYD_VALVE.value,
-                register.address,
-                ElectroValveState.OFF.value,
-            )
+        self.write_iolink_hregister(register.address, ElectroValveState.OFF.value)
 
     def get_master_connection(self, stype: SlaveType) -> RelModbusMaster:
         if stype == SlaveType.IOLINK:
@@ -399,7 +385,6 @@ class RelControl:
                 address=self.get_register_with_offset(register, stype), value=value
             )
         else:
-            logger.info("writing coil with %s", bool(value))
             response = master.slave_conn.write_coil(
                 address=self.get_register_with_offset(register, stype), value=bool(value)
             )
@@ -407,8 +392,13 @@ class RelControl:
             logger.error("error writing register on %s", stype)
             status.error = response
             return status
-        logger.info("writing ok ✨ %s", stype)
         status.value = value
+        logger.info(
+            "writing %s register %s value: ✨ %s",
+            stype,
+            register,
+            value,
+        )
         return status
 
     def read_iolink_hregister(self, register: int) -> ModbusStatus:
