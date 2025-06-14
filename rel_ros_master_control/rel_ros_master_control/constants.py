@@ -64,6 +64,11 @@ class PressureState(Enum):
     OFF = 256
 
 
+class ElectroValveState(Enum):
+    ON = 3
+    OFF = 5
+
+
 class ManifoldActions(Enum):
     DEACTIVATE: int = int("0000_0000_0000_0000", 2)
     ACTIVATE: int = int("0000_0000_0000_0001", 2)

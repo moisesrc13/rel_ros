@@ -14,6 +14,7 @@ from rel_ros_master_control.config import (
 from rel_ros_master_control.constants import (
     DigitalHydValve,
     DigitalOutput,
+    ElectroValveState,
     HMIWriteAction,
     ManifoldActions,
     Params,
@@ -223,7 +224,6 @@ class RelControl:
         else:
             offset_value = self.master_hmi.slave.slave_tcp.offset
         register = register + offset_value
-        logger.debug("register with offset %s", register)
         return register
 
     def write_iolink_hregister(self, register: int, value: int) -> ModbusStatus:
@@ -238,12 +238,26 @@ class RelControl:
         return self.write_register(register.address, value, SlaveType.HMI)
 
     def eletrovalve_on(self):
-        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
-        self.write_iolink_hregister(register.address, 3)
+        register = get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value)
+        status = self.write_iolink_hregister(register.address, ElectroValveState.ON.value)
+        if not status.error:
+            logger.info(
+                "writing IOLink %s (%s) value: ✨ %s",
+                DigitalOutput.DIGITAL_OUT_HYD_VALVE.value,
+                register.address,
+                ElectroValveState.ON.value,
+            )
 
     def eletrovalve_off(self):
-        register = get_register_by_name(self.iolink_hr, "digital_out_hyd_valve")
-        self.write_iolink_hregister(register.address, 5)
+        register = get_register_by_name(self.iolink_hr, DigitalOutput.DIGITAL_OUT_HYD_VALVE.value)
+        status = self.write_iolink_hregister(register.address, ElectroValveState.OFF.value)
+        if not status.error:
+            logger.info(
+                "writing IOLink %s (%s) value: ✨ %s",
+                DigitalOutput.DIGITAL_OUT_HYD_VALVE.value,
+                register.address,
+                ElectroValveState.OFF.value,
+            )
 
     def get_master_connection(self, stype: SlaveType) -> RelModbusMaster:
         if stype == SlaveType.IOLINK:
@@ -380,7 +394,6 @@ class RelControl:
     ) -> ModbusStatus:
         status = ModbusStatus()
         master = self.get_master_connection(stype)
-        logger.info("writing to %s register %s value %s", rtype, register, value)
         if rtype == RegisterType.HOLDING:
             response = master.slave_conn.write_register(
                 address=self.get_register_with_offset(register, stype), value=value
@@ -395,7 +408,6 @@ class RelControl:
             status.error = response
             return status
         logger.info("writing ok ✨ %s", stype)
-        status.status = f"write ok {stype.value}"
         status.value = value
         return status
 
