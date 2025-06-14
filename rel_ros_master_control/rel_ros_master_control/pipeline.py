@@ -12,7 +12,6 @@ from rel_ros_master_control.constants import (
     Params,
     PressureState,
     SensorDistanceParams,
-    SensorDistanceState,
     SensorDistanceStateName,
     Sensors,
 )
@@ -64,7 +63,7 @@ def sensor_distance_params(control: RelControl, bucket_distance: int) -> SensorD
 
 def sensor_distance_state(
     control: RelControl, sensor_distance_params: SensorDistanceParams
-) -> SensorDistanceState:
+) -> SensorDistanceStateName:
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     distance_state = SensorDistanceStateName.E
     if sensor_distance < sensor_distance_params.vacuum_distance:
@@ -111,8 +110,6 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
     control.apply_tower_state(state)
     return state
 
-
-# TODO calculate sensor_distance_state and pass it as an input
 
 #  ---------------------------------------------------------
 #  SensorDistanceStateName
@@ -217,7 +214,6 @@ def sensor_laser_on_state__d(
 @config.when(sensor_distance_state=SensorDistanceStateName.E)
 def sensor_laser_on_state__e(
     control: RelControl,
-    sensor_distance_params: SensorDistanceStateName,
 ) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)

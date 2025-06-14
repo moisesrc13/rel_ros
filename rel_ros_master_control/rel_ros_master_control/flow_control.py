@@ -1,10 +1,11 @@
 import importlib
+from queue import Queue
 from typing import Any, Optional
 
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
-from rel_ros_master_control.constants import Constants, FlowStateAction
+from rel_ros_master_control.constants import Constants, FlowStateAction, FlowTask
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -51,12 +52,9 @@ class LoggingPreNodeExecute(lifecycle.api.BasePreNodeExecute):
         logger.info("🚀 running 📋 %s", node_._name)
 
 
-def run(control: RelControl, tasks: list[str]):
+def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
     router_module = importlib.import_module("rel_ros_master_control.pipeline")
     default_adapter = base.DefaultAdapter(base.DictResult())
-    inputs = {
-        "control": control,
-    }
     dr = (
         driver.Builder()
         .with_modules(router_module)
@@ -68,28 +66,50 @@ def run(control: RelControl, tasks: list[str]):
         )
         .build()
     )
-    init_flow_state = FlowStateAction.UNKNOWN
-    node_to_validate = tasks[-1]
     try:
-        logger.info("✨ running control flow with tasks %s", tasks)
-        r = dr.execute(tasks)
-        init_flow_state = FlowStateAction(int(r[node_to_validate].iloc[-1]))
+        logger.info("✨ running control flow with tasks %s", flow_task.tasks)
+        r = dr.execute(flow_task.tasks)
+        outputs = {key: value for key, value in r.items() if key in flow_task.outputs}
+        logger.info("🗳 ==> next inputs %s", outputs)
+        return outputs
     except Exception as err:
-        logger.error("❌ error running flow - %s", err)
+        logger.error("❌ error running flow tasks %s - %s", flow_task, err)
+        raise err
 
-    match init_flow_state:
-        case FlowStateAction.TO_RECYCLE_PROCESS:
-            run(control, Constants.flow_tasks_recycle)
-        case FlowStateAction.TO_PWM:
-            run(control, Constants.flow_tasks_pwm)
-        case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
-            run(control, Constants.flow_tasks_pwm)
-        case FlowStateAction.WAITING_FOR_BUCKET:
-            run(control, Constants.flow_tasks_bucket_change)
-        case FlowStateAction.COMPLETE:
-            logger.info("🤘 🎮 completing flow with state DONE")
-        case _:
-            logger.warning("❓ completing flow with state %s ...", init_flow_state)
+
+def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, debug=False):
+    inputs = {"control": control}
+    while True:
+        try:
+            inputs = run_flow(inputs, flow_task)
+            inputs["control"] = control
+            final_output_name = flow_task.tasks[-1]
+            final_value = inputs[final_output_name]
+            if isinstance(final_value, FlowStateAction):
+                match final_value:
+                    case FlowStateAction.TO_RECYCLE_PROCESS:
+                        flow_task = Constants.flow_tasks_recycle
+                    case FlowStateAction.TO_PWM:
+                        flow_task = Constants.flow_tasks_pwm
+                    case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
+                        flow_task = Constants.flow_tasks_pwm
+                    case FlowStateAction.WAITING_FOR_BUCKET:
+                        flow_task = Constants.flow_tasks_bucket_change
+                    case FlowStateAction.COMPLETE:
+                        logger.info("🤘 🎮 completing flow with state DONE")
+                        flow_task = Constants.flow_calculate_distance_sensor_case
+                        inputs = {"control": control}
+                    case _:
+                        logger.warning("❓ completing flow with state %s", final_value)
+                        flow_task = Constants.flow_calculate_distance_sensor_case
+                        inputs = {"control": control}
+            if debug:
+                input("😴 continue? ...")
+        except Exception as err:
+            logger.error("❌ error running flow - %s", err)
+            if queue is not None and (item := queue.get()):
+                logger.warning("mark %s as done", item)
+                queue.task_done()
 
 
 if __name__ == "__main__":
@@ -103,4 +123,4 @@ if __name__ == "__main__":
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
-    run(control, Constants.flow_tasks_init_state)
+    run_flow(control, Constants.flow_tasks_init_state)
