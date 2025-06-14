@@ -44,5 +44,7 @@ if __name__ == "__main__":
         case TestCase.A:
             control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
             control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
+            control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 2)
+            control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 92)
 
     logger.info("done ...")
