@@ -298,7 +298,7 @@ class RelControl:
         register = get_register_by_name(self.hmi_cr, enum_name.value)
         value = self.read_hmi_cregister(register.address).value
         logger.info(
-            "reading HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+            "reading 📺 HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
         )
         return self.read_hmi_cregister(register.address).value
 
@@ -306,7 +306,7 @@ class RelControl:
         register = get_register_by_name(self.hmi_hr, enum_name.value)
         value = self.read_hmi_hregister(register.address).value
         logger.info(
-            "reading HMI hr %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+            "reading 📺 HMI hr %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
         )
         return self.read_hmi_hregister(register.address).value
 
@@ -408,7 +408,7 @@ class RelControl:
         register = get_register_by_name(self.iolink_hr, enum_name.value)
         value = self.read_hregister(register.address, SlaveType.IOLINK).value
         logger.info(
-            "reading IOLink hr %s (%s) ok | value: ✨ %s", register.name, register.address, value
+            "reading 🛸 IOLink hr %s (%s) ok | value: ✨ %s", register.name, register.address, value
         )
         return value
 
@@ -418,14 +418,6 @@ class RelControl:
         if rtype == RegisterType.HOLDING:
             return self.read_hregister(register, SlaveType.HMI)
         return self.read_hmi_cregister(register)
-
-    def get_iolink_data_by_hr_name(self, register_name: str) -> int:
-        register = get_register_by_name(self.iolink_hr, register_name)
-        value = self.read_iolink_hregister(register.address).value
-        logger.info(
-            "reading IOLink hr %s (%s) ok | value: ✨ %s", register_name, register.address, value
-        )
-        return self.read_iolink_hregister(register.address).value
 
     def get_iolink_hr_data(self) -> list[HRegister]:
         updated_registers = []
@@ -453,7 +445,7 @@ class RelControl:
         addresses = [r.address for r in self.hmi_hr]
         addresses.sort()
         logger.info(
-            "reading HMI %s holding register data, addresses %s", master.slave_conn, addresses
+            "reading 📺 HMI %s holding register data, addresses %s", master.slave_conn, addresses
         )
         logger.info("reading total records %s", len(addresses))
         registers_data = {}
@@ -478,7 +470,7 @@ class RelControl:
         addresses = [r.address for r in self.hmi_cr]
         addresses.sort()
         logger.info(
-            "reading HMI %s coils register data, addresses %s", master.slave_conn, addresses
+            "reading 📺 HMI %s coils register data, addresses %s", master.slave_conn, addresses
         )
         logger.info("reading total coil records %s", len(addresses))
         registers_data = {}
