@@ -260,12 +260,6 @@ class RelControl:
             logger.error("error reading register %s on %s", register, stype)
             status.error = response
             return status
-        logger.info(
-            "reading ok address %s | ✨ response: %s - | type: %s",
-            register,
-            response.registers,
-            stype,
-        )
         decoder = get_decoder(response)
         status.value = get_value(decoder)
         status.status = f"read ok {stype.value}"
@@ -421,6 +415,10 @@ class RelControl:
 
     def get_iolink_data_by_hr_name(self, register_name: str) -> int:
         register = get_register_by_name(self.iolink_hr, register_name)
+        value = self.read_iolink_hregister(register.address).value
+        logger.info(
+            "reading IOLink hr %s (%s) ok | value: ✨ %s", register_name, register.address, value
+        )
         return self.read_iolink_hregister(register.address).value
 
     def get_iolink_hr_data(self) -> list[HRegister]:
