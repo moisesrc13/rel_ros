@@ -395,7 +395,7 @@ class RelControl:
         status.value = value
         logger.info(
             "writing %s register %s value: ✨ %s",
-            stype,
+            stype.value,
             register,
             value,
         )
@@ -406,7 +406,11 @@ class RelControl:
 
     def read_iolink_hregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.iolink_hr, enum_name.value)
-        return self.read_hregister(register.address, SlaveType.IOLINK).value
+        value = self.read_hregister(register.address, SlaveType.IOLINK).value
+        logger.info(
+            "reading IOLink hr %s (%s) ok | value: ✨ %s", register.name, register.address, value
+        )
+        return value
 
     def read_hmi_register(
         self, register: int, rtype: RegisterType = RegisterType.HOLDING
