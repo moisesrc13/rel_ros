@@ -69,8 +69,9 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
     try:
         logger.info("✨ running control flow with tasks %s", flow_task.tasks)
         r = dr.execute(flow_task.tasks)
-        logger.info("response from hamilton driver: %s", r)
-        return {key: value for key, value in r.items() if key in flow_task.outputs}
+        outputs = {key: value for key, value in r.items() if key in flow_task.outputs}
+        logger.info("🗳 next inputs %s", outputs)
+        return outputs
     except Exception as err:
         logger.error("❌ error running flow tasks %s - %s", flow_task, err)
         raise err
