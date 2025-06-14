@@ -229,8 +229,8 @@ class RelControl:
     def write_iolink_hregister(self, register: int, value: int) -> ModbusStatus:
         return self.write_register(register, value, SlaveType.IOLINK)
 
-    def write_iolink_hregister_by_name(self, name: str, value: int) -> ModbusStatus:
-        register = get_register_by_name(self.iolink_hr, name)
+    def write_iolink_hregister_by_name(self, enum_name: Enum, value: int) -> ModbusStatus:
+        register = get_register_by_name(self.iolink_hr, enum_name.value)
         return self.write_register(register.address, value, SlaveType.IOLINK)
 
     def write_hmi_hregister_by_name(self, enum_name: Enum, value: int) -> ModbusStatus:

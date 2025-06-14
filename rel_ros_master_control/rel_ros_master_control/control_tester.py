@@ -2,6 +2,7 @@ import argparse
 from enum import Enum
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
+from rel_ros_master_control.constants import Params, Sensors
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -27,6 +28,9 @@ if __name__ == "__main__":
         default="a",
         type=str,
     )
+    args = parser.parse_args()
+    test_case = TestCase(args.testcase)
+    logger.info("running test case %s", test_case)
     iolink_config = load_iolink_config()
     hmi_config = load_hmi_config()
     control = RelControl(
@@ -36,3 +40,9 @@ if __name__ == "__main__":
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
+    match test_case:
+        case TestCase.A:
+            control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
+            control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
+
+    logger.info("done ...")
