@@ -282,22 +282,19 @@ class RelControl:
             status.error = response
             return status
         status.value = int(response.bits[0])
-        logger.info("reading coil %s ok | value: ✨ %s", register, status.value)
         status.status = "read coil ok"
         return status
 
     def read_hmi_hregister(self, register: int) -> ModbusStatus:
         status = ModbusStatus()
-        logger.info("reading hmi holding register %s", register)
         master = self.get_master_connection(SlaveType.HMI)
         response = master.slave_conn.read_holding_registers(
             address=self.get_register_with_offset(register, SlaveType.HMI), count=1
         )
         if response.isError():
-            logger.error("error reading hmi holding register")
+            logger.error("error reading HMI hr %s", register)
             status.error = response
             return status
-        logger.info("reading hmi hr ok | value: ✨ %s", response.registers)
         decoder = get_decoder(response)
         status.value = get_value(decoder)
         status.status = "read hr ok"
@@ -305,10 +302,18 @@ class RelControl:
 
     def read_hmi_cregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.hmi_cr, enum_name.value)
+        value = self.read_hmi_cregister(register.address).value
+        logger.info(
+            "reading HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+        )
         return self.read_hmi_cregister(register.address).value
 
     def read_hmi_hregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.hmi_hr, enum_name.value)
+        value = self.read_hmi_hregister(register.address).value
+        logger.info(
+            "reading HMI hr %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+        )
         return self.read_hmi_hregister(register.address).value
 
     def apply_pressure_regulator_state(self, state: PressureState):
