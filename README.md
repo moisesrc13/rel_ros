@@ -123,6 +123,12 @@ cd ~/ros2_ws
 
 ---
 
+### Master Tester
+
+```bash
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control_tester.py -t a
+```
+
 ### Master Commands for IOLink and HMI
 
 #### HMI master commands
