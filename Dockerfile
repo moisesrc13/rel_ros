@@ -50,6 +50,7 @@ RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
 RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
 RUN echo 'export APP_MASTER_IOLINK_ID=0' >> ~/.bashrc
 
+ENV PYTHONPATH=""
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"

@@ -4,7 +4,6 @@ pydantic-settings==2.6.0
 pydantic_core==2.23.4
 black==25.1.0
 catkin_pkg==1.0.0
-empy==4.2
 isort==6.0.1
 tenacity==9.1.2
 pyaml==25.1.0
