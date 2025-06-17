@@ -170,23 +170,59 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 
 ---
 
-## Sym links in RPi
+## Run ROS on RPi4
+
+### Sym links in RPi
 
 ```bash
 ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi && \
 ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control && \
 ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
+ln -s /home/relant/git/rel_ros/config /home/relant/config
 ```
 
-### Run ROS on RPi4
+### Files and requirements
 
-```
+```bash
 cd /home/relant/ros2_ws
 cp /home/relant/git/rel_ros/*.sh .
-cp -r /home/relant/git/rel_ros/rel_ros_master_control/rel_ros_master_control/config /home/relant/ros2_ws/install/rel_ros_master_control/lib/python3.12/site-packages/rel_ros_master_control/
-cp -r /home/relant/git/rel_ros/rel_ros_hmi/rel_ros_hmi/config /home/relant/ros2_ws/install/rel_ros_hmi/lib/python3.12/site-packages/rel_ros_hmi/
 
+# install requirements, ensure the venv is activated
+pip install -r ~/git/rel_ros/requirements.txt
 ```
+
+### 1. Export env vars (RPi)
+
+```bash
+export CONFIG_PATH="/home/relant/config"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.12/site-packages"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
+export LOGLEVEL="DEBUG"
+export USE_TEST_MODBUS="true"
+export APP_MASTER_IOLINK_ID="0"
+```
+
+### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
+### 3. Run rest API app (optional - RPi)
+
+`python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
+
+### 4. Run test HMI modbus slave (RPi)
+
+`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
+
+### 5. Run IOLink Node (RPi)
+
+```bash
+cd ~/ros2_ws
+./run-ros-master.sh
+```
+
+
 
 ## Config REST Service
 
