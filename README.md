@@ -177,7 +177,7 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 ```bash
 ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi && \
 ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control && \
-ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
+ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces && \
 ln -s /home/relant/git/rel_ros/config /home/relant/config
 ```
 
@@ -199,7 +199,7 @@ export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.12/site-p
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 export LOGLEVEL="DEBUG"
-export USE_TEST_MODBUS="true"
+export USE_TEST_MODBUS="true"  # set this to false to work with IOLink connected in the network
 export APP_MASTER_IOLINK_ID="0"
 ```
 
@@ -222,7 +222,13 @@ cd ~/ros2_ws
 ./run-ros-master.sh
 ```
 
+---
 
+### Master Tester (Rpi)
+
+```bash
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control_tester.py -t a
+```
 
 ## Config REST Service
 
