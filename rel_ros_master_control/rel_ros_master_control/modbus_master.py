@@ -68,7 +68,7 @@ class RelModbusMaster:
     )
     def do_connect(self):
         try:
-            logger.info("connecting to modbus slave")
+            logger.info("connecting to modbus slave %s", self.slave_conn)
             assert self.slave_conn.connect()
             logger.info(
                 "modbus slave connected 🤘 is socked opened %s, transport %s",
