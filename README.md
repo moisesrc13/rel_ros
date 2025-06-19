@@ -102,7 +102,12 @@ export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
 ```
 
-### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data
+### 2. Run HMI node
+
+```bash
+cd ~/ros2_ws
+./run-ros-hmi.sh
+```
 
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
@@ -110,11 +115,7 @@ export APP_MASTER_IOLINK_ID="0"
 
 `python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
 
-### 4. Run test HMI modbus slave
-
-`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
-
-### 5. Run IOLink Node
+### 4. Run IOLink Node
 
 ```bash
 cd ~/ros2_ws
