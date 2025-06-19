@@ -224,5 +224,5 @@ class Constants:
         outputs=["bucket_change_frame", "bucket_change_step_2"],
     )
     laser_infinity: int = 1000
-    wait_for_sensor_laser_ms: int = 2000
+    wait_for_sensor_laser_ms: int = 5000
     wait_read_laser: float = 0.20
