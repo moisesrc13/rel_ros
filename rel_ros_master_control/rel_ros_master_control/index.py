@@ -38,7 +38,7 @@ class RelROSNode(Node):
         self.start_main_control()
 
     def timer_callback_text(self):
-        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<<<<")
+        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<")
 
     def apply_initial_state(self):
         for m in self.masters:
