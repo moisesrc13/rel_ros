@@ -83,7 +83,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
             logger.info("raising a UserTask for coil resgister 🤠 ...")
             with PublishHMIUserTask() as msg:
                 if msg:
-                    setattr(msg, "coil_address", register.address)
+                    setattr(msg, "coil_address", register.name)
                     setattr(msg, "value", value)
                     logger.info(
                         "📨 publishing message on HMIUserTask for slave id %s - %s",

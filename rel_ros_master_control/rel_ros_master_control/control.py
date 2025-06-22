@@ -133,7 +133,7 @@ class RelControl:
         self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
 
-    def run_user_actions(self, coil_address: int, value: int):
+    def run_user_actions(self, coil_address: str, value: int):
         """
         This are all manifold actions
 
