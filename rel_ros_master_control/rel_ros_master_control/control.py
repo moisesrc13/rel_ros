@@ -141,8 +141,8 @@ class RelControl:
             coil_address (int): _description_
             value (int): _description_
         """
-        logger.info("running user task on %s - value %s", register, value)
         register, _ = get_register_by_address(self.hmi_cr, coil_address)
+        logger.info("running user task on %s - value %s", register.name, value)
         user_action = HMIWriteAction(register.name)
         if value == 0:
             self.apply_manifold_state(ManifoldActions.DEACTIVATE)
