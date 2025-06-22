@@ -113,7 +113,7 @@ cd ~/ros2_ws
 
 ```bash
 source install/setup.bash
-ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: 25, value: 1}"
+ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
 ```
 
 

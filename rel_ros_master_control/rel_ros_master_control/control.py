@@ -141,7 +141,7 @@ class RelControl:
             coil_address (int): _description_
             value (int): _description_
         """
-        register, _ = get_register_by_address(self.hmi_cr, coil_address)
+        register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
             logger.info("resgiter with coil_address %s not found", coil_address)
             return
