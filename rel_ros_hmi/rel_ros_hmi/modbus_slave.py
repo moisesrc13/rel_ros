@@ -80,10 +80,10 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 logger.debug("Not getting a valid register for address %s", address)
                 return
             rtype = RegisterModbusType.CR
-            logger.info("raising a UserTask 🤠 ...")
+            logger.info("raising a UserTask for coil resgister 🤠 ...")
             with PublishHMIUserTask() as msg:
                 if msg:
-                    setattr(msg, "coil_address", register)
+                    setattr(msg, "coil_address", register.address)
                     setattr(msg, "value", value)
                     logger.info(
                         "📨 publishing message on HMIUserTask for slave id %s - %s",

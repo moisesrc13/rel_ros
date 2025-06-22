@@ -142,6 +142,9 @@ class RelControl:
             value (int): _description_
         """
         register, _ = get_register_by_address(self.hmi_cr, coil_address)
+        if not register:
+            logger.info("resgiter with coil_address %s not found", coil_address)
+            return
         logger.info("running user task on %s - value %s", register.name, value)
         user_action = HMIWriteAction(register.name)
         if value == 0:

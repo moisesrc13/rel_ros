@@ -116,6 +116,7 @@ source install/setup.bash
 ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: 25, value: 1}"
 ```
 
+
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
 ### 3. Run rest API app (optional)
