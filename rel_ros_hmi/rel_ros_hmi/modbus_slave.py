@@ -87,7 +87,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                     setattr(msg, "value", value)
                     logger.info(
                         "📨 publishing message on HMIUserTask for slave id %s - %s",
-                        self.slave.id,
+                        self.slave.hmi_id,
                         msg,
                     )
                     self.user_task_publisher.publish(msg)
