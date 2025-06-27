@@ -222,13 +222,16 @@ export APP_MASTER_IOLINK_ID="0"
 
 ### 4. Run test HMI modbus slave (RPi)
 
-`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
+```bash
+cd ~/ros2_ws
+authbind --deep ./run-ros-hmi.sh
+```
 
 ### 5. Run IOLink Node (RPi)
 
 ```bash
 cd ~/ros2_ws
-./run-ros-master.sh
+authbind --deep ./run-ros-master.sh
 ```
 
 ---
@@ -305,5 +308,13 @@ IOLink: 192.168.0.21:502
 
 - HMI connection in VT Studio > System Settings > PLC communication
 - Start simulator > Tool > Start simulator
-- Allow TPC connections on 502 port
-  `sudo iptables -A INPUT -p tcp --dport 502 -j ACCEPT`
+
+## Non Root privileged ports (for modbus)
+
+```bash
+sudo apt-get install authbind
+sudo mkdir /etc/authbind/byport
+sudo touch /etc/authbind/byport/502
+sudo chmod 777 /etc/authbind/byport/502
+authbind --deep  # script here
+```
