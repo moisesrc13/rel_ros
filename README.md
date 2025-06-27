@@ -294,3 +294,16 @@ network:
 
 Then run
 `sudo netplan apply`
+
+## Team Viewer
+ID: 928154640
+pwd: vm2sruv8
+
+## Setup Relant
+RPi: 192.168.0.10
+IOLink: 192.168.0.21:502
+
+- HMI connection in VT Studio > System Settings > PLC communication
+- Start simulator > Tool > Start simulator
+- Allow TPC connections on 502 port
+  `sudo iptables -A INPUT -p tcp --dport 502 -j ACCEPT`
