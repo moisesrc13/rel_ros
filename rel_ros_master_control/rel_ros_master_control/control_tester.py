@@ -1,4 +1,5 @@
 import argparse
+import time
 from enum import Enum
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
@@ -7,6 +8,12 @@ from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
+
+# d = Distancia de sensosr laser
+# W = distancia de tamaño de cubeta
+# X = Límite superior de prevacío
+# Y = Límite superior de vacio
+# Z = Distancia para vacío
 
 
 class TestCase(Enum):
@@ -43,7 +50,7 @@ if __name__ == "__main__":
     match test_case:
         case TestCase.A:
             control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
-            control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
+            control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 200)
             control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 0)
             control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 0)
         case TestCase.D:
