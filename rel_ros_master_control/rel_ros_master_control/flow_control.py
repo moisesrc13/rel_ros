@@ -85,6 +85,7 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
             inputs["control"] = control
             final_output_name = flow_task.tasks[-1]
             final_value = inputs[final_output_name]
+            logger.info("👌 latest flow output %s", final_value)
             if isinstance(final_value, FlowStateAction):
                 match final_value:
                     case FlowStateAction.TO_RECYCLE_PROCESS:

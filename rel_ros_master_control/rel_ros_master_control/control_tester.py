@@ -33,7 +33,7 @@ def test_case_a(control: RelControl):
     input("😴 increase sensor laser ? ...")
     while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < vacuum_distance:
         time.sleep(1)
-        sensor_distance += 10
+        sensor_distance += 25
         logger.info("increase sensor distance %s", sensor_distance)
         control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, sensor_distance)
         time.sleep(3)
