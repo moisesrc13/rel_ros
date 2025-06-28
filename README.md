@@ -156,6 +156,7 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 
 ```bash
 
+# Run IOLink on local for testing
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
 # iolink write

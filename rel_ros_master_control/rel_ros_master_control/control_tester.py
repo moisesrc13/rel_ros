@@ -24,6 +24,12 @@ class TestCase(Enum):
     E = "e"  # E) Sensor laser d>W && d<= ∞
 
 
+def test_case_a(control: RelControl):
+    control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
+    control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 200)
+    control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 1)
+
+
 if __name__ == "__main__":
     logger.info("starting control tester for node id 0 🤠")
     parser = argparse.ArgumentParser()
@@ -47,12 +53,14 @@ if __name__ == "__main__":
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
+    logger.info("setting params for bucket distances")
+    control.write_hmi_hregister_by_name(Params.param_distance_bucket_1, 100)
+    control.write_hmi_hregister_by_name(Params.param_distance_bucket_2, 200)
+    control.write_hmi_hregister_by_name(Params.param_distance_bucket_3, 300)
     match test_case:
         case TestCase.A:
-            control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
-            control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 200)
-            control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 0)
-            control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 0)
+            test_case_a(control)
+
         case TestCase.D:
             control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
             control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
