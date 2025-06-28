@@ -30,7 +30,9 @@ def test_case_a(control: RelControl):
     control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, sensor_distance)
     control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, vacuum_distance)
     control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 1)
+    input("😴 increase sensor laser ? ...")
     while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < vacuum_distance:
+        time.sleep(1)
         sensor_distance += 10
         logger.info("increase sensor distance %s", sensor_distance)
         control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, sensor_distance)

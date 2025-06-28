@@ -72,7 +72,7 @@ class RelROSNode(Node):
                         m,
                         Constants.flow_calculate_distance_sensor_case,
                         self.queue,
-                        True,
+                        os.getenv("DEBUG_ROS", "true").lower() in ["true", "yes"],
                     ),  # true for debugging
                 )
                 self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")

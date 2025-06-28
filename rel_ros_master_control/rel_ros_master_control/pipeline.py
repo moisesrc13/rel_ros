@@ -64,6 +64,7 @@ def sensor_distance_params(control: RelControl, bucket_distance: int) -> SensorD
 def sensor_distance_state(
     control: RelControl, sensor_distance_params: SensorDistanceParams
 ) -> SensorDistanceStateName:
+    logger.info("📏 getting sensor distance state...")
     sensor_distance = control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
     distance_state = SensorDistanceStateName.E
     if sensor_distance < sensor_distance_params.vacuum_distance:
