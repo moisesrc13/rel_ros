@@ -308,6 +308,7 @@ IOLink: 192.168.0.21:502
 
 - HMI connection in VT Studio > System Settings > PLC communication
 - Start simulator > Tool > Start simulator
+- Send Data, Communications > PC VT Send Data > all data
 
 ## Non Root privileged ports (for modbus)
 
