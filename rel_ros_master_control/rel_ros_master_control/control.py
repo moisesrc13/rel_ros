@@ -121,6 +121,7 @@ class RelControl:
         self.master_hmi.do_connect()
         logger.info("master_HMI connected ✨")
         logger.info("creating PWM")
+        self.pwm = None
         try:
             self.pwm = RelPWM(PWMConfig())
             logger.info("PWM set ✨")
@@ -346,8 +347,9 @@ class RelControl:
             self.pwm.change_duty(duty=pulse_value)
 
     def stop_pwm(self):
-        self.pwm.stop_duty()
-        self.pwm_started = False
+        if self.pwm:
+            self.pwm.stop_duty()
+            self.pwm_started = False
 
     def write_hmi_cregister_by_address_name(self, enum_name: Enum, enum_value: Enum):
         self.write_register_by_address_name(
