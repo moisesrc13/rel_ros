@@ -5,7 +5,12 @@ from typing import Any, Optional
 from hamilton import base, driver, lifecycle, node, telemetry
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
-from rel_ros_master_control.constants import Constants, FlowStateAction, FlowTask
+from rel_ros_master_control.constants import (
+    Constants,
+    FlowStateAction,
+    FlowTask,
+    SensorDistanceStateName,
+)
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
 
@@ -81,13 +86,18 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     inputs = {"control": control}
     while True:
         try:
+            logger.info("💡 running flow: %s", flow_task.name)
+            if debug:
+                input("😴 continue? ...")
             inputs = run_flow(inputs, flow_task)
             inputs["control"] = control
             final_output_name = flow_task.tasks[-1]
             final_value = inputs[final_output_name]
-            logger.info("👌 latest flow output %s", final_value)
+            logger.info("📤 latest flow output: %s", final_value)
             if isinstance(final_value, FlowStateAction):
                 match final_value:
+                    case SensorDistanceStateName.E:
+                        pass
                     case FlowStateAction.TO_RECYCLE_PROCESS:
                         flow_task = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
@@ -104,8 +114,6 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
                         logger.warning("❓ completing flow with state %s", final_value)
                         flow_task = Constants.flow_calculate_distance_sensor_case
                         inputs = {"control": control}
-            if debug:
-                input("😴 continue? ...")
         except Exception as err:
             logger.error("❌ error running flow - %s", err)
             if queue is not None and (item := queue.get()):
