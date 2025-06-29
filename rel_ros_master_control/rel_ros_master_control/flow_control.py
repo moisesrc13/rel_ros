@@ -104,6 +104,8 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
                         flow_task = Constants.flow_tasks_pwm
                     case FlowStateAction.PRESSURE_NOT_ON_TARGET_BARES:
                         flow_task = Constants.flow_tasks_pwm
+                    case FlowStateAction.BUCKET_CHANGE_OVER_W:
+                        flow_task = Constants.flow_tasks_bucket_change_frame
                     case FlowStateAction.WAITING_FOR_BUCKET:
                         flow_task = Constants.flow_tasks_bucket_change
                     case FlowStateAction.COMPLETE:
