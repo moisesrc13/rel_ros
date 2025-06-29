@@ -78,7 +78,7 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         logger.info("🗳 ==> next inputs %s", outputs)
         return outputs
     except Exception as err:
-        logger.error("❌ error running flow tasks %s - %s", flow_task, err)
+        logger.error("❌ error running flow tasks: %s - %s", flow_task, err)
         raise err
 
 
@@ -86,7 +86,7 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     inputs = {"control": control}
     while True:
         try:
-            logger.info("💡 running flow: %s", flow_task.name)
+            logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:
                 input("😴 continue? ...")
             inputs = run_flow(inputs, flow_task)
