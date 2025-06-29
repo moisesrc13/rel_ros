@@ -405,7 +405,7 @@ def bucket_change_frame__underw(
         control.apply_manifold_state(ManifoldActions.ACTIVATE)
         control.apply_manifold_state(ManifoldActions.PISTONS_UP)
         if (
-            control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+            control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
             > sensor_distance_params.bucket_distance
         ):
             control.apply_manifold_state(ManifoldActions.DEACTIVATE)
@@ -416,7 +416,7 @@ def bucket_change_frame__underw(
     control.apply_manifold_state(ManifoldActions.PISTONS_UP)
     logger.info("when laser distance > W turn off vacuum electro-vale")
     while (
-        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
         < sensor_distance_params.bucket_distance
     ):
         continue
@@ -433,7 +433,7 @@ def bucket_change_frame__overw(
     control.apply_manifold_state(ManifoldActions.ACTIVATE)
     control.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
     while (
-        control.read_hmi_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
+        control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE)
         < sensor_distance_params.bucket_distance
     ):
         continue
