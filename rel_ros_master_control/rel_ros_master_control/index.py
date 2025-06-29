@@ -33,7 +33,7 @@ class RelROSNode(Node):
         self.get_logger().info("apply initial state")
         self.apply_initial_state()
         self.get_logger().info("creating alive timer ⏱")
-        self.create_timer(10.0, self.timer_callback_text)
+        self.create_timer(30.0, self.timer_callback_text)
         self.get_logger().info("======= creating MAIN CONTROL 🤖 =======")
         self.start_main_control()
 

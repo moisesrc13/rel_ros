@@ -225,10 +225,16 @@ class Constants:
             "bucket_distance",
             "sensor_distance_params",
             "bucket_change",
+        ],
+        outputs=["bucket_change"],
+    )
+    flow_tasks_bucket_change_frame = FlowTask(
+        name="flow_tasks_bucket_change_frame",
+        tasks=[
             "bucket_change_frame",
             "bucket_change_step_2",
         ],
-        outputs=["bucket_change_frame", "bucket_change_step_2"],
+        outputs=["bucket_change_step_2"],
     )
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 5000

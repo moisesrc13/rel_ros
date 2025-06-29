@@ -78,7 +78,7 @@ def run_flow(inputs: dict, flow_task: FlowTask) -> dict:
         logger.info("🗳 ==> next inputs %s", outputs)
         return outputs
     except Exception as err:
-        logger.error("❌ error running flow tasks: %s - %s", flow_task, err)
+        logger.error("❌ error running flow tasks: %s - %s", flow_task.tasks, err)
         raise err
 
 
