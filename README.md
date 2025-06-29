@@ -102,7 +102,20 @@ export USE_TEST_MODBUS="true"
 export APP_MASTER_IOLINK_ID="0"
 ```
 
-### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data
+### 2. Run HMI node
+
+```bash
+cd ~/ros2_ws
+./run-ros-hmi.sh
+```
+
+#### ROS publish message
+
+```bash
+source install/setup.bash
+ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
+```
+
 
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
@@ -110,11 +123,7 @@ export APP_MASTER_IOLINK_ID="0"
 
 `python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
 
-### 4. Run test HMI modbus slave
-
-`python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_slave.py`
-
-### 5. Run IOLink Node
+### 4. Run IOLink Node
 
 ```bash
 cd ~/ros2_ws
@@ -147,6 +156,7 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 
 ```bash
 
+# Run IOLink on local for testing
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
 # iolink write
@@ -170,22 +180,67 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 
 ---
 
-## Sym links in RPi
+## Run ROS on RPi4
+
+### Sym links in RPi
 
 ```bash
 ln -s /home/relant/git/rel_ros/rel_ros_hmi /home/relant/ros2_ws/src/rel_ros_hmi && \
 ln -s /home/relant/git/rel_ros/rel_ros_master_control /home/relant/ros2_ws/src/rel_ros_master_control && \
-ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces
+ln -s /home/relant/git/rel_ros/rel_interfaces /home/relant/ros2_ws/src/rel_interfaces && \
+ln -s /home/relant/git/rel_ros/config /home/relant/config
 ```
 
-### Run ROS on RPi4
+### Files and requirements
 
-```
+```bash
 cd /home/relant/ros2_ws
 cp /home/relant/git/rel_ros/*.sh .
-cp -r /home/relant/git/rel_ros/rel_ros_master_control/rel_ros_master_control/config /home/relant/ros2_ws/install/rel_ros_master_control/lib/python3.12/site-packages/rel_ros_master_control/
-cp -r /home/relant/git/rel_ros/rel_ros_hmi/rel_ros_hmi/config /home/relant/ros2_ws/install/rel_ros_hmi/lib/python3.12/site-packages/rel_ros_hmi/
 
+# install requirements, ensure the venv is activated
+pip install -r ~/git/rel_ros/requirements.txt
+```
+
+### 1. Export env vars (RPi)
+
+```bash
+export CONFIG_PATH="/home/relant/config"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.12/site-packages"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
+export PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
+export LOGLEVEL="DEBUG"
+export USE_TEST_MODBUS="true"  # set this to false to work with IOLink connected in the network
+export APP_MASTER_IOLINK_ID="0"
+```
+
+### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
+### 3. Run rest API app (optional - RPi)
+
+`python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/rest/app.py`
+
+### 4. Run test HMI modbus slave (RPi)
+
+```bash
+cd ~/ros2_ws
+authbind --deep ./run-ros-hmi.sh
+```
+
+### 5. Run IOLink Node (RPi)
+
+```bash
+cd ~/ros2_ws
+authbind --deep ./run-ros-master.sh
+```
+
+---
+
+### Master Tester (Rpi)
+
+```bash
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control_tester.py -t a
 ```
 
 ## Config REST Service
@@ -243,3 +298,25 @@ network:
 
 Then run
 `sudo netplan apply`
+
+## Team Viewer
+ID: 928154640
+pwd: vm2sruv8
+
+## Setup Relant
+RPi: 192.168.0.10
+IOLink: 192.168.0.21:502
+
+- HMI connection in VT Studio > System Settings > PLC communication
+- Start simulator > Tool > Start simulator
+- Send Data, Communications > PC VT Send Data > all data
+
+## Non Root privileged ports (for modbus)
+
+```bash
+sudo apt-get install authbind
+sudo mkdir /etc/authbind/byport
+sudo touch /etc/authbind/byport/502
+sudo chmod 777 /etc/authbind/byport/502
+authbind --deep  # script here
+```

@@ -1,4 +1,5 @@
 import argparse
+import time
 from enum import Enum
 
 from rel_ros_master_control.config import load_hmi_config, load_iolink_config
@@ -8,6 +9,12 @@ from rel_ros_master_control.logger import new_logger
 
 logger = new_logger(__name__)
 
+# d = Distancia de sensosr laser
+# W = distancia de tamaño de cubeta
+# X = Límite superior de prevacío
+# Y = Límite superior de vacio
+# Z = Distancia para vacío
+
 
 class TestCase(Enum):
     A = "a"  # A) Sensor laser d<Z
@@ -15,6 +22,21 @@ class TestCase(Enum):
     C = "c"  # C) Sensor laser d>Y && d<=X
     D = "d"  # D) Sensor laser d>X && d<W
     E = "e"  # E) Sensor laser d>W && d<= ∞
+
+
+def test_case_a(control: RelControl):
+    vacuum_distance = 200
+    sensor_distance = 100
+    control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, sensor_distance)
+    control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, vacuum_distance)
+    control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 1)
+    input("😴 increase sensor laser ? ...")
+    while control.read_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE) < vacuum_distance:
+        time.sleep(1)
+        sensor_distance += 25
+        logger.info("increase sensor distance %s", sensor_distance)
+        control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, sensor_distance)
+        time.sleep(3)
 
 
 if __name__ == "__main__":
@@ -40,16 +62,18 @@ if __name__ == "__main__":
         hmi_hr=hmi_config.holding_registers,
         hmi_cr=hmi_config.coil_registers,
     )
+    logger.info("setting params for bucket distances")
+    control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_1, 100)
+    control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 200)
+    control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_3, 300)
     match test_case:
         case TestCase.A:
-            control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
-            control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
-            control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 0)
-            control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 0)
+            test_case_a(control)
+
         case TestCase.D:
             control.write_iolink_hregister_by_name(Sensors.SENSOR_LASER_DISTANCE, 90)
             control.write_hmi_hregister_by_name(Params.PARAM_VACUUM_DISTANCE, 100)
             control.write_hmi_hregister_by_name(Params.PARAM_BUCKET_SIZE_SELECTION, 2)
             control.write_hmi_hregister_by_name(Params.PARAM_DISTANCE_BUCKET_2, 92)
 
-    logger.info("done ...")
+    logger.info("Done 🤠...")

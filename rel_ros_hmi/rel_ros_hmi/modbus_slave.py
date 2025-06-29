@@ -80,14 +80,14 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
                 logger.debug("Not getting a valid register for address %s", address)
                 return
             rtype = RegisterModbusType.CR
-            logger.info("raising a UserTask 🤠 ...")
+            logger.info("raising a UserTask for coil resgister 🤠 ...")
             with PublishHMIUserTask() as msg:
                 if msg:
-                    setattr(msg, "coil_address", register)
+                    setattr(msg, "coil_address", register.name)
                     setattr(msg, "value", value)
                     logger.info(
                         "📨 publishing message on HMIUserTask for slave id %s - %s",
-                        self.slave.id,
+                        self.slave.hmi_id,
                         msg,
                     )
                     self.user_task_publisher.publish(msg)
@@ -203,7 +203,7 @@ class ModbusSlaveThread(Thread):
         self.user_task_publisher = user_task_publisher
 
     def run(self):
-        logger.info("running slave thread %s", self.hmi_id)
+        logger.info("running slave hmi_id %s", self.hmi_id)
         try:
             server = run_sync_modbus_server(
                 slave=self.slave,
@@ -214,7 +214,7 @@ class ModbusSlaveThread(Thread):
             if server:
                 server.shutdown()
         except Exception as ex:
-            logger.error("Error %s running slave thread %s", ex, self.hmi_id)
+            logger.error("Error %s running slave hmi_id %s", ex, self.hmi_id)
 
 
 def run_modbus_slaves(

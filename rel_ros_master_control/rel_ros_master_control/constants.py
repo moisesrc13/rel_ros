@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -179,10 +180,12 @@ class Params(Enum):
 class FlowTask(BaseModel):
     tasks: list[str]
     outputs: list[str]
+    name: Optional[str]
 
 
 class Constants:
     flow_calculate_distance_sensor_case = FlowTask(
+        name="flow_calculate_distance_sensor_case",
         tasks=[
             "check_distance_sensor_for_electrovalves",
             "bucket_distance",
@@ -192,6 +195,7 @@ class Constants:
         outputs=["sensor_distance_params", "sensor_distance_state"],
     )
     flow_tasks_init_state = FlowTask(
+        name="flow_tasks_init_state",
         tasks=[
             "sensor_laser_on_state",
             "init_flow_state",
@@ -199,6 +203,7 @@ class Constants:
         outputs=["init_flow_state"],
     )
     flow_tasks_recycle = FlowTask(
+        name="flow_tasks_recycle",
         tasks=[
             "prepare_for_recycle_process",
             "start_pwm",
@@ -209,20 +214,28 @@ class Constants:
         outputs=["recycle_flow_state"],
     )
     flow_tasks_pwm = FlowTask(
+        name="flow_tasks_pwm",
         tasks=["start_pwm", "validate_recycle", "recycle", "recycle_state"],
         outputs=["recycle_state"],
     )
     flow_tasks_bucket_change = FlowTask(
+        name="flow_tasks_bucket_change",
         tasks=[
             "check_distance_sensor_for_electrovalves",
             "bucket_distance",
             "sensor_distance_params",
             "bucket_change",
+        ],
+        outputs=["bucket_change"],
+    )
+    flow_tasks_bucket_change_frame = FlowTask(
+        name="flow_tasks_bucket_change_frame",
+        tasks=[
             "bucket_change_frame",
             "bucket_change_step_2",
         ],
-        outputs=["bucket_change_frame", "bucket_change_step_2"],
+        outputs=["bucket_change_step_2"],
     )
     laser_infinity: int = 1000
-    wait_for_sensor_laser_ms: int = 2000
+    wait_for_sensor_laser_ms: int = 5000
     wait_read_laser: float = 0.20

@@ -33,12 +33,12 @@ class RelROSNode(Node):
         self.get_logger().info("apply initial state")
         self.apply_initial_state()
         self.get_logger().info("creating alive timer ⏱")
-        self.create_timer(10.0, self.timer_callback_text)
+        self.create_timer(30.0, self.timer_callback_text)
         self.get_logger().info("======= creating MAIN CONTROL 🤖 =======")
         self.start_main_control()
 
     def timer_callback_text(self):
-        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<<<<")
+        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<")
 
     def apply_initial_state(self):
         for m in self.masters:
@@ -57,7 +57,7 @@ class RelROSNode(Node):
         self.get_logger().info("creating hmi consumers is done ...")
 
     def listener_hmi_user_task_callback(self, msg: HMIUserTask, hmi_id: int = 0):
-        self.get_logger().info(f"📨 I got an HMI {hmi_id} user task message 📺 {msg}")
+        self.get_logger().info(f"📨 HMI {hmi_id} user task message 📺 {msg}")
         self.masters[hmi_id].run_user_actions(msg.coil_address, msg.value)
 
     def start_main_control(self):
@@ -72,7 +72,7 @@ class RelROSNode(Node):
                         m,
                         Constants.flow_calculate_distance_sensor_case,
                         self.queue,
-                        True,
+                        os.getenv("DEBUG_ROS", "true").lower() in ["true", "yes"],
                     ),  # true for debugging
                 )
                 self.get_logger().info(f"🚀 🎮 starting main control for node id {m.hmi_id}")
