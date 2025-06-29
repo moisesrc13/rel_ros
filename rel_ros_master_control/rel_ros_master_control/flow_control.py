@@ -96,8 +96,16 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
             logger.info("📤 latest flow output: %s", final_value)
             if isinstance(final_value, FlowStateAction):
                 match final_value:
+                    case SensorDistanceStateName.A:
+                        flow_task = Constants.flow_tasks_init_state
+                    case SensorDistanceStateName.B:
+                        flow_task = Constants.flow_tasks_init_state
+                    case SensorDistanceStateName.C:
+                        flow_task = Constants.flow_tasks_init_state
+                    case SensorDistanceStateName.D:
+                        flow_task = Constants.flow_tasks_init_state
                     case SensorDistanceStateName.E:
-                        pass
+                        flow_task = Constants.flow_tasks_init_state
                     case FlowStateAction.TO_RECYCLE_PROCESS:
                         flow_task = Constants.flow_tasks_recycle
                     case FlowStateAction.TO_PWM:
