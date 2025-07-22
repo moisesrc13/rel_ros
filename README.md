@@ -320,3 +320,8 @@ sudo touch /etc/authbind/byport/502
 sudo chmod 777 /etc/authbind/byport/502
 authbind --deep  # script here
 ```
+# check for error
+
+```
+ rel_ros_master_control.services.pwm - ERROR - error setting up PWM - No access to /dev/mem.  Try running as root!
+```

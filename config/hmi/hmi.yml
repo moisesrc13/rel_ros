@@ -88,6 +88,7 @@
       address: 38
     - name: "status_pump_no_depressurized"
       address: 39
+      # 40 emergency stop
   holding_registers:
   # --------------------------------------- PARAMETERS START
     - name: "param_target_pressure_hyd_home"
