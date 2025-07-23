@@ -99,7 +99,7 @@
       address: 40007
       data_type: "uint16"
     - name: "param_user_password"
-      address: 40008
+      address: 16392
       data_type: "uint16"
     - name: "param_target_pressure_hyd_manual"
       address: 40009
