@@ -93,7 +93,7 @@
   holding_registers:
   # --------------------------------------- PARAMETERS START
     - name: "param_target_pressure_hyd_home"
-      address: 40006
+      address: 4006
       data_type: "uint16"
     - name: "param_target_pressure_pistons_home"
       address: 40007
