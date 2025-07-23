@@ -3,8 +3,8 @@
       hmi_id: 0
       slave_tcp:
         host: 0.0.0.0  # localhost for ROS working as HMI slave
-        port: 8845  # 502 is the standard
-        #port: 502  # 502 is the standard
+        #port: 8845  # 502 is the standard
+        port: 502  # 502 is the standard
         offset: 0
   coil_registers:  # default value to 0
     - name: "open_local_window_1_1"
@@ -88,7 +88,8 @@
       address: 38
     - name: "status_pump_no_depressurized"
       address: 39
-      # 40 emergency stop
+    - name: "status_debug"
+      address: 40
   holding_registers:
   # --------------------------------------- PARAMETERS START
     - name: "param_target_pressure_hyd_home"
