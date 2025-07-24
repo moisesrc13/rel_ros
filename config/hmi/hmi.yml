@@ -92,6 +92,12 @@
       address: 40
   holding_registers:
   # --------------------------------------- PARAMETERS START
+    - name: "test_1"
+      address: 8
+      data_type: "uint16"
+    - name: "test_2"
+      address: 9
+      data_type: "uint16"
     - name: "param_target_pressure_hyd_home"
       address: 40006
       data_type: "uint16"
