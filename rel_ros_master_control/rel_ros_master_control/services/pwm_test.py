@@ -3,7 +3,8 @@ import time
 
 # Define the GPIO chip and line
 chip = gpiod.Chip('/dev/gpiochip0')  # Or 'gpiochip1' or other, depending on your RPi model
-pwm_line = chip.get_line(32)  # Replace 17 with your desired GPIO pin number
+print(chip.get_info())
+pwm_line = chip.request_lines(32)  # Replace 17 with your desired GPIO pin number
 
 # Request the line as an output
 pwm_line.request(consumer="PWM_Example", type=gpiod.LINE_REQ_DIR_OUT)
