@@ -351,3 +351,10 @@ crw-r----- 1 root kmem 1, 1 Jun  4 06:24 /dev/mem
 ```
 
 `sudo adduser relant kmem`
+
+### Fix perms issues
+
+sudo apt install python3.12-venv
+python3 -m venv --system-site-packages sysvenv
+source sysvenv/bin/activate
+pip install gpiod
