@@ -2,7 +2,7 @@ import lgpio
 import time
 
 # Pin number (BCM numbering)
-PWM_PIN = 12
+PWM_PIN = 32
 
 # Open the GPIO chip
 h = lgpio.gpiochip_open(0)
