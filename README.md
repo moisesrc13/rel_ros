@@ -335,6 +335,7 @@ Checking this [lib](https://lloydrochester.com/post/hardware/libgpiod-intro-rpi/
 sudo apt install gpiod
 sudo apt install libgpiod-dev
 sudo apt-get install python3-rpi.gpio
+sudo apt install python3-lgpio
 
 Get the chip number
 
