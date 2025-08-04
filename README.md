@@ -334,6 +334,7 @@ Checking this [lib](https://lloydrochester.com/post/hardware/libgpiod-intro-rpi/
 
 sudo apt install gpiod
 sudo apt install libgpiod-dev
+sudo apt-get install python3-rpi.gpio
 
 Get the chip number
 
@@ -342,3 +343,11 @@ sudo gpiodetect
 gpiochip0 [pinctrl-bcm2711] (58 lines)
 gpiochip1 [raspberrypi-exp-gpio] (8 lines) ===> use this one
 ```
+
+add user to `kmem` 
+```
+(venv) relant@relant-desktop:~/git/rel_ros$ ls -al /dev/mem
+crw-r----- 1 root kmem 1, 1 Jun  4 06:24 /dev/mem
+```
+
+`sudo adduser relant kmem`
