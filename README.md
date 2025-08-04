@@ -334,3 +334,11 @@ Checking this [lib](https://lloydrochester.com/post/hardware/libgpiod-intro-rpi/
 
 sudo apt install gpiod
 sudo apt install libgpiod-dev
+
+Get the chip number
+
+```
+sudo gpiodetect
+gpiochip0 [pinctrl-bcm2711] (58 lines)
+gpiochip1 [raspberrypi-exp-gpio] (8 lines) ===> use this one
+```
