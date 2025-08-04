@@ -6,7 +6,7 @@ import time
 PWM_PIN = 32
 
 # Frequency of the PWM signal in Hz
-FREQUENCY = 1000
+FREQUENCY = 10
 
 # Open the GPIO chip
 # On a Raspberry Pi, the main GPIO chip is usually #0
