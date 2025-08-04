@@ -327,3 +327,10 @@ authbind --deep  # script here
 ```
 
 `Reldosys1069`
+
+## PWM update
+
+Checking this [lib](https://lloydrochester.com/post/hardware/libgpiod-intro-rpi/)
+
+sudo apt install gpiod
+sudo apt install libgpiod-dev
