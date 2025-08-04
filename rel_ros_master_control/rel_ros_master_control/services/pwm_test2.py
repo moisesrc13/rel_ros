@@ -33,7 +33,7 @@ try:
         time.sleep(0.02) # Small delay for the fade effect
 
     # Hold at 100% duty cycle for a moment
-    time.sleep(1)
+    time.sleep(3)
 
     # Fade out: decrease duty cycle from 100 to 0
     for duty_cycle in range(100, -1, -1):
@@ -41,7 +41,7 @@ try:
         time.sleep(0.02) # Small delay for the fade effect
 
     # Hold at 0% duty cycle for a moment
-    time.sleep(1)
+    time.sleep(3)
     
 finally:
     # --- Cleanup ---
