@@ -3,7 +3,7 @@ import time
 
 # --- Configuration ---
 # GPIO pin number (using BCM numbering)
-PWM_PIN = 32
+PWM_PIN = 12
 
 # Frequency of the PWM signal in Hz
 FREQUENCY = 10
