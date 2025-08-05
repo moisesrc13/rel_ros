@@ -12,7 +12,7 @@ PWM_PIN = 12
 FREQUENCY = 50
 
 # Duty cycle as a percentage (0-100)
-DUTY_CYCLE = 50
+DUTY_CYCLE = 100
 
 # Open the GPIO chip
 try:
