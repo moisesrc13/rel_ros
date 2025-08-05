@@ -9,7 +9,7 @@ PWM_PIN = 12
 # Frequency of the PWM signal in Hz
 # Note: 500,000 Hz (500 kHz) is a realistic high frequency.
 # 10,000,000 Hz (10 MHz) will not work.
-FREQUENCY = 5
+FREQUENCY = 1000
 
 # Duty cycle as a percentage (0-100)
 DUTY_CYCLE = 50
@@ -30,7 +30,7 @@ print(f"Duty Cycle: {DUTY_CYCLE}%")
 try:
     # Start the PWM with the specified frequency and duty cycle
     # tx_pwm(handle, gpio, frequency, duty_cycle_percentage)
-    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE * 100)
+    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE * 10000)
 
     # Let the PWM run indefinitely until interrupted
     print("PWM is now running. Press Ctrl+C to stop.")
