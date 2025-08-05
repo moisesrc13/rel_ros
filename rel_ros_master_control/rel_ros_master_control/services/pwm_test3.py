@@ -9,10 +9,10 @@ PWM_PIN = 12
 # Frequency of the PWM signal in Hz
 # Note: 500,000 Hz (500 kHz) is a realistic high frequency.
 # 10,000,000 Hz (10 MHz) will not work.
-FREQUENCY = 50
+FREQUENCY = 5
 
 # Duty cycle as a percentage (0-100)
-DUTY_CYCLE = 100
+DUTY_CYCLE = 50
 
 # Open the GPIO chip
 try:
