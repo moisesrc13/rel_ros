@@ -30,7 +30,7 @@ print(f"Duty Cycle: {DUTY_CYCLE}%")
 try:
     # Start the PWM with the specified frequency and duty cycle
     # tx_pwm(handle, gpio, frequency, duty_cycle_percentage)
-    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE * 1000)
+    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE * 100)
 
     # Let the PWM run indefinitely until interrupted
     print("PWM is now running. Press Ctrl+C to stop.")
