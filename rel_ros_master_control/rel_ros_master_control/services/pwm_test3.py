@@ -16,8 +16,8 @@ DUTY_CYCLE = 50
 
 # Open the GPIO chip
 try:
-    h = lgpio.gpiochip_open(0)
-    print("Successfully opened GPIO chip 0.")
+    h = lgpio.gpiochip_open(1)
+    print("Successfully opened GPIO chip 1.")
 except lgpio.LgpiodError as e:
     print(f"Error opening GPIO chip: {e}")
     print("Is the lgpiod daemon running? Try 'sudo systemctl start lgpiod.service'")
