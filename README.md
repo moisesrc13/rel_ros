@@ -330,32 +330,4 @@ authbind --deep  # script here
 
 ## PWM update
 
-Checking this [lib](https://lloydrochester.com/post/hardware/libgpiod-intro-rpi/)
-
-sudo apt install gpiod
-sudo apt install libgpiod-dev
-sudo apt-get install python3-rpi.gpio
-sudo apt install python3-lgpio
-
-Get the chip number
-
-```
-sudo gpiodetect
-gpiochip0 [pinctrl-bcm2711] (58 lines)
-gpiochip1 [raspberrypi-exp-gpio] (8 lines) ===> use this one
-```
-
-add user to `kmem` 
-```
-(venv) relant@relant-desktop:~/git/rel_ros$ ls -al /dev/mem
-crw-r----- 1 root kmem 1, 1 Jun  4 06:24 /dev/mem
-```
-
-`sudo adduser relant kmem`
-
-### Fix perms issues
-
-sudo apt install python3.12-venv
-python3 -m venv --system-site-packages sysvenv
-source sysvenv/bin/activate
-pip install gpiod
+We just need to use the lib `lgpio` and install it with pip as normal dependency. We must call method `gpio_claim_output` in order to enable the pin as PWM
