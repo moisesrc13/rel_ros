@@ -10,7 +10,7 @@ PWM_PIN = 13
 # Frequency of the PWM signal in Hz
 # Note: 500,000 Hz (500 kHz) is a realistic high frequency.
 # 10,000,000 Hz (10 MHz) will not work.
-FREQUENCY = 5000
+FREQUENCY = 2000
 
 # Duty cycle as a percentage (0-100)
 DUTY_CYCLE = 50
