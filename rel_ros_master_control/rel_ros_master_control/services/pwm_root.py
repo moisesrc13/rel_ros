@@ -62,4 +62,4 @@ class RelPWM:
 
 if __name__ == "__main__":
     my_pwm = RelPWM(PWMConfig())
-    my_pwm.run_duty(5)
+    my_pwm.run_duty(120)
