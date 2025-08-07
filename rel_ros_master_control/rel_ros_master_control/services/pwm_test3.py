@@ -31,6 +31,7 @@ print(f"Duty Cycle: {DUTY_CYCLE}%")
 try:
     # Start the PWM with the specified frequency and duty cycle
     # tx_pwm(handle, gpio, frequency, duty_cycle_percentage)
+    print(f"claim the pin {PWM_PIN}")
     lgpio.gpio_claim_output(h, PWM_PIN)
     lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE)
 
