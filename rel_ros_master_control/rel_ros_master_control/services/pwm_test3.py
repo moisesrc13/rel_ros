@@ -23,7 +23,7 @@ except lgpio.LgpiodError as e:
     print("Is the lgpiod daemon running? Try 'sudo systemctl start lgpiod.service'")
     exit()
 
-print(f"Starting PWM on BCM GPIO {PWM_PIN} (Physical Pin 32)")
+print(f"Starting PWM on BCM GPIO {PWM_PIN} (Physical Pin 33)")
 print(f"Frequency: {FREQUENCY} Hz")
 print(f"Duty Cycle: {DUTY_CYCLE}%")
 
