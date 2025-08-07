@@ -4,7 +4,7 @@ import time
 # --- Configuration ---
 # GPIO pin number (using BCM numbering)
 # Physical Pin 32 corresponds to BCM GPIO 12
-PWM_PIN = 12
+PWM_PIN = 6
 
 # Frequency of the PWM signal in Hz
 # Note: 500,000 Hz (500 kHz) is a realistic high frequency.
