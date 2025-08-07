@@ -4,6 +4,7 @@ import time
 # --- Configuration ---
 # GPIO pin number (using BCM numbering)
 # Physical Pin 32 corresponds to BCM GPIO 12
+# Physical Pin 33 corresponds to BCM GPIO 13
 PWM_PIN = 13
 
 # Frequency of the PWM signal in Hz
@@ -30,6 +31,7 @@ print(f"Duty Cycle: {DUTY_CYCLE}%")
 try:
     # Start the PWM with the specified frequency and duty cycle
     # tx_pwm(handle, gpio, frequency, duty_cycle_percentage)
+    lgpio.gpio_claim_output(h, PWM_PIN)
     lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE)
 
     # Let the PWM run indefinitely until interrupted
