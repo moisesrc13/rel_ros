@@ -9,6 +9,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # install ros package
 RUN apt-get update && apt-get install -y \
   ros-humble-demo-nodes-cpp curl wget python3.11-dev \
+  swig gpiod libgpiod-dev \
   virtualenv nano qt5-* \
   ros-humble-demo-nodes-py && \
   rm -rf /var/lib/apt/lists/*
