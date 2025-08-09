@@ -1,5 +1,6 @@
-import lgpio
 import time
+
+import lgpio
 
 # --- Configuration ---
 # GPIO pin number (using BCM numbering)
@@ -33,7 +34,11 @@ try:
     # tx_pwm(handle, gpio, frequency, duty_cycle_percentage)
     print(f"claim the pin {PWM_PIN}")
     lgpio.gpio_claim_output(h, PWM_PIN)
-    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY,  DUTY_CYCLE)
+    # Ramping up
+    for duty_cycle in range(0, 101, 1):
+        lgpio.tx_pwm(h, PWM_PIN, FREQUENCY, duty_cycle)
+        time.sleep(0.01)
+    lgpio.tx_pwm(h, PWM_PIN, FREQUENCY, DUTY_CYCLE)
 
     # Let the PWM run indefinitely until interrupted
     print("PWM is now running. Press Ctrl+C to stop.")
@@ -45,7 +50,7 @@ finally:
     print("\nStopping PWM and cleaning up.")
     # Stop the PWM signal by setting the frequency to 0
     lgpio.tx_pwm(h, PWM_PIN, 0, 0)
-    
+
     # Close the GPIO chip
     lgpio.gpiochip_close(h)
     print("GPIO chip closed.")

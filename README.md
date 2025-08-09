@@ -330,4 +330,4 @@ authbind --deep  # script here
 
 ## PWM update
 
-We just need to use the lib `lgpio` and install it with pip as normal dependency. We must call method `gpio_claim_output` in order to enable the pin as PWM
+We just need to use the lib [lgpio](http://abyz.me.uk/lg/py_lgpio.html) and install it with pip as normal dependency. We must call method `gpio_claim_output` in order to enable the pin as PWM
