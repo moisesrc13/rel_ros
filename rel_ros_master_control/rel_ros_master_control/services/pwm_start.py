@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import sys
@@ -13,12 +14,12 @@ logger = new_logger(__name__)
 
 
 class RelPWM:
-    def __init__(self, config=PWMConfig()):
+    def __init__(self, option: str = "medium"):
         self.is_running = False
         try:
-            self.config = config
-            self.handler = lgpio.gpiochip_open(config.chip)
-            lgpio.gpio_claim_output(self.handler, config.pin)
+            self.config = PWMConfig(option=option)
+            self.handler = lgpio.gpiochip_open(self.config.chip)
+            lgpio.gpio_claim_output(self.handler, self.config.pin)
         except lgpio.LgpiodError as ec:
             logger.error("error opening chip for PWM %s", ec)
         except Exception as err:
@@ -29,11 +30,11 @@ class RelPWM:
             self.is_running = True
             logger.info("ramping up PWM ...")
             for duty_cycle in range(0, self.config.steps, 1):
-                lgpio.tx_pwm(self.handler, self.config.pin, self.config.frequency, duty_cycle)
+                lgpio.tx_pwm(self.handler, self.config.pin, self.config.params.frequency, duty_cycle)
                 time.sleep(0.01)
             logger.info("running full PWM ...")
             lgpio.tx_pwm(
-                self.handler, self.config.pin, self.config.frequency, self.config.duty_cycle
+                self.handler, self.config.pin, self.config.params.frequency, self.config.params.duty_cycle
             )
             while True:
                 time.sleep(0.5)
@@ -58,14 +59,24 @@ def stop_pwm_handler(pwm: RelPWM):
 
     return signal_handler
 
-def do_run_process():
+def do_run_process(option: str = "medium"):
     root_dir = os.path.abspath(os.path.dirname(__file__))
     script_file = os.path.basename(__file__)
-    subprocess.run(["python", f"{root_dir}/{script_file}"])
+    subprocess.run(["python", f"{root_dir}/{script_file}"], "--option", option)
     
 
 if __name__ == "__main__":
-    pwm = RelPWM()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-o",
+        "--option",
+        help="pwm type, e.g 'high', 'medium', 'low'",
+        dest="option",
+        default="medium",
+        type=str,
+    )
+    args = parser.parse_args()
+    pwm = RelPWM(option=args.option)
     handler = stop_pwm_handler(pwm)
     with open("/tmp/pwm_control.pid", "w") as f:
         f.write(str(os.getpid()))
