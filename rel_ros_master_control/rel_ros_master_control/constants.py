@@ -186,6 +186,10 @@ class FlowTask(BaseModel):
 
 
 class Constants:
+    flow_check_manual_mode = FlowTask(
+        name="flow_check_manual_mode",
+        tasks=["check_manual_mode"]
+    )
     flow_calculate_distance_sensor_case = FlowTask(
         name="flow_calculate_distance_sensor_case",
         tasks=[
