@@ -16,6 +16,7 @@ logger = new_logger(__name__)
 class RelPWM:
     def __init__(self, option: str = "medium"):
         self.is_running = False
+        self.option = option
         try:
             self.config = PWMConfig(option=option)
             self.handler = lgpio.gpiochip_open(self.config.chip)
@@ -28,7 +29,7 @@ class RelPWM:
     def run(self):
         try:
             self.is_running = True
-            logger.info("ramping up PWM ...")
+            logger.info("ramping up PWM for option %s ...", self.option)
             for duty_cycle in range(0, self.config.steps, 1):
                 lgpio.tx_pwm(self.handler, self.config.pin, self.config.params.frequency, duty_cycle)
                 time.sleep(0.01)
