@@ -1,4 +1,5 @@
 import os
+import sys
 import signal
 import time
 
@@ -12,6 +13,7 @@ logger = new_logger(__name__)
 
 class RelPWM:
     def __init__(self, config=PWMConfig()):
+        self.is_running = False
         try:
             self.config = config
             self.handler = lgpio.gpiochip_open(config.chip)
@@ -23,6 +25,7 @@ class RelPWM:
 
     def run(self):
         try:
+            self.is_running = True
             logger.info("ramping up PWM ...")
             for duty_cycle in range(0, self.config.steps, 1):
                 lgpio.tx_pwm(self.handler, self.config.pin, self.config.frequency, duty_cycle)
@@ -34,13 +37,15 @@ class RelPWM:
             while True:
                 time.sleep(0.5)
         finally:
-            self.stop()
+            if self.is_running:
+                self.stop()
 
     def stop(self):
         try:
             lgpio.tx_pwm(self.handler, self.config.pin, 0, 0)
             lgpio.gpiochip_close(self.handler)
             logger.info("GPIO chip closed.")
+            self.is_running = False
         except:
             logger.error("error stopping PWM")
 
@@ -48,6 +53,7 @@ class RelPWM:
 def stop_pwm_handler(pwm: RelPWM):
     def signal_handler(signum, frame):
         pwm.stop()
+        sys.exit(0)
 
     return signal_handler
 
