@@ -1,3 +1,4 @@
+import signal
 import time
 
 import lgpio
@@ -32,9 +33,26 @@ class RelPWM:
             while True:
                 time.sleep(0.5)
         finally:
-            logger.info("stopping PWM and cleaning up")
-            lgpio.tx_pwm(self.handler, self.config.pin, 0, 0)
+            self.stop()
 
-            # Close the GPIO chip
+    def stop(self):
+        try:
+            lgpio.tx_pwm(self.handler, self.config.pin, 0, 0)
             lgpio.gpiochip_close(self.handler)
             logger.info("GPIO chip closed.")
+        except:
+            logger.error("error stopping PWM")
+
+
+def stop_pwm_handler(pwm: RelPWM):
+    def signal_handler(signum, frame):
+        pwm.stop()
+
+    return signal_handler
+
+
+if __name__ == "__main__":
+    pwm = RelPWM()
+    handler = stop_pwm_handler(pwm)
+    signal.signal(signal.SIGINT, handler)
+    signal.signal(signal.SIGTERM, handler)
