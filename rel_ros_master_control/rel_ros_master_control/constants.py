@@ -187,7 +187,7 @@ class FlowTask(BaseModel):
 
 class Constants:
     flow_calculate_distance_sensor_case = FlowTask(
-        name="flow_calculate_distance_sensor_case",
+        name="flow_calculate_distance_sensor_case",  # first to run
         tasks=[
             "check_distance_sensor_for_electrovalves",
             "bucket_distance",
