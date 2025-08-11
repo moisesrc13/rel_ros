@@ -39,7 +39,8 @@ from rel_ros_master_control.models.status_device_m import TowerState, TowerStatu
 
 logger = new_logger(__name__)
 try:
-    from rel_ros_master_control.services.pwm import RelPWM
+    from rel_ros_master_control.services.pwm_start import do_run_process as run_pwm
+    from rel_ros_master_control.services.pwm_stop import do_stop_process as stop_pwm
 except Exception as err:
     logger.warning("expected error if not running on RPi - %s", err)
 
@@ -120,13 +121,6 @@ class RelControl:
         logger.info("connecting master HMI")
         self.master_hmi.do_connect()
         logger.info("master_HMI connected ✨")
-        logger.info("creating PWM")
-        self.pwm = None
-        try:
-            self.pwm = RelPWM(PWMConfig())
-            logger.info("PWM set ✨")
-        except Exception as err:
-            logger.warning("pwm service not created - %s", err)
 
     def apply_initial_state(self):
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
