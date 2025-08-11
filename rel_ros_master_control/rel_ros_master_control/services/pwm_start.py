@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import signal
 import time
@@ -57,10 +58,13 @@ def stop_pwm_handler(pwm: RelPWM):
 
     return signal_handler
 
+def do_run_process():
+    root_dir = os.path.abspath(os.path.dirname(__file__))
+    script_file = os.path.basename(__file__)
+    subprocess.run(["python", f"{root_dir}/{script_file}"])
+    
 
 if __name__ == "__main__":
-    ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-    print(ROOT_DIR)
     pwm = RelPWM()
     handler = stop_pwm_handler(pwm)
     with open("/tmp/pwm_control.pid", "w") as f:
