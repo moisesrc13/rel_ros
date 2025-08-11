@@ -63,7 +63,7 @@ def stop_pwm_handler(pwm: RelPWM):
 def do_run_process(option: str = "medium"):
     root_dir = os.path.abspath(os.path.dirname(__file__))
     script_file = os.path.basename(__file__)
-    subprocess.run(["python", f"{root_dir}/{script_file}"], "--option", option)
+    subprocess.run(["python", f"{root_dir}/{script_file}", "--option", option])
     
 
 if __name__ == "__main__":
