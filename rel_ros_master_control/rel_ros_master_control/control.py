@@ -324,25 +324,22 @@ class RelControl:
             self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
         )
         option = self.read_hmi_register(option_register.address).value
-        register_name = Params.PARAM_PULSE_TRAIN_LOW
+        pwm_ption = "low"
         match option:
             case PWMPulseSet.HIGH.value:
-                register_name = Params.PARAM_PULSE_TRAIN_HIGH
+                pwm_ption = "high"
             case PWMPulseSet.MEDIUM.value:
-                register_name = Params.PARAM_PULSE_TRAIN_MEDIUM
+                pwm_ption = "medium"
             case _:
-                register_name = Params.PARAM_PULSE_TRAIN_LOW
-        register = get_register_by_name(self.hmi_hr, register_name.value)
-        pulse_value = self.read_hmi_register(register.address).value
+                pwm_ption = "low"
+        
         if not self.pwm_started:
-            self.pwm.start_duty(duty=pulse_value)
+            run_pwm(option=pwm_ption)
             self.pwm_started = True
-        else:
-            self.pwm.change_duty(duty=pulse_value)
 
     def stop_pwm(self):
-        if self.pwm:
-            self.pwm.stop_duty()
+        if self.pwm_started:
+            stop_pwm()
             self.pwm_started = False
 
     def write_hmi_cregister_by_address_name(self, enum_name: Enum, enum_value: Enum):
