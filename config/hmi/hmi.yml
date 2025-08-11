@@ -23,7 +23,7 @@
       address: 6
     - name: "enter_screen_4_0"
       address: 7
-    - name: "enter_screen_1_0"
+    - name: "enter_manual_mode_screen"
       address: 8
     - name: "button_lock_password"
       address: 9

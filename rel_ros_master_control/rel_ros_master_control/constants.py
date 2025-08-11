@@ -140,7 +140,7 @@ class HMIWriteAction(Enum):
     STATUS_PUMP_NO_PRESSURE = "status_pump_no_pressure"
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
     ENTER_SCREEN_3_0 = "enter_screen_3_0"
-    ENTER_SCREEN_1_0 = "enter_screen_1_0"
+    ENTER_MANUAL_MODE_SCREEN = "enter_manual_mode_screen"
     STATUS_MANUAL_RECYCLE_COUNT = "status_manual_recycle_count"
 
 

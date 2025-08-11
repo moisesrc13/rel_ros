@@ -444,7 +444,7 @@ def bucket_change_frame__overw(
 def bucket_change_step_2(control: RelControl) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     logger.info("enter to screen 1-0")
-    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_SCREEN_1_0, CoilState.ON)
+    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_MANUAL_MODE_SCREEN, CoilState.ON)
     logger.info("wait for action bucket change stop 3")
     while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_CHANGE_BUCKET_3) == 0:
         continue
