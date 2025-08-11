@@ -113,8 +113,10 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
 
 
 def check_manual_mode(control: RelControl) -> FlowStateAction:
-    if control.read_hmi_cregister_by_name(HMIWriteAction.ENTER_MANUAL_MODE_SCREEN):
-        return FlowStateAction.MANUAL_MODE
+    while control.read_hmi_cregister_by_name(HMIWriteAction.ENTER_MANUAL_MODE_SCREEN):
+        logger.info("Enter to manual mode 🔨 ...")
+        
+        
     return FlowStateAction.AUTO_MODE
     
     
