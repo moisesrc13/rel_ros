@@ -33,6 +33,8 @@ class FlowStateAction(Enum):
     BUCKET_CHANGE_OVER_W = 18
     BUCKET_CHANGE_STEP_2 = 19
     COMPLETE = 20
+    MANUAL_MODE = 21
+    AUTO_MODE = 22
 
 
 class DigitalOutput(Enum):
