@@ -1,3 +1,4 @@
+import os
 import signal
 import time
 
@@ -54,5 +55,8 @@ def stop_pwm_handler(pwm: RelPWM):
 if __name__ == "__main__":
     pwm = RelPWM()
     handler = stop_pwm_handler(pwm)
+    with open("/tmp/pwm_control.pid", "w") as f:
+        f.write(str(os.getpid()))
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
+    pwm.run()
