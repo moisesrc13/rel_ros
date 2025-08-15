@@ -140,6 +140,13 @@ class RelControl:
             coil_address (int): _description_
             value (int): _description_
         """
+        def do_manifold_state(value: int, state: ManifoldActions):
+            if value:
+                self.apply_manifold_state(ManifoldActions.ACTIVATE)
+                self.apply_manifold_state(state)
+            else:
+                self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+        
         # check manual is ON
         if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
             return
@@ -157,11 +164,27 @@ class RelControl:
         
         match user_task:
             case ManualTasks.ACTION_PRE_FILL_LINE:
+                if not value:
+                    self.stop_pwm()
+                    return                    
                 inputs = {"control": self}
                 outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
                 sensor_distance_state = outputs.get("sensor_distance_state")
-                if sensor_distance_state == SensorDistanceStateName.D and self.read_hmi_cregister_by_name(ManifoldActions.PISTONS_DOWN):
-                    run_pwm
+                if sensor_distance_state == SensorDistanceStateName.D and value:
+                    self.apply_pwm_state()
+            case ManualTasks.ACTION_RECYCLE_RETRACTIL:
+                do_manifold_state(value, ManifoldActions.RECYCLE)
+            case ManualTasks.ACTION_PULL_DOWN_PISTONS_MANUAL:
+                do_manifold_state(value, ManifoldActions.PISTONS_DOWN)
+            case ManualTasks.ACTION_PULL_UP_PISTONS_MANUAL:
+                do_manifold_state(value, ManifoldActions.PISTONS_UP)
+            case ManualTasks.ACTION_VACUUM_AIR:
+                do_manifold_state(value, ManifoldActions.AIR_FOR_VACUUM)
+                
+            
+                    
+                    
+                
                     
                     
                 
@@ -188,6 +211,7 @@ class RelControl:
                 self.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
             case HMIWriteAction.ACTION_RECYCLE:
                 self.apply_manifold_state(ManifoldActions.RECYCLE)
+            
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -346,9 +370,7 @@ class RelControl:
             enum_value=state,
         )
 
-    def apply_pwm_state(self):
-        if self.pwm_started:
-            return
+    def get_pwm_option(self):
         option_register = get_register_by_name(
             self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
         )
@@ -361,9 +383,13 @@ class RelControl:
                 pwm_ption = "medium"
             case _:
                 pwm_ption = "low"
-        
+        return pwm_ption
+
+    def apply_pwm_state(self):
+        if self.pwm_started:
+            return
         if not self.pwm_started:
-            run_pwm(option=pwm_ption)
+            run_pwm(option=self.get_pwm_option())
             self.pwm_started = True
 
     def stop_pwm(self):
