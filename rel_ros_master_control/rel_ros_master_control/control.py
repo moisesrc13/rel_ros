@@ -164,6 +164,8 @@ class RelControl:
             return
 
         match user_task:
+            case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
+                return
             case ManualTasks.ACTION_PRE_FILL_LINE:
                 if not value:
                     self.stop_pwm()
