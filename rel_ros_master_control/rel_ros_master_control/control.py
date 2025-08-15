@@ -182,7 +182,7 @@ class RelControl:
             case ManualTasks.ACTION_VACUUM_AIR:
                 do_manifold_state(value, ManifoldActions.AIR_FOR_VACUUM)
             case ManualTasks.ACTION_DEPRESSURIZE:
-                do_manifold_state(value, ManifoldActions.VENTING_RETRACTIL_UP)
+                do_manifold_state(value, ManifoldActions.RECYCLE)
             case _:
                 logger.info("user task  %s not supported", user_task)
                 return
