@@ -287,6 +287,8 @@ sudo reboot
 
 `nano /etc/netplan/99_config.yaml`
 
+This is RPi IP Network
+
 ```yaml
 network:
   version: 2
