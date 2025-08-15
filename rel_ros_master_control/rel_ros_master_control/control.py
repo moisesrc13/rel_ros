@@ -614,6 +614,7 @@ def run():
     slave_type = SlaveType(args.mode)
     if slave_type == SlaveType.IOLINK:
         if args.action == "tower":
+            logger.info("applying tower state %s", args.tower)
             control.apply_tower_state(TowerState(args.tower))
             return
         if args.action == "write":
