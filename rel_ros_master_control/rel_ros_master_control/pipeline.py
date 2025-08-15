@@ -112,17 +112,6 @@ def set_visual_alarm_for_bucket_state(control: RelControl) -> TowerState:
     return state
 
 
-def check_manual_mode(control: RelControl) -> FlowStateAction:
-    while control.read_hmi_cregister_by_name(HMIWriteAction.ENTER_MANUAL_MODE_SCREEN):
-        logger.info("Enter to manual mode 🔨 ...")
-        if control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_PRE_FILL_LINE):
-            
-        
-        
-    return FlowStateAction.AUTO_MODE
-    
-    
-
 #  ---------------------------------------------------------
 #  SensorDistanceStateName
 #  These are the 5 main paths from the laser distance state

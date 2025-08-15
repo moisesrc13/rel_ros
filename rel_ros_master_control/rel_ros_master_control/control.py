@@ -16,6 +16,7 @@ from rel_ros_master_control.constants import (
     DigitalOutput,
     ElectroValveState,
     HMIWriteAction,
+    ManualTasks,
     ManifoldActions,
     Params,
     PressureSet,
@@ -128,19 +129,32 @@ class RelControl:
         self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
 
-    def run_user_actions(self, coil_address: str, value: int):
+    def run_user_tasks(self, coil_address: str, value: int):
         """
-        This are all manifold actions
+        This are all user tasks. Only valid in Manual mode
+        For pistons 
 
         Args:
             coil_address (int): _description_
             value (int): _description_
         """
+        # check manual is ON
+        if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
+            return
+        logger.info("manual mode is ON")
         register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
-            logger.info("resgiter with coil_address %s not found", coil_address)
+            logger.info("resgiter with coil_address %s for user task not found", coil_address)
             return
         logger.info("running user task on %s - value %s", register.name, value)
+        try:
+            user_task = ManualTasks(register.name)
+            
+            
+            
+        except:
+            logger.error("user task for register %s not supported", register.name)
+            return
         user_action = HMIWriteAction(register.name)
         if value == 0:
             self.apply_manifold_state(ManifoldActions.DEACTIVATE)

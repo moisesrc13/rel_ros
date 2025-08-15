@@ -78,6 +78,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register, idx = get_register_by_address(self.hr, address)
         rtype = RegisterModbusType.HR
         if not register:
+            # if not holding register, check whether is a coil to send a user task
             register, idx = get_register_by_address(self.cr, address)
             if not register:
                 logger.debug("Not getting a valid register for address %s", address)

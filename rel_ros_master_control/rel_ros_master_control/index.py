@@ -57,8 +57,8 @@ class RelROSNode(Node):
         self.get_logger().info("creating hmi consumers is done ...")
 
     def listener_hmi_user_task_callback(self, msg: HMIUserTask, hmi_id: int = 0):
-        self.get_logger().info(f"📨 HMI {hmi_id} user task message 📺 {msg}")
-        self.masters[hmi_id].run_user_actions(msg.coil_address, msg.value)
+        self.get_logger().info(f"📨 HMI {hmi_id} user 👷 task message 📺 {msg}")
+        self.masters[hmi_id].run_user_tasks(msg.coil_address, msg.value)
 
     def start_main_control(self):
         if not (os.getenv("ENABLE_CONTROL", "true").lower() in ["true", "yes"]):
