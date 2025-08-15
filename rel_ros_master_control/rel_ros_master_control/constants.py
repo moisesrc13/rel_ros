@@ -120,15 +120,6 @@ class SensorDistanceStateName(Enum):
 
 
 class HMIWriteAction(Enum):
-    ACTION_TURN_ON_PUMPING_PROCESS = "action_turn_on_pumping_process"
-    ACTION_PRE_FILL_LINE = "action_pre_fill_line"
-    ACTION_PULL_DOWN_PISTONS_MANUAL = "action_pull_down_pistons_manual"
-    ACTION_PULL_UP_PISTONS_MANUAL = "action_pull_up_pistons_manual"
-    ACTION_VACUUM_AIR = "action_vacuum_air"
-    ACTION_PRE_FILL_LINE = "action_pre_fill_line"
-    ACTION_DEPRESSURIZE = "action_depressurize"
-    ACTION_RECYCLE_CAR = "action_recycle_car"
-    ACTION_RECYCLE_RETRACTIL = "action_recycle_retractil"
     ACTION_BUTTON_START_BUCKET_CHANGE_1 = "action_button_start_bucket_change_1"
     ACTION_BUTTON_START_BUCKET_CHANGE_2 = "action_button_start_bucket_change_2"
     ACTION_PULL_DOWN_PISTONS_BUCKET = "action_pull_down_pistons_bucket"
@@ -143,7 +134,6 @@ class HMIWriteAction(Enum):
     STATUS_PUMP_NO_PRESSURE = "status_pump_no_pressure"
     STATUS_PUMP_NO_DEPRESSURIZED = "status_pump_no_depressurized"
     ENTER_SCREEN_3_0 = "enter_screen_3_0"
-    ENTER_MANUAL_MODE_SCREEN = "enter_manual_mode_screen"
     STATUS_MANUAL_RECYCLE_COUNT = "status_manual_recycle_count"
 
 
@@ -179,9 +169,10 @@ class Params(Enum):
     PARAM_BUCKET_SIZE_SELECTION = "param_bucket_size_selection"
     PARAM_PRESSURE_GUARD_LIMIT = "param_pressure_guard_limit"
 
+
 class ManualTasks(Enum):
     ENTER_MANUAL_MODE_SCREEN = "enter_manual_mode_screen"
-    ACTION_PRE_FILL_LINE = "action_pre_fill_line"    
+    ACTION_PRE_FILL_LINE = "action_pre_fill_line"
     ACTION_TURN_ON_PUMPING_PROCESS = "action_turn_on_pumping_process"
     ACTION_RECYCLE_CAR = "action_recycle_car"
     ACTION_RECYCLE_RETRACTIL = "action_recycle_retractil"
@@ -189,6 +180,7 @@ class ManualTasks(Enum):
     ACTION_PULL_UP_PISTONS_MANUAL = "action_pull_up_pistons_manual"
     ACTION_VACUUM_AIR = "action_vacuum_air"
     ACTION_DEPRESSURIZE = "action_depressurize"
+
 
 class FlowTask(BaseModel):
     tasks: list[str]
@@ -250,6 +242,7 @@ class Constants:
         outputs=["bucket_change_step_2"],
     )
     flow_manual_pre_fill_line = FlowTask(
+        name="flow_manual_pre_fill_line",
         tasks=[
             "check_distance_sensor_for_electrovalves",
             "bucket_distance",

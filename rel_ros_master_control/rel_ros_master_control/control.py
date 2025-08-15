@@ -12,17 +12,17 @@ from rel_ros_master_control.config import (
     load_status_device_config,
 )
 from rel_ros_master_control.constants import (
+    Constants,
     DigitalHydValve,
     DigitalOutput,
     ElectroValveState,
     HMIWriteAction,
-    ManualTasks,
     ManifoldActions,
+    ManualTasks,
     Params,
     PressureSet,
     PressureState,
     PWMPulseSet,
-    Constants,
     SensorDistanceStateName,
 )
 from rel_ros_master_control.logger import new_logger
@@ -38,7 +38,7 @@ from rel_ros_master_control.models.modbus_m import (
     get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
-from flow_control import run_flow
+from rel_ros_master_control.util import run_flow
 
 logger = new_logger(__name__)
 try:
@@ -134,19 +134,20 @@ class RelControl:
     def run_user_tasks(self, coil_address: str, value: int):
         """
         This are all user tasks. Only valid in Manual mode
-        For pistons 
+        For pistons
 
         Args:
             coil_address (int): _description_
             value (int): _description_
         """
+
         def do_manifold_state(value: int, state: ManifoldActions):
             if value:
                 self.apply_manifold_state(ManifoldActions.ACTIVATE)
                 self.apply_manifold_state(state)
             else:
                 self.apply_manifold_state(ManifoldActions.DEACTIVATE)
-        
+
         # check manual is ON
         if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
             return
@@ -160,13 +161,13 @@ class RelControl:
             user_task = ManualTasks(register.name)
         except:
             logger.error("user task for register %s not supported", register.name)
-            return        
-        
+            return
+
         match user_task:
             case ManualTasks.ACTION_PRE_FILL_LINE:
                 if not value:
                     self.stop_pwm()
-                    return                    
+                    return
                 inputs = {"control": self}
                 outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
                 sensor_distance_state = outputs.get("sensor_distance_state")
@@ -184,7 +185,7 @@ class RelControl:
                 do_manifold_state(value, ManifoldActions.VENTING_RETRACTIL_UP)
             case _:
                 logger.info("user task  %s not supported", user_task)
-                return            
+                return
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:

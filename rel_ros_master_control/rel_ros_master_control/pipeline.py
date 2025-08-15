@@ -9,6 +9,7 @@ from rel_ros_master_control.constants import (
     FlowStateAction,
     HMIWriteAction,
     ManifoldActions,
+    ManualTasks,
     Params,
     PressureState,
     SensorDistanceParams,
@@ -234,7 +235,7 @@ def init_flow_state(sensor_laser_on_state: FlowStateAction) -> FlowStateAction:
 
 def prepare_for_recycle_process(control: RelControl) -> FlowStateAction:
     control.write_hmi_cregister_by_address_name(
-        HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
+        ManualTasks.ACTION_TURN_ON_PUMPING_PROCESS, CoilState.ON
     )
     target_pressure = control.read_hmi_hregister_by_name(Params.PARAM_REGULATOR_PRESSURE_SET)
     logger.info("checking target pressure on")
@@ -330,7 +331,7 @@ def recycle_flow_state__ok(recycle: FlowStateAction, control: RelControl) -> Flo
 
     logger.info("waiting to turn off pump process from HMI ⏲ ...")
     while (
-        control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_TURN_ON_PUMPING_PROCESS)
+        control.read_hmi_cregister_by_name(ManualTasks.ACTION_TURN_ON_PUMPING_PROCESS)
         != CoilState.OFF.value
     ):
         continue
@@ -348,7 +349,7 @@ def recycle_flow_state__timeout(recycle: FlowStateAction, control: RelControl) -
     # wait for confirmation to continue
     # lets assume this is manual recycle
     logger.info("waiting for manual recycle, STANDBY ⏲ ...")
-    while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_RECYCLE_RETRACTIL) == 0:
+    while control.read_hmi_cregister_by_name(ManualTasks.ACTION_RECYCLE_RETRACTIL) == 0:
         continue
     logger.info("recycle retractil received")
     recycle_manual_count = control.read_hmi_hregister_by_name(
@@ -444,7 +445,7 @@ def bucket_change_frame__overw(
 def bucket_change_step_2(control: RelControl) -> FlowStateAction:
     control.apply_manifold_state(ManifoldActions.DEACTIVATE)
     logger.info("enter to screen 1-0")
-    control.write_hmi_cregister_by_address_name(HMIWriteAction.ENTER_MANUAL_MODE_SCREEN, CoilState.ON)
+    control.write_hmi_cregister_by_address_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN, CoilState.ON)
     logger.info("wait for action bucket change stop 3")
     while control.read_hmi_cregister_by_name(HMIWriteAction.ACTION_BUTTON_CHANGE_BUCKET_3) == 0:
         continue
