@@ -179,6 +179,16 @@ class Params(Enum):
     PARAM_BUCKET_SIZE_SELECTION = "param_bucket_size_selection"
     PARAM_PRESSURE_GUARD_LIMIT = "param_pressure_guard_limit"
 
+class ManualTasks(Enum):
+    ENTER_MANUAL_MODE_SCREEN = "enter_manual_mode_screen"
+    ACTION_PRE_FILL_LINE = "action_pre_fill_line"    
+    ACTION_TURN_ON_PUMPING_PROCESS = "action_turn_on_pumping_process"
+    ACTION_RECYCLE_CAR = "action_recycle_car"
+    ACTION_RECYCLE_RETRACTIL = "action_recycle_retractil"
+    ACTION_PULL_DOWN_PISTONS_MANUAL = "action_pull_down_pistons_manual"
+    ACTION_PULL_UP_PISTONS_MANUAL = "action_pull_up_pistons_manual"
+    ACTION_VACUUM_AIR = "action_vacuum_air"
+    ACTION_DEPRESSURIZE = "action_depressurize"
 
 class FlowTask(BaseModel):
     tasks: list[str]
