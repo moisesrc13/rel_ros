@@ -25,6 +25,9 @@ logger = new_logger(__name__)
 
 
 class PublishHMIUserTask:
+    """
+    this is the publisher we will use for user actions need immediate response
+    """
     def __init__(self) -> None:
         self.msg = None
 
@@ -75,6 +78,7 @@ class ModbusServerBlock(ModbusSequentialDataBlock):
         register, idx = get_register_by_address(self.hr, address)
         rtype = RegisterModbusType.HR
         if not register:
+            # if not holding register, check whether is a coil to send a user task
             register, idx = get_register_by_address(self.cr, address)
             if not register:
                 logger.debug("Not getting a valid register for address %s", address)
@@ -222,7 +226,7 @@ def run_modbus_slaves(
 ):
     for slave in slaves:
         slave_thread = ModbusSlaveThread(
-            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.hmi_id)
+            slave=slave, hr=hr, cr=cr, user_task_publisher=publishers.get(slave.hmi_id) # gets the HMIUserTask publisher for topicrel/hmi_user_task_[hmi_id]
         )
         slave_thread.daemon = True
         slave_thread.start()

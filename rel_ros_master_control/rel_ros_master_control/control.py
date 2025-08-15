@@ -12,15 +12,18 @@ from rel_ros_master_control.config import (
     load_status_device_config,
 )
 from rel_ros_master_control.constants import (
+    Constants,
     DigitalHydValve,
     DigitalOutput,
     ElectroValveState,
     HMIWriteAction,
     ManifoldActions,
+    ManualTasks,
     Params,
     PressureSet,
     PressureState,
     PWMPulseSet,
+    SensorDistanceStateName,
 )
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
@@ -34,12 +37,13 @@ from rel_ros_master_control.models.modbus_m import (
     get_register_by_address,
     get_register_by_name,
 )
-from rel_ros_master_control.models.pwm_m import PWMConfig
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
+from rel_ros_master_control.util import run_flow
 
 logger = new_logger(__name__)
 try:
-    from rel_ros_master_control.services.pwm import RelPWM
+    from rel_ros_master_control.services.pwm_start import do_run_process as run_pwm
+    from rel_ros_master_control.services.pwm_stop import do_stop_process as stop_pwm
 except Exception as err:
     logger.warning("expected error if not running on RPi - %s", err)
 
@@ -120,13 +124,6 @@ class RelControl:
         logger.info("connecting master HMI")
         self.master_hmi.do_connect()
         logger.info("master_HMI connected ✨")
-        logger.info("creating PWM")
-        self.pwm = None
-        try:
-            self.pwm = RelPWM(PWMConfig())
-            logger.info("PWM set ✨")
-        except Exception as err:
-            logger.warning("pwm service not created - %s", err)
 
     def apply_initial_state(self):
         self.apply_hyd_valve_state(DigitalHydValve.OUT1_OFF_OUT2_OFF)
@@ -134,37 +131,61 @@ class RelControl:
         self.apply_pressure_regulator_state(PressureState.OFF)
         self.apply_tower_state(TowerState.ACOUSTIC_ALARM_OFF)
 
-    def run_user_actions(self, coil_address: str, value: int):
+    def run_user_tasks(self, coil_address: str, value: int):
         """
-        This are all manifold actions
+        This are all user tasks. Only valid in Manual mode
+        For pistons
 
         Args:
-            coil_address (int): _description_
-            value (int): _description_
+            coil_address (int): hmi coil address
+            value (int): hmi coli value
         """
+
+        def do_manifold_state(value: int, state: ManifoldActions):
+            if value:
+                self.apply_manifold_state(ManifoldActions.ACTIVATE)
+                self.apply_manifold_state(state)
+            else:
+                self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+
+        # check manual is ON
+        if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
+            return
+        logger.info("🔨 manual mode is ON")
         register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
-            logger.info("resgiter with coil_address %s not found", coil_address)
+            logger.info("resgiter with coil_address %s for user task not found", coil_address)
             return
         logger.info("running user task on %s - value %s", register.name, value)
-        user_action = HMIWriteAction(register.name)
-        if value == 0:
-            self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+        try:
+            user_task = ManualTasks(register.name)
+        except:
+            logger.error("user task for register %s not supported", register.name)
             return
-        self.apply_manifold_state(ManifoldActions.ACTIVATE)
-        match user_action:
-            case HMIWriteAction.ACTION_PULL_DOWN_PISTONS_MANUAL:
-                self.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
-            case HMIWriteAction.ACTION_PULL_UP_PISTONS_MANUAL:
-                self.apply_manifold_state(ManifoldActions.PISTONS_UP)
-            case HMIWriteAction.ACTION_DEPRESSURIZE:
-                self.apply_manifold_state(
-                    ManifoldActions.VENTING_RETRACTIL_UP
-                )  # need to check if is up or down
-            case HMIWriteAction.ACTION_VACUUM_AIR:
-                self.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
-            case HMIWriteAction.ACTION_RECYCLE:
-                self.apply_manifold_state(ManifoldActions.RECYCLE)
+
+        match user_task:
+            case ManualTasks.ACTION_PRE_FILL_LINE:
+                if not value:
+                    self.stop_pwm()
+                    return
+                inputs = {"control": self}
+                outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
+                sensor_distance_state = outputs.get("sensor_distance_state")
+                if sensor_distance_state == SensorDistanceStateName.D and value:
+                    self.apply_pwm_state()
+            case ManualTasks.ACTION_RECYCLE_RETRACTIL:
+                do_manifold_state(value, ManifoldActions.RECYCLE)
+            case ManualTasks.ACTION_PULL_DOWN_PISTONS_MANUAL:
+                do_manifold_state(value, ManifoldActions.PISTONS_DOWN)
+            case ManualTasks.ACTION_PULL_UP_PISTONS_MANUAL:
+                do_manifold_state(value, ManifoldActions.PISTONS_UP)
+            case ManualTasks.ACTION_VACUUM_AIR:
+                do_manifold_state(value, ManifoldActions.AIR_FOR_VACUUM)
+            case ManualTasks.ACTION_DEPRESSURIZE:
+                do_manifold_state(value, ManifoldActions.VENTING_RETRACTIL_UP)
+            case _:
+                logger.info("user task  %s not supported", user_task)
+                return
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
@@ -323,32 +344,31 @@ class RelControl:
             enum_value=state,
         )
 
-    def apply_pwm_state(self):
-        if self.pwm_started:
-            return
+    def get_pwm_option(self):
         option_register = get_register_by_name(
             self.hmi_hr, Params.PARAM_PULSE_TRAIN_SELECTION.value
         )
         option = self.read_hmi_register(option_register.address).value
-        register_name = Params.PARAM_PULSE_TRAIN_LOW
+        pwm_ption = "low"
         match option:
             case PWMPulseSet.HIGH.value:
-                register_name = Params.PARAM_PULSE_TRAIN_HIGH
+                pwm_ption = "high"
             case PWMPulseSet.MEDIUM.value:
-                register_name = Params.PARAM_PULSE_TRAIN_MEDIUM
+                pwm_ption = "medium"
             case _:
-                register_name = Params.PARAM_PULSE_TRAIN_LOW
-        register = get_register_by_name(self.hmi_hr, register_name.value)
-        pulse_value = self.read_hmi_register(register.address).value
+                pwm_ption = "low"
+        return pwm_ption
+
+    def apply_pwm_state(self):
+        if self.pwm_started:
+            return
         if not self.pwm_started:
-            self.pwm.start_duty(duty=pulse_value)
+            run_pwm(option=self.get_pwm_option())
             self.pwm_started = True
-        else:
-            self.pwm.change_duty(duty=pulse_value)
 
     def stop_pwm(self):
-        if self.pwm:
-            self.pwm.stop_duty()
+        if self.pwm_started:
+            stop_pwm()
             self.pwm_started = False
 
     def write_hmi_cregister_by_address_name(self, enum_name: Enum, enum_value: Enum):

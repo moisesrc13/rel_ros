@@ -44,10 +44,23 @@ class RelROSNode(Node):
         return publishers
 
     def listener_hmi_action_callback(self, msg: HMIAction):
+        """
+        this is for integration with ROS on topics
+
+        Args:
+            msg (HMIAction): HMI action
+        """
         self.get_logger().info(f"📨 I got an HMIAction message {msg}")
         self.do_hmi_action(msg.hmi_id, msg)
 
     def do_hmi_action(self, master_id: int, msg: HMIAction):
+        """
+        perform the HMI action [read | write] coming from topic message
+
+        Args:
+            master_id (int): master id
+            msg (HMIAction): message
+        """
         def get_action_name() -> Optional[HMIActionName]:
             try:
                 return HMIActionName(msg.action)

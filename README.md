@@ -320,3 +320,14 @@ sudo touch /etc/authbind/byport/502
 sudo chmod 777 /etc/authbind/byport/502
 authbind --deep  # script here
 ```
+# check for error
+
+```
+ rel_ros_master_control.services.pwm - ERROR - error setting up PWM - No access to /dev/mem.  Try running as root!
+```
+
+`Reldosys1069`
+
+## PWM update
+
+We just need to use the lib [lgpio](http://abyz.me.uk/lg/py_lgpio.html) and install it with pip as normal dependency. We must call method `gpio_claim_output` in order to enable the pin as PWM

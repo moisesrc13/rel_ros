@@ -23,7 +23,7 @@
       address: 6
     - name: "enter_screen_4_0"
       address: 7
-    - name: "enter_screen_1_0"
+    - name: "enter_manual_mode_screen"
       address: 8
     - name: "button_lock_password"
       address: 9
@@ -88,6 +88,8 @@
       address: 38
     - name: "status_pump_no_depressurized"
       address: 39
+    - name: "status_debug"
+      address: 40
   holding_registers:
   # --------------------------------------- PARAMETERS START
     - name: "param_target_pressure_hyd_home"
