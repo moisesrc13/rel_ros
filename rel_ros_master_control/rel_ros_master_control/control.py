@@ -180,38 +180,11 @@ class RelControl:
                 do_manifold_state(value, ManifoldActions.PISTONS_UP)
             case ManualTasks.ACTION_VACUUM_AIR:
                 do_manifold_state(value, ManifoldActions.AIR_FOR_VACUUM)
-                
-            
-                    
-                    
-                
-                    
-                    
-                
-                
-            
-            
-            
-        
-        user_action = HMIWriteAction(register.name)
-        if value == 0:
-            self.apply_manifold_state(ManifoldActions.DEACTIVATE)
-            return
-        self.apply_manifold_state(ManifoldActions.ACTIVATE)
-        match user_action:
-            case HMIWriteAction.ACTION_PULL_DOWN_PISTONS_MANUAL:
-                self.apply_manifold_state(ManifoldActions.PISTONS_DOWN)
-            case HMIWriteAction.ACTION_PULL_UP_PISTONS_MANUAL:
-                self.apply_manifold_state(ManifoldActions.PISTONS_UP)
-            case HMIWriteAction.ACTION_DEPRESSURIZE:
-                self.apply_manifold_state(
-                    ManifoldActions.VENTING_RETRACTIL_UP
-                )  # need to check if is up or down
-            case HMIWriteAction.ACTION_VACUUM_AIR:
-                self.apply_manifold_state(ManifoldActions.AIR_FOR_VACUUM)
-            case HMIWriteAction.ACTION_RECYCLE:
-                self.apply_manifold_state(ManifoldActions.RECYCLE)
-            
+            case ManualTasks.ACTION_DEPRESSURIZE:
+                do_manifold_state(value, ManifoldActions.VENTING_RETRACTIL_UP)
+            case _:
+                logger.info("user task  %s not supported", user_task)
+                return            
 
     def apply_state(self, hr: HRegister, state_value: int):
         try:
