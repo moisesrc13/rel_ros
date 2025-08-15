@@ -150,7 +150,7 @@ class RelControl:
         # check manual is ON
         if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
             return
-        logger.info("manual mode is ON")
+        logger.info("🔨 manual mode is ON")
         register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
             logger.info("resgiter with coil_address %s for user task not found", coil_address)

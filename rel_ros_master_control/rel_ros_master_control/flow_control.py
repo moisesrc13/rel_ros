@@ -10,6 +10,7 @@ from rel_ros_master_control.constants import (
     FlowStateAction,
     FlowTask,
     SensorDistanceStateName,
+    ManualTasks,
 )
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
@@ -86,9 +87,12 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     inputs = {"control": control}
     while True:
         try:
+            if control.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
+                logger.info("manual mode ON, 💤 passing over main control ...")
+                continue
             logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:
-                input("😴 continue? ...")
+                input("😴 debug & continue? ...")
             inputs = run_flow(inputs, flow_task)
             inputs["control"] = control
             final_output_name = flow_task.tasks[-1]
