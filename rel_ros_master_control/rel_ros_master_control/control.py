@@ -160,7 +160,8 @@ class RelControl:
                 inputs = {"control": self}
                 outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
                 sensor_distance_state = outputs.get("sensor_distance_state")
-                if sensor_distance_state == SensorDistanceStateName.D:
+                if sensor_distance_state == SensorDistanceStateName.D and self.read_hmi_cregister_by_name(ManifoldActions.PISTONS_DOWN):
+                    run_pwm
                     
                     
                 
