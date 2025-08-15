@@ -9,6 +9,7 @@ class StatusRegister(BaseModel):
 
 
 class TowerState(Enum):
+    TOFF = "toff"
     FULL = "full"
     MEDIUM_HIGH = "medium_high"
     MEDIUM = "medium"
@@ -33,6 +34,7 @@ class StatusSegment(BaseModel):
 
 
 class TowerControlStates(BaseModel):
+    toff: list[int]
     full: list[int]
     medium_high: list[int]
     medium: list[int]

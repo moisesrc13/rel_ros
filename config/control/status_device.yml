@@ -2,6 +2,7 @@ start_address: 6060
 total_registers: 8
 alarm_address: 6052
 states:
+  toff: [0, 0, 0, 0, 0, 0, 0, 0]
   full: [22, 3628, 256, 1, 0, 256, 1, 0]
   medium_high: [16, 3328, 5645, 1, 0, 256, 1, 0]
   medium: [0, 0, 0, 1046, 3328, 260, 1, 1024]

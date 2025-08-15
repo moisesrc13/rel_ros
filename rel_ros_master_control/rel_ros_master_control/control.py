@@ -88,7 +88,7 @@ class SlaveType(Enum):
 
 
 class RegisterType(Enum):
-    HOLDING = "holiding"
+    HOLDING = "holding"
     COIL = "coil"
 
 
@@ -228,6 +228,8 @@ class RelControl:
                 registers = self.tower_devive.tower_status.states.vacuum
             case TowerState.BUCKET_CHANGE:
                 registers = self.tower_devive.tower_status.states.bucket_change
+            case TowerState.TOFF:
+                registers = self.tower_devive.tower_status.states.toff
             case TowerState.ACOUSTIC_ALARM_ON:
                 start_address = self.tower_devive.tower_status.alarm_address
                 registers = self.tower_devive.tower_status.states.acoustic_alarm_on
@@ -553,7 +555,7 @@ def run():
     parser.add_argument(
         "-a",
         "--action",
-        choices=["read", "write"],
+        choices=["read", "write", "tower"],
         help="modbus action",
         dest="action",
         default="read",
@@ -589,6 +591,14 @@ def run():
         default=RegisterType.HOLDING.value,
         type=str,
     )
+    parser.add_argument(
+        "-t",
+        "--tower",
+        help="tower state",
+        dest="tower",
+        default=TowerState.FULL,
+        type=str,
+    )
 
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
@@ -603,6 +613,9 @@ def run():
     )
     slave_type = SlaveType(args.mode)
     if slave_type == SlaveType.IOLINK:
+        if args.action == "tower":
+            control.apply_tower_state(TowerState(args.tower))
+            return
         if args.action == "write":
             control.write_iolink_hregister(args.register, args.value)
         elif args.action == "read":
