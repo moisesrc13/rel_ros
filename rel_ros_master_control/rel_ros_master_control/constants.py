@@ -125,6 +125,7 @@ class HMIWriteAction(Enum):
     ACTION_PULL_DOWN_PISTONS_MANUAL = "action_pull_down_pistons_manual"
     ACTION_PULL_UP_PISTONS_MANUAL = "action_pull_up_pistons_manual"
     ACTION_VACUUM_AIR = "action_vacuum_air"
+    ACTION_PRE_FILL_LINE = "action_pre_fill_line"
     ACTION_DEPRESSURIZE = "action_depressurize"
     ACTION_RECYCLE_CAR = "action_recycle_car"
     ACTION_RECYCLE_RETRACTIL = "action_recycle_retractil"
