@@ -35,7 +35,6 @@ from rel_ros_master_control.models.modbus_m import (
     get_register_by_address,
     get_register_by_name,
 )
-from rel_ros_master_control.models.pwm_m import PWMConfig
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
 
 logger = new_logger(__name__)
