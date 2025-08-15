@@ -137,8 +137,8 @@ class RelControl:
         For pistons
 
         Args:
-            coil_address (int): _description_
-            value (int): _description_
+            coil_address (int): hmi coil address
+            value (int): hmi coli value
         """
 
         def do_manifold_state(value: int, state: ManifoldActions):
