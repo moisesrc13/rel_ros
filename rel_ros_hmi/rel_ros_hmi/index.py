@@ -34,6 +34,11 @@ class RelROSNode(Node):
         self.masters = create_masters_for_hmis(
             config.hmis, config.holding_registers, config.coil_registers
         )
+        self.get_logger().info("creating alive timer ⏱")
+        self.create_timer(30.0, self.timer_callback_text)
+
+    def timer_callback_text(self):
+        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 📺 <<<<<<<<<<<<<<<<<<<<")
 
     def create_hmi_user_task_publishers(self, count: int = 1) -> dict:
         publishers = {}
@@ -61,6 +66,7 @@ class RelROSNode(Node):
             master_id (int): master id
             msg (HMIAction): message
         """
+
         def get_action_name() -> Optional[HMIActionName]:
             try:
                 return HMIActionName(msg.action)

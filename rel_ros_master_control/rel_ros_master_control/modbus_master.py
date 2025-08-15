@@ -41,6 +41,7 @@ def setup_sync_client(
         else:
             logger.error("modbus master type not supported")
             raise RuntimeError("modbus master not supported")
+        logger.info("connected ⭐")
         return client
     except Exception as err:
         logger.error("❌ Error creating modbus client - %s", err)
