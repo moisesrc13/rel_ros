@@ -160,7 +160,7 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
 # iolink write
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200 -m iolink
 
 # read all
 # iolink
