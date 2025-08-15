@@ -1,11 +1,13 @@
 import os
-import subprocess
 import signal
+import subprocess
 
-def do_stop_process():
+
+def do_stop_pwm_process():
     root_dir = os.path.abspath(os.path.dirname(__file__))
     script_file = os.path.basename(__file__)
     subprocess.run(["python", f"{root_dir}/{script_file}"])
+
 
 if __name__ == "__main__":
     try:

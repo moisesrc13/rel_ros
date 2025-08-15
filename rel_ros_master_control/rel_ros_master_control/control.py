@@ -42,8 +42,8 @@ from rel_ros_master_control.models.status_device_m import TowerState, TowerStatu
 
 logger = new_logger(__name__)
 try:
-    from rel_ros_master_control.services.pwm_start import do_run_process as run_pwm
-    from rel_ros_master_control.services.pwm_stop import do_stop_process as stop_pwm
+    from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
+    from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
 except Exception as err:
     logger.warning("expected error if not running on RPi - %s", err)
 
