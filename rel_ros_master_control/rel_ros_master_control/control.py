@@ -324,9 +324,9 @@ class RelControl:
     def read_hmi_cregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.hmi_cr, enum_name.value)
         value = self.read_hmi_cregister(register.address).value
-        logger.info(
-            "reading 📺 HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
-        )
+        # logger.info(
+        #    "reading 📺 HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+        # )
         return self.read_hmi_cregister(register.address).value
 
     def read_hmi_hregister_by_name(self, enum_name: Enum) -> int:
