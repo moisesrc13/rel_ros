@@ -25,6 +25,7 @@ from rel_ros_master_control.constants import (
     PWMPulseSet,
     SensorDistanceStateName,
 )
+from rel_ros_master_control.flow_util import run_flow
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
 from rel_ros_master_control.models.hmi_m import SlaveHMI
@@ -38,7 +39,6 @@ from rel_ros_master_control.models.modbus_m import (
     get_register_by_name,
 )
 from rel_ros_master_control.models.status_device_m import TowerState, TowerStatusDevice
-from rel_ros_master_control.util import run_flow
 
 logger = new_logger(__name__)
 try:

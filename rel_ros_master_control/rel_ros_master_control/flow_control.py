@@ -9,8 +9,8 @@ from rel_ros_master_control.constants import (
     SensorDistanceStateName,
 )
 from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.flow_util import run_flow
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.util import run_flow
 
 logger = new_logger(__name__)
 
