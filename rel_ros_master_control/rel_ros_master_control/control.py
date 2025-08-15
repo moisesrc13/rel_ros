@@ -22,6 +22,8 @@ from rel_ros_master_control.constants import (
     PressureSet,
     PressureState,
     PWMPulseSet,
+    Constants,
+    SensorDistanceStateName,
 )
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.modbus_master import RelModbusMaster
@@ -149,12 +151,24 @@ class RelControl:
         logger.info("running user task on %s - value %s", register.name, value)
         try:
             user_task = ManualTasks(register.name)
-            
-            
-            
         except:
             logger.error("user task for register %s not supported", register.name)
-            return
+            return        
+        
+        match user_task:
+            case ManualTasks.ACTION_PRE_FILL_LINE:
+                inputs = {"control": self}
+                outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
+                sensor_distance_state = outputs.get("sensor_distance_state")
+                if sensor_distance_state == SensorDistanceStateName.D:
+                    
+                    
+                
+                
+            
+            
+            
+        
         user_action = HMIWriteAction(register.name)
         if value == 0:
             self.apply_manifold_state(ManifoldActions.DEACTIVATE)
