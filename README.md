@@ -178,14 +178,16 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
 
 # tower
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m iolink -t "full"
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "full"
 
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py
---action read --register 5 -m iolink -t "medium"
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "medium"
 
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m iolink -t "bucket_change"
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "bucket_change"
 
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m iolink -t "toff"
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "toff"
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "acoustic_alarm_on"
+
 
 ```
 
