@@ -42,8 +42,8 @@ from rel_ros_master_control.models.status_device_m import TowerState, TowerStatu
 
 logger = new_logger(__name__)
 try:
-    from rel_ros_master_control.services.pwm_start import do_run_process as run_pwm
-    from rel_ros_master_control.services.pwm_stop import do_stop_process as stop_pwm
+    from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
+    from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
 except Exception as err:
     logger.warning("expected error if not running on RPi - %s", err)
 
@@ -88,7 +88,7 @@ class SlaveType(Enum):
 
 
 class RegisterType(Enum):
-    HOLDING = "holiding"
+    HOLDING = "holding"
     COIL = "coil"
 
 
@@ -164,6 +164,8 @@ class RelControl:
             return
 
         match user_task:
+            case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
+                return
             case ManualTasks.ACTION_PRE_FILL_LINE:
                 if not value:
                     self.stop_pwm()
@@ -182,7 +184,7 @@ class RelControl:
             case ManualTasks.ACTION_VACUUM_AIR:
                 do_manifold_state(value, ManifoldActions.AIR_FOR_VACUUM)
             case ManualTasks.ACTION_DEPRESSURIZE:
-                do_manifold_state(value, ManifoldActions.VENTING_RETRACTIL_UP)
+                do_manifold_state(value, ManifoldActions.RECYCLE)
             case _:
                 logger.info("user task  %s not supported", user_task)
                 return
@@ -226,6 +228,8 @@ class RelControl:
                 registers = self.tower_devive.tower_status.states.vacuum
             case TowerState.BUCKET_CHANGE:
                 registers = self.tower_devive.tower_status.states.bucket_change
+            case TowerState.TOFF:
+                registers = self.tower_devive.tower_status.states.toff
             case TowerState.ACOUSTIC_ALARM_ON:
                 start_address = self.tower_devive.tower_status.alarm_address
                 registers = self.tower_devive.tower_status.states.acoustic_alarm_on
@@ -322,9 +326,9 @@ class RelControl:
     def read_hmi_cregister_by_name(self, enum_name: Enum) -> int:
         register = get_register_by_name(self.hmi_cr, enum_name.value)
         value = self.read_hmi_cregister(register.address).value
-        logger.info(
-            "reading 📺 HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
-        )
+        # logger.info(
+        #    "reading 📺 HMI coil %s (%s) ok | value: ✨ %s", enum_name.value, register.address, value
+        # )
         return self.read_hmi_cregister(register.address).value
 
     def read_hmi_hregister_by_name(self, enum_name: Enum) -> int:
@@ -551,7 +555,7 @@ def run():
     parser.add_argument(
         "-a",
         "--action",
-        choices=["read", "write"],
+        choices=["read", "write", "tower"],
         help="modbus action",
         dest="action",
         default="read",
@@ -587,6 +591,14 @@ def run():
         default=RegisterType.HOLDING.value,
         type=str,
     )
+    parser.add_argument(
+        "-t",
+        "--tower",
+        help="tower state",
+        dest="tower",
+        default=TowerState.FULL,
+        type=str,
+    )
 
     args = parser.parse_args()
     logger.info("starting main control for master io link %s ...", args.id)
@@ -601,6 +613,10 @@ def run():
     )
     slave_type = SlaveType(args.mode)
     if slave_type == SlaveType.IOLINK:
+        if args.action == "tower":
+            logger.info("applying tower state %s", args.tower)
+            control.apply_tower_state(TowerState(args.tower))
+            return
         if args.action == "write":
             control.write_iolink_hregister(args.register, args.value)
         elif args.action == "read":

@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 from rel_ros_master_control.control import RelControl
 from rel_ros_master_control.logger import new_logger
-from rel_ros_master_control.services.pwm_start import do_run_process as run_pwm
-from rel_ros_master_control.services.pwm_stop import do_stop_process as stop_pwm
+from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
+from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
 
 logger = new_logger(__name__)
 
@@ -71,6 +71,7 @@ async def run_pwm_api(
 ):
     background_tasks.add_task(run_pwm)
     return {"message": "pwm running..."}
+
 
 @api_router.post("/pwm/stop")
 async def stop_pwm_api(

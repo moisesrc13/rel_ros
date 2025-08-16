@@ -20,7 +20,6 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     while True:
         try:
             if control.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
-                logger.info("manual mode ON, 💤 passing over main control ...")
                 continue
             logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:

@@ -160,7 +160,7 @@ python ~/ros2_ws/src/rel_ros_hmi/rel_ros_hmi/modbus_master.py --action read --re
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py
 
 # iolink write
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 1200 -m iolink
 
 # read all
 # iolink
@@ -176,6 +176,19 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 5 -m hmi -x coil --value 1
 
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 5 -m hmi -x coil
+
+# tower
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "full"
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "medium"
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "bucket_change"
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "toff"
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "acoustic_alarm_on"
+
+
 ```
 
 ---
@@ -287,6 +300,8 @@ sudo reboot
 
 `nano /etc/netplan/99_config.yaml`
 
+This is RPi IP Network
+
 ```yaml
 network:
   version: 2
@@ -331,3 +346,16 @@ authbind --deep  # script here
 ## PWM update
 
 We just need to use the lib [lgpio](http://abyz.me.uk/lg/py_lgpio.html) and install it with pip as normal dependency. We must call method `gpio_claim_output` in order to enable the pin as PWM
+
+### commands
+
+```bash
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/services/start_pwm.py
+
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/services/stop_pwm.py
+```
+
+## User Password
+
+coil: 28H -> 40 decimal
+password: 0

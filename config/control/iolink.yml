@@ -40,7 +40,7 @@ holding_registers:
       data_type: "uint16"
       mode: "w"
     - name: "action_manifold"
-      address: 5051
+      address: 5052
       words: 1
       data_type: "uint16"
       mode: "w"

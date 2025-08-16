@@ -1,8 +1,8 @@
 import argparse
 import os
+import signal
 import subprocess
 import sys
-import signal
 import time
 
 import lgpio
@@ -31,11 +31,16 @@ class RelPWM:
             self.is_running = True
             logger.info("ramping up PWM for option %s ...", self.option)
             for duty_cycle in range(0, self.config.steps, 1):
-                lgpio.tx_pwm(self.handler, self.config.pin, self.config.params.frequency, duty_cycle)
+                lgpio.tx_pwm(
+                    self.handler, self.config.pin, self.config.params.frequency, duty_cycle
+                )
                 time.sleep(0.01)
             logger.info("running full PWM ...")
             lgpio.tx_pwm(
-                self.handler, self.config.pin, self.config.params.frequency, self.config.params.duty_cycle
+                self.handler,
+                self.config.pin,
+                self.config.params.frequency,
+                self.config.params.duty_cycle,
             )
             while True:
                 time.sleep(0.5)
@@ -60,11 +65,12 @@ def stop_pwm_handler(pwm: RelPWM):
 
     return signal_handler
 
-def do_run_process(option: str = "medium"):
+
+def do_start_pwm_process(option: str = "medium"):
     root_dir = os.path.abspath(os.path.dirname(__file__))
     script_file = os.path.basename(__file__)
     subprocess.run(["python", f"{root_dir}/{script_file}", "--option", option])
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
