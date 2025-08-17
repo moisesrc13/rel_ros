@@ -13,7 +13,7 @@ from rel_ros_master_control.control import run_masters_to_iolinks
 from rel_ros_master_control.flow_control import run_control
 
 
-class RelROSNode(Node):
+class RelROSControlNode(Node):
     def __init__(self):
         super().__init__("rel_ros_master_control_node")
         self.is_control_running = False
@@ -38,7 +38,7 @@ class RelROSNode(Node):
         self.start_main_control()
 
     def timer_callback_text(self):
-        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS 👾 <<<<<<<<<<<<<<<<<<<<")
+        self.get_logger().info(" >>>>>>>>>>>>>>>>>>>> I'm alive in ROS  👾 <<<<<<<<<<<<<<<<<<<<")
 
     def apply_initial_state(self):
         for m in self.masters:
@@ -85,7 +85,7 @@ class RelROSNode(Node):
 def main():
     try:
         rclpy.init()
-        node = RelROSNode()
+        node = RelROSControlNode()
         rclpy.spin(node)
         rclpy.shutdown()
 

@@ -16,7 +16,7 @@ class HMIActionName(Enum):
     NONE = "none"
 
 
-class RelROSNode(Node):
+class RelROSHMINode(Node):
     def __init__(self):
         super().__init__("rel_ros_hmi_node")
         self.subscription_hmi_status = self.create_subscription(
@@ -98,7 +98,7 @@ class RelROSNode(Node):
 def main():
     try:
         rclpy.init()
-        node = RelROSNode()
+        node = RelROSHMINode()
         rclpy.spin(node)
         rclpy.shutdown()
 
