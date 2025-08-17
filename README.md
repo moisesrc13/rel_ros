@@ -19,6 +19,7 @@ docker run --rm --name rel-ros -it \
  -v $(pwd)/rel_ros_master_control:/home/relant/ros2_ws/src/rel_ros_master_control \
  -v $(pwd)/rel_ros_hmi:/home/relant/ros2_ws/src/rel_ros_hmi \
  -v $(pwd)/rel_interfaces:/home/relant/ros2_ws/src/rel_interfaces \
+ -v $(pwd)/config:/home/relant/config \
  rel-ros:0.1.0 /bin/bash
 ```
 
@@ -167,7 +168,7 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
 
 # hmi read all hr
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holding
 
 # hmi read all cr
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
@@ -187,7 +188,51 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "toff"
 
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "acoustic_alarm_on"
+```
 
+### Manual HMI Tasks
+
+```bash
+# manual on
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 8 -m hmi -x coil --value 1
+
+# prefill, this will run a sub flow to check sensor laser. PWM activated on D) Sensor laser d>X && d<W
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 14 -m hmi -x coil --value 1
+## simulate state D
+
+  ### -> sensor laser
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 2002 --value 60 -m iolink
+
+  ### -> param vacuum limit high
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40015 --value 50 -m hmi -x holding
+
+  ### -> param bucket size selection (option 1)
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40033 --value 1 -m hmi -x holding
+
+  ### -> param distance bucket 1
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40028 --value 100 -m hmi -x holding
+
+  ### CONDITION
+  ## sensor_distance > sensor_distance_params.high_vacuum_limit and sensor_distance < sensor_distance_params.bucket_distance
+
+# -> ./prefill-test.sh
+
+PARAM_DISTANCE_BUCKET_1
+
+# pistons down
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 15 -m hmi -x coil --value 1
+
+# pistons up
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 16 -m hmi -x coil --value 1
+
+# vacuum air
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 17 -m hmi -x coil --value 1
+
+# depressurize
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 18 -m hmi -x coil --value 1
+
+# recycle retractil
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 23 -m hmi -x coil --value 1
 
 ```
 
@@ -226,7 +271,7 @@ export USE_TEST_MODBUS="true"  # set this to false to work with IOLink connected
 export APP_MASTER_IOLINK_ID="0"
 ```
 
-### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
+### 2. (FOR TEST ONLY) Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
 
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
@@ -327,6 +372,8 @@ IOLink: 192.168.0.21:502
 - Send Data, Communications > PC VT Send Data > all data
 
 ## Non Root privileged ports (for modbus)
+
+Note: this is not longer required since the modbus HMI now runs on port >= 8845
 
 ```bash
 sudo apt-get install authbind

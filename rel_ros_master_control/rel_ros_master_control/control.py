@@ -44,6 +44,8 @@ logger = new_logger(__name__)
 try:
     from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
     from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
+
+    logger.info("♾️ pwm libs loaded")
 except Exception as err:
     logger.warning("expected error if not running on RPi - %s", err)
 
@@ -92,6 +94,12 @@ class RegisterType(Enum):
     COIL = "coil"
 
 
+class ControlState(BaseModel):
+    is_manual: bool = False
+    is_prefill: bool = False
+    pwm_started: bool = False
+
+
 class RelControl:
     """Main class for control"""
 
@@ -103,7 +111,7 @@ class RelControl:
         hmi_hr: list[HRegister],
         hmi_cr: list[CRegister],
     ) -> None:
-        self.pwm_started = False
+        self.control_state = ControlState()
         self.iolink_hr = iolink_hr
         self.hmi_hr = hmi_hr
         self.hmi_cr = hmi_cr
@@ -142,16 +150,15 @@ class RelControl:
         """
 
         def do_manifold_state(value: int, state: ManifoldActions):
+            """
+            function to apply manifold state
+            """
             if value:
                 self.apply_manifold_state(ManifoldActions.ACTIVATE)
                 self.apply_manifold_state(state)
             else:
                 self.apply_manifold_state(ManifoldActions.DEACTIVATE)
 
-        # check manual is ON
-        if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
-            return
-        logger.info("🔨 manual mode is ON")
         register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
             logger.info("resgiter with coil_address %s for user task not found", coil_address)
@@ -163,17 +170,33 @@ class RelControl:
             logger.error("user task for register %s not supported", register.name)
             return
 
+        # check if manual is on for any other task
+        if user_task != ManualTasks.ENTER_MANUAL_MODE_SCREEN and not self.control_state.is_manual:
+            # in this case manual is not on and we should not perform the task
+            logger.info("manual is OFF 🚩, not running task")
+            return
+
         match user_task:
             case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
-                return
+                if value:
+                    logger.info("🔨 manual mode is ON 🏳️")
+                    self.control_state.is_manual = True
+                else:
+                    logger.info("🔨 manual mode is OFF 🚩")
+                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
+                    self.control_state.is_manual = False
+                    return
             case ManualTasks.ACTION_PRE_FILL_LINE:
-                if not value:
+                if not value and self.control_state.is_prefill:
                     self.stop_pwm()
+                    self.control_state.is_prefill = False
                     return
                 inputs = {"control": self}
-                outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
+                outputs = run_flow(inputs, Constants.flow_calculate_distance_sensor_case)
                 sensor_distance_state = outputs.get("sensor_distance_state")
+                logger.info("sensor_distance_state %s for prefill", sensor_distance_state)
                 if sensor_distance_state == SensorDistanceStateName.D and value:
+                    self.control_state.is_prefill = True
                     self.apply_pwm_state()
             case ManualTasks.ACTION_RECYCLE_RETRACTIL:
                 do_manifold_state(value, ManifoldActions.RECYCLE)
@@ -364,16 +387,18 @@ class RelControl:
         return pwm_ption
 
     def apply_pwm_state(self):
-        if self.pwm_started:
+        if self.control_state.pwm_started:
             return
-        if not self.pwm_started:
+        if not self.control_state.pwm_started:
+            logger.info("running pwm ♾️")
             run_pwm(option=self.get_pwm_option())
-            self.pwm_started = True
+            self.control_state.pwm_started = True
 
     def stop_pwm(self):
-        if self.pwm_started:
+        if self.control_state.pwm_started:
+            logger.info("stopping pwm ♾️")
             stop_pwm()
-            self.pwm_started = False
+            self.control_state.pwm_started = False
 
     def write_hmi_cregister_by_address_name(self, enum_name: Enum, enum_value: Enum):
         self.write_register_by_address_name(

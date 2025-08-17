@@ -21,6 +21,7 @@ USER relant
 
 WORKDIR /home/relant
 COPY ./run.sh /home/relant/run.sh
+COPY ./prefill-test /home/relant/prefill-test
 
 # create ROS workspace and virutal env
 RUN mkdir -p /home/relant/ros2_ws/src

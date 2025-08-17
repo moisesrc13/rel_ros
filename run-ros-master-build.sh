@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source ~/.bashrc
 RELANT_PACKAGE="rel_ros_master_control"
-RELANT_NODE="rel_ros_master_control_node"
+RELANT_NODE="rel_ros_master_control_node"  # this is definided in the python ROS Node name
 cd ~/ros2_ws
 colcon build
 source install/setup.bash

@@ -67,12 +67,14 @@ def stop_pwm_handler(pwm: RelPWM):
 
 
 def do_start_pwm_process(option: str = "medium"):
+    logger.info("running ♾️ pwm with option %s", option)
     root_dir = os.path.abspath(os.path.dirname(__file__))
     script_file = os.path.basename(__file__)
     subprocess.run(["python", f"{root_dir}/{script_file}", "--option", option])
 
 
 if __name__ == "__main__":
+    logger.info("running ♾️ pwm start program")
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-o",

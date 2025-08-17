@@ -1,3 +1,4 @@
+# this is the tower status device
 start_address: 6060
 total_registers: 8
 alarm_address: 6052
