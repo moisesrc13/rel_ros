@@ -168,7 +168,7 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m iolink
 
 # hmi read all hr
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holiding
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x holding
 
 # hmi read all cr
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action read --register 0 -m hmi -x coil
