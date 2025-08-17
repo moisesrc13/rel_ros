@@ -163,6 +163,12 @@ class RelControl:
             logger.error("user task for register %s not supported", register.name)
             return
 
+        # check if manual is on for any other task
+        if user_task != ManualTasks.ENTER_MANUAL_MODE_SCREEN and not self.is_manual:
+            # in this case manual is not on and we should not perform the task
+            logger.info("manual is OFF 🚩, not running task")
+            return
+
         match user_task:
             case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
                 if value:
