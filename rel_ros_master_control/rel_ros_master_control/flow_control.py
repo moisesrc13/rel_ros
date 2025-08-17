@@ -19,7 +19,7 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     inputs = {"control": control}
     while True:
         try:
-            if control.is_manual:
+            if control.control_state.is_manual:
                 continue
             logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:
