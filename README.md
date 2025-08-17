@@ -188,7 +188,27 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "toff"
 
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "acoustic_alarm_on"
+```
 
+### Manual HMI Tasks
+
+```bash
+# manual on
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 8 -m hmi -x coil --value 1
+
+# prefill
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 14 -m hmi -x coil --value 1
+
+
+# pistons down
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 15 -m hmi -x coil --value 1
+
+
+# pistons up
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 16 -m hmi -x coil --value 1
+
+# vacuum air
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 17 -m hmi -x coil --value 1
 
 ```
 
