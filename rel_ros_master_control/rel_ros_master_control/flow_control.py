@@ -20,7 +20,6 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     while True:
         try:
             if control.is_manual:
-                logger.info("reomve this log after, but manual is on!!")
                 continue
             logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:
