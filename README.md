@@ -19,6 +19,7 @@ docker run --rm --name rel-ros -it \
  -v $(pwd)/rel_ros_master_control:/home/relant/ros2_ws/src/rel_ros_master_control \
  -v $(pwd)/rel_ros_hmi:/home/relant/ros2_ws/src/rel_ros_hmi \
  -v $(pwd)/rel_interfaces:/home/relant/ros2_ws/src/rel_interfaces \
+ -v $(pwd)/config:/home/relant/config \
  rel-ros:0.1.0 /bin/bash
 ```
 
@@ -226,7 +227,7 @@ export USE_TEST_MODBUS="true"  # set this to false to work with IOLink connected
 export APP_MASTER_IOLINK_ID="0"
 ```
 
-### 2. Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
+### 2. (FOR TEST ONLY) Run test modbus master control (IOLink) slave. The slave is a server, contains all register data (RPi)
 
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
