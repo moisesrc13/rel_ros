@@ -328,6 +328,8 @@ IOLink: 192.168.0.21:502
 
 ## Non Root privileged ports (for modbus)
 
+Note: this is not longer required since the modbus HMI now runs on port >= 8845
+
 ```bash
 sudo apt-get install authbind
 sudo mkdir /etc/authbind/byport

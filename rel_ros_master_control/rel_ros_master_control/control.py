@@ -104,6 +104,7 @@ class RelControl:
         hmi_cr: list[CRegister],
     ) -> None:
         self.pwm_started = False
+        self.is_manual = False
         self.iolink_hr = iolink_hr
         self.hmi_hr = hmi_hr
         self.hmi_cr = hmi_cr
@@ -142,16 +143,15 @@ class RelControl:
         """
 
         def do_manifold_state(value: int, state: ManifoldActions):
+            """
+            function to apply manifold state
+            """
             if value:
                 self.apply_manifold_state(ManifoldActions.ACTIVATE)
                 self.apply_manifold_state(state)
             else:
                 self.apply_manifold_state(ManifoldActions.DEACTIVATE)
 
-        # check manual is ON
-        if not self.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
-            return
-        logger.info("🔨 manual mode is ON")
         register = get_register_by_name(self.hmi_cr, coil_address)
         if not register:
             logger.info("resgiter with coil_address %s for user task not found", coil_address)
@@ -165,7 +165,12 @@ class RelControl:
 
         match user_task:
             case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
-                return
+                if value:
+                    logger.info("🔨 manual mode is ON")
+                    self.is_manual = True
+                else:
+                    self.is_manual = False
+                    return
             case ManualTasks.ACTION_PRE_FILL_LINE:
                 if not value:
                     self.stop_pwm()

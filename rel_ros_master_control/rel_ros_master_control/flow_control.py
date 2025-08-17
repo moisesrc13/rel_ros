@@ -19,7 +19,8 @@ def run_control(control: RelControl, flow_task: FlowTask, queue: Queue = None, d
     inputs = {"control": control}
     while True:
         try:
-            if control.read_hmi_cregister_by_name(ManualTasks.ENTER_MANUAL_MODE_SCREEN):
+            if control.is_manual:
+                logger.info("reomve this log after, but manual is on!!")
                 continue
             logger.info("💡 running flow: %s \n inputs: \n %s", flow_task.name, inputs)
             if debug:
