@@ -388,11 +388,13 @@ class RelControl:
         if self.control_state.pwm_started:
             return
         if not self.control_state.pwm_started:
+            logger.info("running pwm ♾️")
             run_pwm(option=self.get_pwm_option())
             self.control_state.pwm_started = True
 
     def stop_pwm(self):
         if self.control_state.pwm_started:
+            logger.info("stopping pwm ♾️")
             stop_pwm()
             self.control_state.pwm_started = False
 
