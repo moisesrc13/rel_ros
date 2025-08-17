@@ -90,8 +90,8 @@ cd ~/ros2_ws
 
 ```bash
 source install/setup.bash  # -> important to run this always before
-ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: enter_manual_mode_screen, value: 1}"
-ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
+ros2 topic pub --once /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: enter_manual_mode_screen, value: 1}"
+ros2 topic pub --once /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
 ```
 
 ### info
