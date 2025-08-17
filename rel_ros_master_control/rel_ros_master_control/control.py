@@ -176,6 +176,7 @@ class RelControl:
                     self.is_manual = True
                 else:
                     logger.info("🔨 manual mode is OFF 🚩")
+                    self.apply_manifold_state(ManifoldActions.DEACTIVATE)
                     self.is_manual = False
                     return
             case ManualTasks.ACTION_PRE_FILL_LINE:
