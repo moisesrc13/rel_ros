@@ -196,7 +196,7 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 # manual on
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 8 -m hmi -x coil --value 1
 
-# prefill, this will run a sub flow to check sensor laser
+# prefill, this will run a sub flow to check sensor laser. PWM activated on D) Sensor laser d>X && d<W
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 14 -m hmi -x coil --value 1
 
 # pistons down

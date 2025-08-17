@@ -86,7 +86,7 @@ def sensor_distance_state(
     ):
         distance_state = SensorDistanceStateName.D
     # return default for now
-    logger.info("📏 sensor distance state %s", distance_state)
+    logger.info("📏 sensor distance state %s", distance_state.value)
     return distance_state
 
 
