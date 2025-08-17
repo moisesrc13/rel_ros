@@ -215,6 +215,7 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
   ### CONDITION
   ## sensor_distance > sensor_distance_params.high_vacuum_limit and sensor_distance < sensor_distance_params.bucket_distance
 
+# -> ./prefill-test.sh
 
 PARAM_DISTANCE_BUCKET_1
 
