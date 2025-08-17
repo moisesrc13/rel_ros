@@ -186,6 +186,7 @@ class RelControl:
                 inputs = {"control": self}
                 outputs = run_flow(inputs, Constants.flow_manual_pre_fill_line)
                 sensor_distance_state = outputs.get("sensor_distance_state")
+                logger.info("sensor_distance_state %s for prefill", sensor_distance_state)
                 if sensor_distance_state == SensorDistanceStateName.D and value:
                     self.apply_pwm_state()
             case ManualTasks.ACTION_RECYCLE_RETRACTIL:
