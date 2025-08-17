@@ -166,9 +166,10 @@ class RelControl:
         match user_task:
             case ManualTasks.ENTER_MANUAL_MODE_SCREEN:
                 if value:
-                    logger.info("🔨 manual mode is ON")
+                    logger.info("🔨 manual mode is ON 🏳️")
                     self.is_manual = True
                 else:
+                    logger.info("🔨 manual mode is OFF 🚩")
                     self.is_manual = False
                     return
             case ManualTasks.ACTION_PRE_FILL_LINE:
