@@ -10,6 +10,7 @@ def do_stop_pwm_process():
 
 
 if __name__ == "__main__":
+    print("running ♾️ pwm start program")
     try:
         with open("/tmp/pwm_control.pid", "r") as f:
             pid = int(f.read())

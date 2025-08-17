@@ -74,6 +74,7 @@ def do_start_pwm_process(option: str = "medium"):
 
 
 if __name__ == "__main__":
+    logger.info("running ♾️ pwm start program")
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-o",
