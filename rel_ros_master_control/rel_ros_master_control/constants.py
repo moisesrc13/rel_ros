@@ -241,16 +241,6 @@ class Constants:
         ],
         outputs=["bucket_change_step_2"],
     )
-    flow_manual_pre_fill_line = FlowTask(
-        name="flow_manual_pre_fill_line",
-        tasks=[
-            "check_distance_sensor_for_electrovalves",
-            "bucket_distance",
-            "sensor_distance_params",
-            "sensor_distance_state",
-        ],
-        outputs=["sensor_distance_params", "sensor_distance_state"],
-    )
     laser_infinity: int = 1000
     wait_for_sensor_laser_ms: int = 5000
     wait_read_laser: float = 0.20
