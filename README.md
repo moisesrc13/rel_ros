@@ -416,3 +416,12 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/services/stop
 
 coil: 28H -> 40 decimal
 password: 0
+
+
+## Rel API setup
+
+sudo cp rel-api.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable rel-api.service
+sudo systemctl status rel-api.service
+sudo systemctl start rel-api.service

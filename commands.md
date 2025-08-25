@@ -1,4 +1,25 @@
-#### IOLink test slave with HMI too
+# Run the RO2 Nodes
+
+Only two nodes are required to run:
+- HMI
+- Master Control
+
+## start HMI
+```bash
+cd ~/ros2_ws
+. ./run-ros-hmi-build.sh
+```
+
+## start master control
+
+```bash
+cd ~/ros2_ws
+. ./run-ros-master-build.sh
+```
+
+
+
+## IOLink test slave with HMI too
 
 ```bash
 
@@ -35,12 +56,12 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --
 python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action tower --register 5 -m iolink -t "acoustic_alarm_on"
 ```
 
-### Manual HMI Tasks
+## Manual HMI Tasks
 
 ```bash
 # unblock manual for password
 
-python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 28 -m hmi -x coil --value 1
+python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/control.py --action write --register 40 -m hmi -x coil --value 1
 
 
 # manual on
