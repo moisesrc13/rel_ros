@@ -22,7 +22,7 @@ cd ~/ros2_ws
 After starting the Nodes, you can start the API as follows
 
 ```bash
-python rel_ros_master_control/rel_ros_master_control/rest/app.py
+python ~/git/rel_ros/rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
 
 
