@@ -45,7 +45,7 @@ async def read_register(
     read_request: ReadRequest,
 ):
     logger.debug(
-        "getting register %s data for slave type %s and register type",
+        "getting register %s data for slave type %s and register type %s",
         read_request.register,
         read_request.slave_type,
         read_request.register_type,
@@ -104,7 +104,7 @@ async def write_register(
 
 @api_router.post("/pwm/run")
 async def run_pwm_api(background_tasks: BackgroundTasks, pwm_request: PWMRequest):
-    background_tasks.add_task(run_pwm, pwm_request.option)
+    background_tasks.add_task(run_pwm, pwm_request.option.value)
     return {"message": "pwm running..."}
 
 
