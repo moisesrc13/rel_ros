@@ -425,3 +425,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable rel-api.service
 sudo systemctl status rel-api.service
 sudo systemctl start rel-api.service
+
+Available at `http://192.168.0.10:9080/docs`
