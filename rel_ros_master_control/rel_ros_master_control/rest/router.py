@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import BaseModel
 
-from rel_ros_master_control.control import RelControl
+from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
 from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
@@ -14,6 +14,8 @@ api_router = APIRouter()
 class WriteRequest(BaseModel):
     register: int
     value: int
+    register_type: RegisterType = RegisterType("coil")
+    slave_type: SlaveType = SlaveType("hmi")
 
 
 class PWMRequest(BaseModel):
@@ -54,9 +56,22 @@ async def write_register(
     request: Request,
     write_request: WriteRequest,
 ):
-    logger.debug("write register %s with value %s", write_request.register, write_request.value)
+    logger.debug(
+        "write slave type %s register %s with value %s",
+        write_request.slave_type,
+        write_request.register,
+        write_request.value,
+    )
     control: RelControl = request.app.state.control
-    control_status = control.write_iolink_hregister(write_request.register, write_request.value)
+    if write_request.slave_type == SlaveType.IOLINK:
+        control_status = control.write_iolink_hregister(write_request.register, write_request.value)
+    else:
+        control_status = control.write_register(
+            register=write_request.register,
+            value=write_request.value,
+            stype=write_request.slave_type,
+            rtype=write_request.register_type,
+        )
     if control_status.error:
         raise HTTPException(
             status_code=control_status.HTTP_500_INTERNAL_SERVER_ERROR,
