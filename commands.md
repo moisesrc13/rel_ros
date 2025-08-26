@@ -5,6 +5,7 @@ Only two nodes are required to run:
 - Master Control
 
 ## start HMI
+
 ```bash
 cd ~/ros2_ws
 . ./run-ros-hmi-build.sh
@@ -15,6 +16,13 @@ cd ~/ros2_ws
 ```bash
 cd ~/ros2_ws
 . ./run-ros-master-build.sh
+```
+
+## Start API
+After starting the Nodes, you can start the API as follows
+
+```bash
+python rel_ros_master_control/rel_ros_master_control/rest/app.py
 ```
 
 
