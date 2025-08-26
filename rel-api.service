@@ -1,0 +1,15 @@
+[Unit]
+Description=Relant API
+DefaultDependencies=no
+After=network.target network-online.target
+
+[Service]
+Type=simple
+User=relant
+Group=relant
+ExecStart=/home/relant/git/rel_ros/run-api.sh
+TimeoutStartSec=0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

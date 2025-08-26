@@ -83,6 +83,24 @@ cd ~/ros2_ws
 ./run-ros-build-interfaces.sh
 ```
 
+
+## ROS messages
+
+### publish
+
+```bash
+source install/setup.bash  # -> important to run this always before
+ros2 topic pub --once /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: enter_manual_mode_screen, value: 1}"
+ros2 topic pub --once /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
+```
+
+### info
+```bash
+ros2 topic info /rel/hmi_user_task_0
+ros2 topic type /rel/hmi_user_task_0
+ros2 interface show rel_interfaces/msg/HMIUserTask
+```
+
 ## Run ROS Nodes
 
 This is how we can run all nodes
@@ -109,14 +127,6 @@ export APP_MASTER_IOLINK_ID="0"
 cd ~/ros2_ws
 ./run-ros-hmi.sh
 ```
-
-#### ROS publish message
-
-```bash
-source install/setup.bash
-ros2 topic pub /rel/hmi_user_task_0 rel_interfaces/msg/HMIUserTask "{coil_address: action_pull_up_pistons_manual, value: 1}"
-```
-
 
 `python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
 
@@ -406,3 +416,14 @@ python ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/services/stop
 
 coil: 28H -> 40 decimal
 password: 0
+
+
+## Rel API setup
+
+sudo cp rel-api.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable rel-api.service
+sudo systemctl status rel-api.service
+sudo systemctl start rel-api.service
+
+Available at `http://192.168.0.10:9080/docs`
