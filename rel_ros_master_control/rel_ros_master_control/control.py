@@ -94,6 +94,12 @@ class RegisterType(Enum):
     COIL = "coil"
 
 
+class PWMOption(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 class ControlState(BaseModel):
     is_manual: bool = False
     is_prefill: bool = False

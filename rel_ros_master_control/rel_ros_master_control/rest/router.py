@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from pydantic import BaseModel
 
-from rel_ros_master_control.control import RegisterType, RelControl, SlaveType
+from rel_ros_master_control.control import PWMOption, RegisterType, RelControl, SlaveType
 from rel_ros_master_control.logger import new_logger
 from rel_ros_master_control.services.pwm_start import do_start_pwm_process as run_pwm
 from rel_ros_master_control.services.pwm_stop import do_stop_pwm_process as stop_pwm
@@ -25,9 +25,7 @@ class ReadRequest(BaseModel):
 
 
 class PWMRequest(BaseModel):
-    frequency: int = 1000
-    time_seconds: int = 10
-    duty: int = 100
+    option: PWMOption = PWMOption("low")
 
 
 @api_router.get("/")
@@ -105,10 +103,8 @@ async def write_register(
 
 
 @api_router.post("/pwm/run")
-async def run_pwm_api(
-    background_tasks: BackgroundTasks,
-):
-    background_tasks.add_task(run_pwm)
+async def run_pwm_api(background_tasks: BackgroundTasks, pwm_request: PWMRequest):
+    background_tasks.add_task(run_pwm, pwm_request.option)
     return {"message": "pwm running..."}
 
 
