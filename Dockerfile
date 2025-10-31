@@ -8,7 +8,7 @@ USER root
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # install ros package
 RUN apt-get update && apt-get install -y \
-  ros-humble-demo-nodes-cpp curl wget python3.11 python3.11-dev \
+  ros-humble-demo-nodes-cpp curl wget python3.10 python3.10-dev \
   swig gpiod libgpiod-dev \
   virtualenv nano qt5-* \
   ros-humble-demo-nodes-py && \
@@ -28,7 +28,7 @@ RUN mkdir -p /home/relant/ros2_ws/src
 COPY ./requirements.txt /home/relant/ros2_ws/requirements.txt
 COPY ./run-ros-*.sh /home/relant/ros2_ws/
 COPY ./config /home/relant/config
-RUN cd /home/relant/ros2_ws && virtualenv -p python3.11 ./venv && touch ./venv/COLCON_IGNORE
+RUN cd /home/relant/ros2_ws && virtualenv -p python3.10 ./venv && touch ./venv/COLCON_IGNORE
 
 
 # activate venv and install dependencies
@@ -53,7 +53,7 @@ RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
 RUN echo 'export APP_MASTER_IOLINK_ID=0' >> ~/.bashrc
 
 ENV PYTHONPATH=""
-ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.11/site-packages"
+ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/venv/lib/python3.10/site-packages"
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_hmi"
 ENV PYTHONPATH="${PYTHONPATH}:/home/relant/ros2_ws/src/rel_ros_master_control"
 
