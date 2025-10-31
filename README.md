@@ -456,3 +456,10 @@ sudo systemctl status rel-api.service
 sudo systemctl start rel-api.service
 
 Available at `http://192.168.0.10:9080/docs`
+
+
+## TTL comm config
+
+`sudo usermod -a -G dialout relant`
+
+mount the COM device when running the container, e.g `docker run --device=/dev/ttyUSB0:/dev/ttyUSB0 rel-ros:0.1.0`

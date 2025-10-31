@@ -36,6 +36,7 @@ RUN source /opt/ros/humble/setup.bash && source /home/relant/ros2_ws/venv/bin/ac
 
 
 USER root
+RUN usermod -a -G dialout relant
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant
 # install VS Code (code-server)

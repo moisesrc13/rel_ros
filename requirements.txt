@@ -19,3 +19,4 @@ numpy==2.2.6
 empy==3.3.4
 gpiod==2.3.0
 lgpio==0.2.2.0
+pyserial==3.5
