@@ -99,6 +99,10 @@ cd ~/ros2_ws
 ./run-ros-hmi-build.sh
 ```
 
+** if not iolink master then run iolink test one
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
 3. run master control
 
 ```bash
