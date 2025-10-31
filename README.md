@@ -83,6 +83,31 @@ cd ~/ros2_ws
 ./run-ros-build-interfaces.sh
 ```
 
+## Running from RO2 Humble docker container
+
+1. build interfaces
+
+```bash
+cd ~/ros2_ws
+./run-ros-build-interfaces.sh
+```
+
+2. run build - hmi
+
+```bash
+cd ~/ros2_ws
+./run-ros-hmi-build.sh
+```
+
+3. run master control
+
+```bash
+cd ~/ros2_ws
+./run-ros-master-build.sh
+```
+
+
+
 
 ## ROS messages
 
