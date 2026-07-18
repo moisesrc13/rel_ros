@@ -83,6 +83,35 @@ cd ~/ros2_ws
 ./run-ros-build-interfaces.sh
 ```
 
+## Running from RO2 Humble docker container
+
+1. build interfaces
+
+```bash
+cd ~/ros2_ws
+./run-ros-build-interfaces.sh
+```
+
+2. run build - hmi
+
+```bash
+cd ~/ros2_ws
+./run-ros-hmi-build.sh
+```
+
+** if not iolink master then run iolink test one
+
+`python  ~/ros2_ws/src/rel_ros_master_control/rel_ros_master_control/modbus_slave.py`
+
+3. run master control
+
+```bash
+cd ~/ros2_ws
+./run-ros-master-build.sh
+```
+
+
+
 
 ## ROS messages
 
@@ -427,3 +456,10 @@ sudo systemctl status rel-api.service
 sudo systemctl start rel-api.service
 
 Available at `http://192.168.0.10:9080/docs`
+
+
+## TTL comm config
+
+`sudo usermod -a -G dialout relant`
+
+mount the COM device when running the container, e.g `docker run --device=/dev/ttyUSB0:/dev/ttyUSB0 rel-ros:0.1.0`

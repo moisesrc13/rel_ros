@@ -8,7 +8,7 @@ USER root
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # install ros package
 RUN apt-get update && apt-get install -y \
-  ros-humble-demo-nodes-cpp curl wget python3.11-dev \
+  ros-humble-demo-nodes-cpp curl wget python3.10 python3.10-dev \
   swig gpiod libgpiod-dev \
   virtualenv nano qt5-* \
   ros-humble-demo-nodes-py && \
@@ -21,7 +21,7 @@ USER relant
 
 WORKDIR /home/relant
 COPY ./run.sh /home/relant/run.sh
-COPY ./prefill-test /home/relant/prefill-test
+COPY ./prefill-test.sh /home/relant/prefill-test.sh
 
 # create ROS workspace and virutal env
 RUN mkdir -p /home/relant/ros2_ws/src
@@ -36,6 +36,7 @@ RUN source /opt/ros/humble/setup.bash && source /home/relant/ros2_ws/venv/bin/ac
 
 
 USER root
+RUN usermod -a -G dialout relant
 RUN chmod -R g+r /home/relant
 RUN chown -R relant:relant /home/relant
 # install VS Code (code-server)
@@ -48,7 +49,7 @@ RUN cd ~/ros2_ws/src && source /opt/ros/humble/setup.bash && ros2 pkg create --b
 RUN cd ~/ros2_ws/src && source /opt/ros/humble/setup.bash && ros2 pkg create --build-type ament_cmake --license Apache-2.0 rel_interfaces
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/relant/ros2_ws/venv/bin/activate" >> ~/.bashrc
-RUN echo 'export USE_TEST_MODBUS="true"' >> ~/.bashrc
+RUN echo 'export USE_TEST_MODBUS="false"' >> ~/.bashrc
 RUN echo 'export LOGLEVEL="DEBUG"' >> ~/.bashrc
 RUN echo 'export APP_MASTER_IOLINK_ID=0' >> ~/.bashrc
 
